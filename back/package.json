@@ -13,6 +13,10 @@
     "morgan": "~1.9.1"
   },
   "devDependencies": {
-    "eslint": "^6.0.1"
+    "eslint": "^6.0.1",
+    "jest": "^24.8.0"
+  },
+  "jest": {
+    "testRegex": "/tests/.*.spec.js$"
   }
 }
