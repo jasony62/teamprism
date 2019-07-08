@@ -22,6 +22,19 @@ module.exports = {
       // 在这个页面中包含的块，默认情况下会包含
       // 提取出来的通用 chunk 和 vendor chunk。
       chunks: ["chunk-vendors", "chunk-common", "index"]
+    },
+    ue_matter_enroll: {
+      // page 的入口
+      entry: "src/ue/matter/enroll/main.js",
+      // 模板来源
+      template: "public/index.html",
+      // 在 dist/index.html 的输出
+      filename: "./ue/matter/enroll/main.html",
+      // 当使用 title 选项时，
+      title: "记录活动",
+      // 在这个页面中包含的块，默认情况下会包含
+      // 提取出来的通用 chunk 和 vendor chunk。
+      chunks: ["chunk-vendors", "chunk-common", "main"]
     }
   },
   // enabled by default if the machine has more than 1 cores
