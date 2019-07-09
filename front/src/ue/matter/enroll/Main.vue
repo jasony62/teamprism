@@ -8,11 +8,18 @@
 </template>
 
 <script>
+import apiApp from "@/apis/matter/enroll/main";
+
 export default {
     name: "enroll",
     methods: {
         checkEntryRule: () => {
-            alert("checkEntryRule");
+            let param = location.search.match(/[\?|&]app=(\w+)&?/);
+            if (param && param.length === 2) {
+                apiApp.getEntryRule(param[1]).then(rsp => {
+                    alert(JSON.stringify(rsp.data));
+                });
+            }
         }
     }
 };

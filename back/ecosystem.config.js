@@ -7,7 +7,7 @@ module.exports = {
     instances: 1,
     autorestart: true,
     watch: true,
-    ignore_watch: ["node_modules"],
+    ignore_watch: ["node_modules", "tests"],
     max_memory_restart: "1G",
     env: {
       NODE_ENV: "development"
