@@ -1,9 +1,9 @@
 module.exports = {
   // 基本路径
-  publicPath: "/",
+  publicPath: "/ue/",
 
   // 输出文件目录
-  outputDir: "../back/public",
+  outputDir: "../back/public/ue",
 
   // 生成的静态资源在它们的文件名中包含hash
   filenameHashing: true,
@@ -23,17 +23,11 @@ module.exports = {
       // 提取出来的通用 chunk 和 vendor chunk。
       chunks: ["chunk-vendors", "chunk-common", "index"]
     },
-    ue_matter_enroll: {
-      // page 的入口
+    matter_enroll: {
       entry: "src/ue/matter/enroll/main.js",
-      // 模板来源
       template: "public/index.html",
-      // 在 dist/index.html 的输出
-      filename: "./ue/matter/enroll/main.html",
-      // 当使用 title 选项时，
+      filename: "./matter/enroll/main.html",
       title: "记录活动",
-      // 在这个页面中包含的块，默认情况下会包含
-      // 提取出来的通用 chunk 和 vendor chunk。
       chunks: ["chunk-vendors", "chunk-common", "main"]
     }
   },

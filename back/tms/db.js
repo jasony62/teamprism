@@ -181,6 +181,19 @@ class Select extends SqlActionWithWhere {
         return `select ${this.fields} from ${this.table} where ${this.where.sql}`
     }
 }
+class SelectOne extends Select {
+    exec() {
+        return new Promise((resolve, reject) => {
+            super.exec().then((rows) => {
+                if (rows && rows.length === 1) {
+                    resolve(rows[0])
+                } else {
+                    reject('没有找到指定对象')
+                }
+            })
+        })
+    }
+}
 
 class Db {
     constructor(conn) {
@@ -206,6 +219,10 @@ class Db {
 
     newSelect(table, fields) {
         return new Select(this.conn, table, fields)
+    }
+
+    newSelectOne(table, fields) {
+        return new SelectOne(this.conn, table, fields)
     }
 }
 
