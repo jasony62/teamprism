@@ -10,6 +10,7 @@ const Who = require('../who')
  */
 function checkAccessToken(token) {
     let who = Who()
+
     return who;
 }
 /**
@@ -47,17 +48,21 @@ function findCtrlAndMethod(path, who) {
  * 自动匹配参数
  */
 router.all('*', async (req, res) => {
-    if (!req.query.access_token)
+    if (!req.query.access_token) {
         res.json({
             code: 1,
             errmsg: '没有access_token'
         })
+        return
+    }
     let who
-    if (false === (who = checkAccessToken(req.query.access_token)))
+    if (false === (who = checkAccessToken(req.query.access_token))) {
         res.json({
             code: 1,
             errmsg: 'access_token不可用'
         })
+        return
+    }
 
     try {
         const [ctrl, method] = findCtrlAndMethod(req.path, who)

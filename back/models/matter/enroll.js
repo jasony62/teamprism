@@ -1,6 +1,4 @@
-const {
-    DbModel
-} = require('../../tms/model')
+const { DbModel } = require('../../tms/model')
 
 class Enroll extends DbModel {
     async byId(appId) {
@@ -21,6 +19,6 @@ class Enroll extends DbModel {
         return oApp;
     }
 }
-module.exports = function () {
+module.exports = function() {
     return new Enroll()
 }

@@ -1,7 +1,5 @@
 const crypto = require('crypto')
-const {
-    Model
-} = require('./model')
+const { Model } = require('./model')
 
 class Who extends Model {
     /**
@@ -20,7 +18,7 @@ class Who extends Model {
         oCookieUser = JSON.stringify(oCookieUser);
         let encoded = Model.encryptEnc(oCookieUser, cookiekey);
         let expireAt = new Date() + (86400 * 3650);
-        this.mySetCookie(`_site_${siteId}_fe_user`, encoded, expireAt);
+        //this.mySetCookie(`_site_${siteId}_fe_user`, encoded, expireAt);
 
         return true;
     }
@@ -39,6 +37,6 @@ class Who extends Model {
     }
 }
 
-module.exports = function () {
+module.exports = function() {
     return new Who()
 }
