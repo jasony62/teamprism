@@ -9,7 +9,7 @@ function getAuthedUser(req, siteid) {
 }
 
 router.get('/token', async (req, res) => {
-    let siteid = req.query.siteid
+    let siteid = req.query.site
     let oAuthedUser = getAuthedUser(req, siteid)
     if (!oAuthedUser) {
         res.json({
@@ -24,7 +24,7 @@ router.get('/token', async (req, res) => {
     res.json(result)
 })
 router.get('/who', (req, res) => {
-    let siteid = req.query.siteid
+    let siteid = req.query.site
     let oAuthedUser = getAuthedUser(req, siteid)
     res.json({
         code: 0,

@@ -1,7 +1,8 @@
-import axios from 'axios'
+import axios2 from '@/apis/axios2'
 
 export default {
-    getEntryRule: function(appId) {
-        return axios.get('/ue/api/matter/enroll/entryRule?app=' + appId + '&access_token=123')
+    getEntryRule: async function(appId) {
+        let axios = await axios2()
+        return axios.get(`/ue/api/matter/enroll/entryRule?app=${appId}`)
     }
 }
