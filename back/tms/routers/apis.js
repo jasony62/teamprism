@@ -1,18 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs')
-const Who = require('../who')
+const Token = require('./token')
 
-/**
- * 返回和token匹配的用户
- * 
- * @param {string} token 
- */
-function checkAccessToken(token) {
-    let who = Who()
-
-    return who;
-}
 /**
  * 根据请求路径找到匹配的控制器和方法
  * 
@@ -56,7 +46,7 @@ router.all('*', async (req, res) => {
         return
     }
     let who
-    if (false === (who = checkAccessToken(req.query.access_token))) {
+    if (false === (who = await Token.fetch(req.query.access_token))) {
         res.json({
             code: 1,
             errmsg: 'access_token不可用'

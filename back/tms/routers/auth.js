@@ -1,25 +1,35 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const Token = require('./token')
 
-let auth = {
-    token: (req, res) => {
-        res.json({
-            code: 0,
-            access_token: "abc123",
-            expire_in: 7200
-        })
-    },
-    who: (req, res) => {
-        let who = require('../who')()
-        let oCookieUser = who.getCookieUser('51855414326b5ff2b1b4a3b5d366393c', req.cookies.xxt_site_51855414326b5ff2b1b4a3b5d366393c_fe_user)
-        res.json({
-            code: 10,
-            user: oCookieUser
-        })
-    }
+function getAuthedUser(req, siteid) {
+    let who = require('../who')()
+    let oCookieUser = who.getCookieUser(siteid, req.cookies[`xxt_site_${siteid}_fe_user`])
+    return oCookieUser;
 }
 
-router.get('/token', auth.token)
-router.get('/who', auth.who)
+router.get('/token', async (req, res) => {
+    let siteid = req.query.siteid
+    let oAuthedUser = getAuthedUser(req, siteid)
+    if (!oAuthedUser) {
+        res.json({
+            code: 40013,
+            errmsg: '没有获得有效用户信息'
+        })
+        return
+    }
+
+    let result = await Token.create(siteid, oAuthedUser)
+
+    res.json(result)
+})
+router.get('/who', (req, res) => {
+    let siteid = req.query.siteid
+    let oAuthedUser = getAuthedUser(req, siteid)
+    res.json({
+        code: 0,
+        user: oAuthedUser
+    })
+})
 
 module.exports = router
