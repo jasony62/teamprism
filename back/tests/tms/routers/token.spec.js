@@ -2,11 +2,11 @@ describe("#tms", function() {
     describe("#routers.js", function() {
         describe("#token.js", function() {
             const Token = require('../../../tms/routers/token')
-            let siteid = 'mockesiteid'
+            let clientId = 'mockeclientid'
             let oMockUser = { uid: 'mockuid' }
             let token
             test("create", async () => {
-                let oResult = await Token.create(siteid, oMockUser)
+                let oResult = await Token.create(clientId, oMockUser)
                 token = oResult.access_token
                 expect(JSON.stringify(oResult)).toMatch(/{"code":0,"access_token":"\w*","expire_in":7200}/)
             })

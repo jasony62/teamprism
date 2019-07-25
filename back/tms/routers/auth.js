@@ -19,7 +19,7 @@ router.get('/token', async (req, res) => {
         return
     }
 
-    let result = await Token.create(siteid, oAuthedUser)
+    let result = await Token.create(oAuthedUser.uid, oAuthedUser)
 
     res.json(result)
 })

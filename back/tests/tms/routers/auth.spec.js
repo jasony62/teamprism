@@ -15,7 +15,7 @@ describe("#tms", function() {
             test("获得accessTokens", (done) => {
                 const agent = request.agent(app);
                 agent.get(`/ue/auth/token?site=${siteid}`)
-                    .set('Cookie', [`xxt_site_${siteid}_fe_user=zfzqFg-8h5fpYOZmdLZw7Rt6RDWz6-gVHhltsChlBi3O4T32TrS8-7Bmjr9NtJTtqbsa9ra6PGypP1cQDh-r3ic9EeeZxRKb0e1KhdtTHAIJEAy4ri7zyHpxn3ILZxckf-UmdLQj-eQI3MLxVIdzuJkMNX3-EP4NOq8hi8Pk`])
+                    .set('Cookie', [testdata.tms.routers.auth.cookie])
                     .then((res) => {
                         expect(res.text).toMatch(/{"code":0,"access_token":"\w*","expire_in":7200}/)
                         done()

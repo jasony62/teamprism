@@ -1,5 +1,5 @@
-const crypto = require('crypto')
-let redis = require('redis');
+const redis = require('redis')
+const uuidv4 = require('uuid/v4');
 
 // token过期时间
 const EXPIRE_IN = 7200
@@ -15,11 +15,12 @@ class TokenRedis {
      * 保存创建的token
      * 
      * @param {string} token 
-     * @param {int} createAt 
+     * @param {string} clientId 
      * @param {object} data 
      */
-    store(token, createAt, identity, data) {
-        let key = `accessToken:${token}:${identity}`
+    store(token, clientId, data) {
+        let createAt = parseInt(new Date * 1 / 1000)
+        let key = `accessToken:${token}:${clientId}`
         return new Promise((resolve) => {
             this.client.set(key, JSON.stringify({ expireAt: createAt + 7200, data: data }), () => {
                 this.client.expire(key, EXPIRE_IN, () => {
@@ -31,11 +32,11 @@ class TokenRedis {
     /**
      * 检查是否已经分配过token
      * 
-     * @param {*} identity 
+     * @param {*} clientId 
      */
-    scan(identity) {
+    scan(clientId) {
         return new Promise((resolve, reject) => {
-            this.client.scan('0', 'MATCH', `*:${identity}`, (err, res) => {
+            this.client.scan('0', 'MATCH', `*:${clientId}`, (err, res) => {
                 if (err) reject(err)
                 else resolve(res[1])
             })
@@ -43,14 +44,14 @@ class TokenRedis {
     }
     /**
      * 
-     * @param {*} keys 
+     * @param {array} keys 
      */
     del(keys) {
         this.client.del(...keys)
     }
     /**
      * 
-     * @param {*} token 
+     * @param {string} token 
      */
     get(token) {
         return new Promise((resolve, reject) => {
@@ -83,21 +84,20 @@ class Token {
      * 生成token
      * 每次生成新token都要替换掉之前的token
      * 
-     * @param {*} req 
+     * @param {string} clientId
+     * 
      */
-    static async create(siteid, oAuthedUser) {
-        let tokenRedis = new TokenRedis()
+    static async create(clientId, clientData) {
+        const tokenRedis = new TokenRedis()
 
-        let identity = crypto.createHash('md5').update(`${oAuthedUser.uid}${siteid}`).digest('hex')
-
-        let keys = await tokenRedis.scan(identity)
+        // 清除已经存在的token
+        const keys = await tokenRedis.scan(clientId)
         if (keys && keys.length)
             tokenRedis.del(keys)
 
-        let current = parseInt(new Date * 1 / 1000)
-        let token = crypto.createHash('md5').update(`${current}${identity}`).digest('hex')
-
-        let expireIn = await tokenRedis.store(token, current, identity, oAuthedUser)
+        // 生成并保存新token
+        const token = uuidv4().replace(/-/g, '')
+        let expireIn = await tokenRedis.store(token, clientId, clientData)
 
         tokenRedis.quit()
 
