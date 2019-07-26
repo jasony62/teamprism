@@ -6,16 +6,20 @@ describe("#tms", function() {
             let oMockUser = { uid: 'mockuid' }
             let token
             test("create", async () => {
-                let oResult = await Token.create(clientId, oMockUser)
-                token = oResult.access_token
-                expect(JSON.stringify(oResult)).toMatch(/{"code":0,"access_token":"\w*","expire_in":7200}/)
+                let aResult = await Token.create(clientId, oMockUser)
+                expect(aResult[0]).toBe(true)
+                expect(aResult[1]).toMatchObject(expect.objectContaining({ expire_in: 7200, access_token: expect.stringMatching(/\w*/) }))
+                token = aResult[1].access_token
             })
             test("check-existent", async () => {
-                let oResult = await Token.fetch(token)
-                expect(JSON.stringify(oResult)).toMatch('{"uid":"mockuid"}')
+                let aResult = await Token.fetch(token)
+                expect(aResult[0]).toBe(true)
+                expect(aResult[1]).toMatchObject(expect.objectContaining({ uid: 'mockuid' }))
             })
             test("check-nonexistent", async () => {
-                expect(await Token.fetch('nosuchtoken')).toEqual(false)
+                let aResult = await Token.fetch('nosuchtoken')
+                expect(aResult[0]).toBe(false)
+                expect(aResult[1]).toBe('error')
             })
         })
     })

@@ -12,26 +12,25 @@ describe("#tms", function() {
                 agent.get(`/ue/auth/token?site=${siteid}`)
                     .set('Cookie', [testdata.tms.routers.auth.cookie])
                     .then((res) => {
-                        let oResult = JSON.parse(res.text)
-                        token = oResult.access_token
+                        token = res.body.access_token
                         done()
                     })
             })
             test("empty access_token", (done) => {
-                request(app).get('/ue/api/version?app=abc').then((response) => {
-                    expect(response.text).toBe(`{"code":1,"errmsg":"没有access_token"}`)
+                request(app).get('/ue/api/version?app=abc').then(res => {
+                    expect(res.body).toMatchObject(expect.objectContaining({ code: 1, errmsg: expect.anything() }))
                     done()
                 })
             })
             test("invalid access_token", (done) => {
-                request(app).get('/ue/api/version?access_token=nosuchtoken&app=abc').then((response) => {
-                    expect(response.text).toBe(`{"code":1,"errmsg":"access_token不可用"}`)
+                request(app).get('/ue/api/version?access_token=nosuchtoken&app=abc').then(res => {
+                    expect(res.body).toMatchObject(expect.objectContaining({ code: 1, errmsg: expect.anything() }))
                     done()
                 })
             })
             test("pass access_token", (done) => {
                 request(app).get(`/ue/api/version?access_token=${token}&app=abc`).then((res) => {
-                    expect(JSON.parse(res.text).version).toBe('0.1')
+                    expect(res.body.version).toBe('0.1')
                     done()
                 })
             })

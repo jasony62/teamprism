@@ -19,9 +19,17 @@ router.get('/token', async (req, res) => {
         return
     }
 
-    let result = await Token.create(oAuthedUser.uid, oAuthedUser)
+    let aResult = await Token.create(oAuthedUser.uid, oAuthedUser)
+    if (false === aResult[0])
+        res.json({
+            code: 10001,
+            errmsg: aResult[1]
+        })
 
-    res.json(result)
+    let token = aResult[1]
+    token.code = 0
+
+    res.json(token)
 })
 router.get('/who', (req, res) => {
     let siteid = req.query.site

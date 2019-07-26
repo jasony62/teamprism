@@ -45,15 +45,15 @@ router.all('*', async (req, res) => {
         })
         return
     }
-    let who
-    if (false === (who = await Token.fetch(req.query.access_token))) {
+    let aResult = await Token.fetch(req.query.access_token)
+    if (false === aResult[0]) {
         res.json({
             code: 1,
-            errmsg: 'access_token不可用'
+            errmsg: aResult[1]
         })
         return
     }
-
+    let who = aResult[1]
     try {
         const [ctrl, method] = findCtrlAndMethod(req.path, who)
         const result = await ctrl[method](req)

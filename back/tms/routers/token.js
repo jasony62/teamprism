@@ -8,8 +8,23 @@ const EXPIRE_IN = 7200
  * 
  */
 class TokenRedis {
-    constructor() {
-        this.client = redis.createClient(6379, 'localhost')
+    constructor(client) {
+        this.redisClient = client
+    }
+    // 连接redis
+    static create() {
+        return new Promise((resolve) => {
+            const client = redis.createClient()
+            client.on('ready', () => {
+                resolve(new TokenRedis(client))
+            })
+            client.on('error', () => {
+                resolve(false)
+            })
+        });
+    }
+    quit() {
+        this.redisClient.quit()
     }
     /**
      * 保存创建的token
@@ -22,8 +37,8 @@ class TokenRedis {
         let createAt = parseInt(new Date * 1 / 1000)
         let key = `accessToken:${token}:${clientId}`
         return new Promise((resolve) => {
-            this.client.set(key, JSON.stringify({ expireAt: createAt + 7200, data: data }), () => {
-                this.client.expire(key, EXPIRE_IN, () => {
+            this.redisClient.set(key, JSON.stringify({ expireAt: createAt + 7200, data: data }), () => {
+                this.redisClient.expire(key, EXPIRE_IN, () => {
                     resolve(EXPIRE_IN)
                 })
             })
@@ -36,7 +51,7 @@ class TokenRedis {
      */
     scan(clientId) {
         return new Promise((resolve, reject) => {
-            this.client.scan('0', 'MATCH', `*:${clientId}`, (err, res) => {
+            this.redisClient.scan('0', 'MATCH', `*:${clientId}`, (err, res) => {
                 if (err) reject(err)
                 else resolve(res[1])
             })
@@ -47,7 +62,7 @@ class TokenRedis {
      * @param {array} keys 
      */
     del(keys) {
-        this.client.del(...keys)
+        this.redisClient.del(...keys)
     }
     /**
      * 
@@ -55,12 +70,12 @@ class TokenRedis {
      */
     get(token) {
         return new Promise((resolve, reject) => {
-            this.client.scan('0', 'MATCH', `accessToken:${token}:*`, (err, res) => {
+            this.redisClient.scan('0', 'MATCH', `accessToken:${token}:*`, (err, res) => {
                 if (err) reject('error')
                 else {
                     if (res[1].length === 1) {
                         let key = res[1][0]
-                        this.client.get(key, (err, res) => {
+                        this.redisClient.get(key, (err, res) => {
                             if (err) reject('error')
                             else resolve(JSON.parse(res))
                         })
@@ -70,10 +85,6 @@ class TokenRedis {
                 }
             })
         })
-    }
-
-    quit() {
-        this.client.quit()
     }
 }
 /**
@@ -85,10 +96,13 @@ class Token {
      * 每次生成新token都要替换掉之前的token
      * 
      * @param {string} clientId
+     * @param {string} clientData
      * 
      */
     static async create(clientId, clientData) {
-        const tokenRedis = new TokenRedis()
+        const tokenRedis = await TokenRedis.create()
+        if (false === tokenRedis)
+            return [false, '连接Redis服务失败']
 
         // 清除已经存在的token
         const keys = await tokenRedis.scan(clientId)
@@ -97,15 +111,14 @@ class Token {
 
         // 生成并保存新token
         const token = uuidv4().replace(/-/g, '')
-        let expireIn = await tokenRedis.store(token, clientId, clientData)
+        const expireIn = await tokenRedis.store(token, clientId, clientData)
 
         tokenRedis.quit()
 
-        return {
-            code: 0,
+        return [true, {
             access_token: token,
             expire_in: expireIn
-        }
+        }]
     }
     /**
      * 获取token对应的数据
@@ -113,12 +126,15 @@ class Token {
      * @param {*} token 
      */
     static async fetch(token) {
-        let tokenRedis = new TokenRedis()
+        let tokenRedis = await TokenRedis.create()
+        if (false === tokenRedis)
+            return [false, '连接Redis服务失败']
+
         try {
             let oResult = await tokenRedis.get(token)
-            return oResult.data
+            return [true, oResult.data]
         } catch (e) {
-            return false
+            return [false, e]
         } finally {
             tokenRedis.quit()
         }

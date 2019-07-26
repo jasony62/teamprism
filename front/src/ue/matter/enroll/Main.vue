@@ -4,6 +4,9 @@
         <div>
             <button v-on:click="checkEntryRule">第一步：获取活动进入规则，根据进入规则提示用户进行下一步操作</button>
         </div>
+        <div>
+            <button v-on:click="wxOAuth2">微信网页授权获得用户信息</button>
+        </div>
     </div>
 </template>
 
@@ -14,12 +17,21 @@ export default {
     name: "enroll",
     methods: {
         checkEntryRule: async () => {
-            let param = location.search.match(/[\?|&]app=(\w+)&?/);
+            let param = location.search.match(/[?|&]app=(\w+)&?/);
             if (param && param.length === 2) {
                 await apiApp.getEntryRule(param[1]).then(rsp => {
                     alert(JSON.stringify(rsp.data));
                 });
             }
+        },
+        wxOAuth2: () => {
+            const appid = "appid";
+            const redirect_uri = encodeURIComponent(
+                `http://${location.host}/ue/wx/oauth2`
+            );
+            const state = encodeURIComponent(location.href);
+            const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+            location.href = uri;
         }
     }
 };

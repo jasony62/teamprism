@@ -8,7 +8,7 @@ async function initAxios() {
     try {
         await axios2()
     } catch (e) {
-        console.log(e)
+        alert('初始化axios失败')
     }
 }
 initAxios()
