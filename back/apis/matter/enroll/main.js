@@ -17,6 +17,6 @@ class Main extends Api {
     }
 }
 
-module.exports = function (who) {
+module.exports = function(who) {
     return new Main(who)
 }

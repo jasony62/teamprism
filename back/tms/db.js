@@ -15,7 +15,7 @@ function connect(readonly, options) {
     return new Promise((resolve, reject) => {
         conn.connect(err => {
             if (err)
-                reject()
+                reject(err)
             else
                 resolve(conn)
         })
@@ -226,7 +226,7 @@ class Db {
     }
 }
 
-module.exports = async function (readonly = false, options = {
+module.exports = async function(readonly = false, options = {
     path: process.cwd() + "/cus/db.json"
 }) {
     try {

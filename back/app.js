@@ -4,7 +4,6 @@ const cookieParser = require('cookie-parser');
 
 const authRouter = require('./tms/routers/auth')
 const apiRouter = require('./tms/routers/apis')
-const wxRouter = require('./tms/routers/wx')
 
 const app = express();
 
