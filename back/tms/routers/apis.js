@@ -60,8 +60,8 @@ router.all('*', async (req, res) => {
         res.json(result)
     } catch (err) {
         res.json({
-            code: 1,
-            errmsg: err.message
+            code: 2,
+            errmsg: err
         })
     }
 });

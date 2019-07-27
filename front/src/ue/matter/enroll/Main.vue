@@ -2,36 +2,42 @@
     <div id="enroll">
         <div>记录活动</div>
         <div>
-            <button v-on:click="checkEntryRule">第一步：获取活动进入规则，根据进入规则提示用户进行下一步操作</button>
+            <button id="checkEntryRule" v-on:click="checkEntryRule">第一步：获取活动进入规则，根据进入规则提示用户进行下一步操作</button>
         </div>
         <div>
-            <button v-on:click="wxOAuth2">微信网页授权获得用户信息</button>
+            <button id="wxOAuth2" v-on:click="wxOAuth2">微信网页授权获得用户信息</button>
         </div>
     </div>
 </template>
 
 <script>
 import apiApp from "@/apis/matter/enroll/main";
+import apiWx from "@/apis/sns/wx/main";
+import qs from "query-string";
 
 export default {
     name: "enroll",
     methods: {
-        checkEntryRule: async () => {
-            let param = location.search.match(/[?|&]app=(\w+)&?/);
-            if (param && param.length === 2) {
-                await apiApp.getEntryRule(param[1]).then(rsp => {
-                    alert(JSON.stringify(rsp.data));
+        checkEntryRule: () => {
+            let params = qs.parse(location.search);
+            if (params.app) {
+                apiApp.getEntryRule(params.app).then(rsp => {
+                    alert(JSON.stringify(rsp));
                 });
             }
         },
-        wxOAuth2: () => {
-            const appid = "appid";
-            const redirect_uri = encodeURIComponent(
-                `http://${location.host}/ue/wx/oauth2`
-            );
-            const state = encodeURIComponent(location.href);
-            const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
-            location.href = uri;
+        wxOAuth2: async () => {
+            try {
+                let appid = await apiWx.appid();
+                const redirect_uri = encodeURIComponent(
+                    `http://${location.host}/ue/wx/oauth2`
+                );
+                const state = encodeURIComponent(location.href);
+                const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+                location.href = uri;
+            } catch (e) {
+                console.log(e);
+            }
         }
     }
 };

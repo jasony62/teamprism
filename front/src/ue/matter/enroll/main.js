@@ -1,14 +1,14 @@
 import Vue from "vue"
 import Enroll from "./Main.vue"
-import axios2 from '@/apis/axios2'
+import { setupAccessToken } from '@/tms/apis/axios2'
 
 Vue.config.productionTip = false
 
 async function initAxios() {
     try {
-        await axios2()
+        await setupAccessToken()
     } catch (e) {
-        alert('初始化axios失败')
+        alert(`初始化失败：${e}`)
     }
 }
 initAxios()

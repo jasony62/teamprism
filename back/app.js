@@ -18,6 +18,5 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 app.use('/ue/auth', authRouter)
 app.use('/ue/api', apiRouter)
-app.use('/ue/wx', wxRouter)
 
 module.exports = app;

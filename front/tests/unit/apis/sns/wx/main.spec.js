@@ -1,5 +1,4 @@
-import api from '@/apis/matter/enroll/main'
-
+import api from '@/apis/sns/wx/main'
 import axios, { setupAccessToken } from '@/tms/apis/axios2';
 import MockAdapter from 'axios-mock-adapter'
 
@@ -9,20 +8,20 @@ mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
     access_token: 'valid_access_token',
     expire_in: 7200
 })
-mock.onGet(/\/ue\/api\/matter\/enroll\/entryRule.*/).reply(200, {
+mock.onGet('/ue/api/sns/wx/appid').reply(200, {
     code: 0,
     appid: 'valid_appid',
 })
 
 describe("#apis", () => {
-    describe("#matter", () => {
-        describe("#enroll", () => {
+    describe("#sns", () => {
+        describe("#wx", () => {
             describe("#main.js", () => {
                 beforeAll(() => {
                     return setupAccessToken('validsiteid')
                 })
-                it("获得活动进入规则", () => {
-                    return api.getEntryRule('57260635db4fb').then(rsp => {
+                it("获得微信appid", () => {
+                    return api.appid().then(rsp => {
                         expect(rsp).toBe('valid_appid')
                     })
                 })
