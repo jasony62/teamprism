@@ -10,12 +10,15 @@ class Main extends Api {
         const siteid = req.query.site
         const modelWx = new Config()
         try {
-            const oWx = await modelWx.bySite(siteid, { fields: 'id,appid' })
+            let oWx
+            oWx = await modelWx.bySite(siteid, { fields: 'id,appid' })
             if (!oWx) {
-                return {
-                    code: 1,
-                    errmsg: '查找的对象不存在'
-                }
+                oWx = await modelWx.bySite('platform', { fields: 'id,appid' })
+                if (!oWx)
+                    return {
+                        code: 1,
+                        errmsg: '查找的对象不存在'
+                    }
             }
 
             return {
