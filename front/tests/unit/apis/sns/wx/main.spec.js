@@ -8,9 +8,9 @@ mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
     access_token: 'valid_access_token',
     expire_in: 7200
 })
-mock.onGet('/ue/api/sns/wx/appid').reply(200, {
+mock.onGet(/\/ue\/api\/sns\/wx\/appid\?site=.+/).reply(200, {
     code: 0,
-    appid: 'valid_appid',
+    result: 'valid_appid',
 })
 
 describe("#apis", () => {
@@ -21,8 +21,8 @@ describe("#apis", () => {
                     return setupAccessToken('validsiteid')
                 })
                 it("获得微信appid", () => {
-                    return api.appid().then(rsp => {
-                        expect(rsp).toBe('valid_appid')
+                    return api.appid().then(rst => {
+                        expect(rst).toBe('valid_appid')
                     })
                 })
             })

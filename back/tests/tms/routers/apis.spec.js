@@ -30,8 +30,7 @@ describe("#tms", function() {
             })
             test("pass access_token", (done) => {
                 request(app).get(`/ue/api/version?access_token=${token}&app=abc`).then((res) => {
-                    console.log(res.body)
-                    expect(res.body.data).toBe('0.1')
+                    expect(res.body.result).toBe('0.1')
                     done()
                 })
             })

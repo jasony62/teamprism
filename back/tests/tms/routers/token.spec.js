@@ -19,7 +19,7 @@ describe("#tms", function() {
             test("check-nonexistent", async () => {
                 let aResult = await Token.fetch('nosuchtoken')
                 expect(aResult[0]).toBe(false)
-                expect(aResult[1]).toBe('error')
+                expect(aResult[1]).toBe('access token error3')
             })
         })
     })

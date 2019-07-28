@@ -11,7 +11,7 @@ describe("#apis", () => {
                 let ctrl = new CtrlClass(request)
                 test("appid()", () => {
                     return ctrl.appid().then(rst => {
-                        expect(rst).toMatchObject({ code: 0, data: expect.stringMatching(/\w+/) })
+                        expect(rst).toMatchObject({ code: 0, result: expect.stringMatching(/\w+/) })
                     })
                 })
             })

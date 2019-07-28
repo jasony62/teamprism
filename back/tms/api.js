@@ -5,26 +5,26 @@ class Client {
  * API返回结果
  */
 class ResultBase {
-    constructor(data, msg, code) {
+    constructor(result, msg, code) {
         this.msg = msg
         this.code = code
-        this.data = data
+        this.result = result
     }
 }
 class ResultData extends ResultBase {
-    constructor(data = null, msg = '正常', code = 0) {
-        super(data, msg, code)
+    constructor(result = null, msg = '正常', code = 0) {
+        super(result, msg, code)
     }
 }
 
 class ResultFault extends ResultBase {
-    constructor(msg = '操作无法完成', data = null, code = 1) {
-        super(data, msg, code)
+    constructor(msg = '操作无法完成', result = null, code = 1) {
+        super(result, msg, code)
     }
 }
 class ResultObjectNotFound extends ResultFault {
-    constructor(msg = '指定的对象不存在', data = null, code = 2) {
-        super(msg, data, code)
+    constructor(msg = '指定的对象不存在', result = null, code = 2) {
+        super(msg, result, code)
     }
 }
 /**

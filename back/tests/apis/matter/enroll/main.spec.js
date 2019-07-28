@@ -16,7 +16,7 @@ describe("#apis", () => {
                         }
                         let ctrl = new CtrlClass(mockReq)
                         return ctrl.entryRule().then(rst => {
-                            expect(rst).toMatchObject({ code: 0, data: expect.anything() })
+                            expect(rst).toMatchObject({ code: 0, result: expect.anything() })
                         })
                     })
                 })

@@ -11,7 +11,7 @@ mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
 })
 mock.onGet(/\/ue\/api\/matter\/enroll\/entryRule.*/).reply(200, {
     code: 0,
-    data: {},
+    result: {},
 })
 
 describe("#apis", () => {

@@ -3,7 +3,7 @@ describe("#apis", () => {
         test("version()", () => {
             const CtrlClass = require('../../apis/main')
             let ctrl = new CtrlClass()
-            expect(ctrl.version()).toMatchObject({ code: 0, data: "0.1" })
+            expect(ctrl.version()).toMatchObject({ code: 0, result: "0.1" })
         })
     })
 })
