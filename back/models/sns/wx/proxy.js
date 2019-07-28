@@ -17,8 +17,6 @@ class Config extends DbModel {
         let dbSelect = db.newSelectOne(this.table, fields)
         dbSelect.where.fieldMatch('siteid', '=', siteId)
         let wx = await dbSelect.exec()
-        if (!wx)
-            throw new Error('对象不存在')
 
         return wx
     }

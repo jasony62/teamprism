@@ -11,7 +11,7 @@ mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
 })
 mock.onGet(/\/ue\/api\/matter\/enroll\/entryRule.*/).reply(200, {
     code: 0,
-    appid: 'valid_appid',
+    data: {},
 })
 
 describe("#apis", () => {
@@ -22,8 +22,8 @@ describe("#apis", () => {
                     return setupAccessToken('validsiteid')
                 })
                 it("获得活动进入规则", () => {
-                    return api.getEntryRule('57260635db4fb').then(rsp => {
-                        expect(rsp).toBe('valid_appid')
+                    return api.getEntryRule('anyappid').then(rst => {
+                        expect(rst).toMatchObject({})
                     })
                 })
             })

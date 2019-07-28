@@ -1,17 +1,12 @@
-const Api = require('../tms/api')
+const { Api, ResultData } = require('../tms/api')
 
 class Main extends Api {
-    constructor(who) {
-        super(who)
+    constructor(...args) {
+        super(...args)
     }
     version() {
-        return {
-            code: 0,
-            version: "0.1"
-        }
+        return new ResultData('0.1')
     }
 }
 
-module.exports = function (who) {
-    return new Main(who)
-}
+module.exports = Main

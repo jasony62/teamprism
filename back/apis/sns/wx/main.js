@@ -1,43 +1,32 @@
-const Api = require('../../../tms/api')
+const { Api, ResultData, ResultFault } = require('../../../tms/api')
 const { Config } = require('../../../models/sns/wx/proxy')
 
 class Main extends Api {
-    constructor(who) {
-        super(who)
+    constructor(...args) {
+        super(...args)
     }
     /**
      * 返回站点或平台关联的微信公众号appid
      */
-    async appid(req) {
-        const siteid = req.query.site
+    async appid() {
+        const { site } = this.request.query
         const modelWx = new Config()
         try {
             let oWx
-            oWx = await modelWx.bySite(siteid, { fields: 'id,appid,joined' })
+            oWx = await modelWx.bySite(site, { fields: 'id,appid,joined' })
             if (!oWx || oWx.joined !== 'Y') {
                 oWx = await modelWx.bySite('platform', { fields: 'id,appid,joined' })
                 if (!oWx || oWx.joined !== 'Y')
-                    return {
-                        code: 1,
-                        errmsg: '没有获得可用数据'
-                    }
+                    return new ResultFault('没有获得可用数据')
             }
 
-            return {
-                code: 0,
-                appid: oWx.appid
-            }
+            return new ResultData(oWx.appid)
         } catch (e) {
-            return {
-                code: 1,
-                errmsg: e
-            }
+            return new ResultFault(e)
         } finally {
             modelWx.end()
         }
     }
 }
 
-module.exports = function(who) {
-    return new Main(who)
-}
+module.exports = Main

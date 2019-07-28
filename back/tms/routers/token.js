@@ -71,16 +71,16 @@ class TokenRedis {
     get(token) {
         return new Promise((resolve, reject) => {
             this.redisClient.scan('0', 'MATCH', `accessToken:${token}:*`, (err, res) => {
-                if (err) reject('error')
+                if (err) reject('access token error1')
                 else {
                     if (res[1].length === 1) {
                         let key = res[1][0]
                         this.redisClient.get(key, (err, res) => {
-                            if (err) reject('error')
+                            if (err) reject('access token error2')
                             else resolve(JSON.parse(res))
                         })
                     } else {
-                        reject('error')
+                        reject('access token error3')
                     }
                 }
             })

@@ -185,11 +185,12 @@ class SelectOne extends Select {
     exec() {
         return new Promise((resolve, reject) => {
             super.exec().then((rows) => {
-                if (rows && rows.length === 1) {
+                if (rows.length === 1)
                     resolve(rows[0])
-                } else {
-                    reject('没有找到指定对象')
-                }
+                else if (rows.length === 0)
+                    resolve(false)
+                else
+                    reject('查询条件错误，获得多条数据')
             })
         })
     }
