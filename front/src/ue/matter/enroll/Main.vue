@@ -28,7 +28,8 @@ export default {
         },
         wxOAuth2: async () => {
             try {
-                let appid = await apiWx.appid();
+                let params = qs.parse(location.search);
+                let appid = await apiWx.appid(params.site);
                 const redirect_uri = encodeURIComponent(
                     `http://${location.host}/ue/wx/oauth2`
                 );

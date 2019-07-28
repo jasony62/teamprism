@@ -1,10 +1,10 @@
 import axios from '@/tms/apis/axios2'
 
 export default {
-    appid: function() {
+    appid: function(siteid) {
         return new Promise(async (resolve, reject) => {
             try {
-                let oResult = await axios.get(`/ue/api/sns/wx/appid`)
+                let oResult = await axios.get(`/ue/api/sns/wx/appid?site=${siteid}`)
                 resolve(oResult.data.appid)
             } catch (e) {
                 reject(e)
