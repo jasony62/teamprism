@@ -9,11 +9,10 @@ class Main extends Api {
      * 返回站点或平台关联的微信公众号appid
      */
     async appid() {
-        const { site } = this.request.query
         const modelWx = new Config()
         try {
             let oWx
-            oWx = await modelWx.bySite(site, { fields: 'id,appid,joined' })
+            oWx = await modelWx.bySite(this.client.siteid, { fields: 'id,appid,joined' })
             if (!oWx || oWx.joined !== 'Y') {
                 oWx = await modelWx.bySite('platform', { fields: 'id,appid,joined' })
                 if (!oWx || oWx.joined !== 'Y')

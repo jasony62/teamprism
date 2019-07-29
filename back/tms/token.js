@@ -8,8 +8,12 @@ const EXPIRE_IN = 7200
  * 在redis中保存客户端的access_token 
  */
 class TokenInRedis {
-    constructor(client) {
-        this.redisClient = client
+    /**
+     * 
+     * @param {*} redisClient 
+     */
+    constructor(redisClient) {
+        this.redisClient = redisClient
     }
     // 连接redis
     static create() {
@@ -21,7 +25,7 @@ class TokenInRedis {
             client.on('error', () => {
                 resolve(false)
             })
-        });
+        })
     }
     quit() {
         this.redisClient.quit()
@@ -29,9 +33,9 @@ class TokenInRedis {
     /**
      * 保存创建的token
      * 
-     * @param {string} token 
-     * @param {string} clientId 
-     * @param {object} data 
+     * @param {String} token 
+     * @param {String} clientId 
+     * @param {Object} data 
      */
     store(token, clientId, data) {
         let createAt = parseInt(new Date * 1 / 1000)
@@ -47,11 +51,11 @@ class TokenInRedis {
     /**
      * 检查是否已经分配过token
      * 
-     * @param {*} clientId 
+     * @param {*} clientId
      */
     scan(clientId) {
         return new Promise((resolve, reject) => {
-            this.redisClient.scan('0', 'MATCH', `*:${clientId}`, (err, res) => {
+            this.redisClient.scan('0', 'MATCH', `AccessToken:*:${clientId}`, (err, res) => {
                 if (err) reject(err)
                 else resolve(res[1])
             })
@@ -96,23 +100,22 @@ class Token {
      * 生成token
      * 每次生成新token都要替换掉之前的token
      * 
-     * @param {string} clientId
-     * @param {string} clientData
+     * @param {TmsClient} tmsClient
      * 
      */
-    static async create(clientId, clientData) {
+    static async create(tmsClient) {
         const tokenRedis = await TokenInRedis.create()
         if (false === tokenRedis)
             return [false, '连接Redis服务失败']
 
         // 清除已经存在的token
-        const keys = await tokenRedis.scan(clientId)
+        const keys = await tokenRedis.scan(tmsClient.id)
         if (keys && keys.length)
             tokenRedis.del(keys)
 
         // 生成并保存新token
         const token = uuidv4().replace(/-/g, '')
-        const expireIn = await tokenRedis.store(token, clientId, clientData)
+        const expireIn = await tokenRedis.store(token, tmsClient.id, tmsClient.toPlainObject())
 
         tokenRedis.quit()
 

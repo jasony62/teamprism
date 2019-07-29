@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs')
-const Token = require('./token')
+const Token = require('../token')
 const { ResultFault } = require('../api')
 
 /**
@@ -12,7 +12,7 @@ const { ResultFault } = require('../api')
  * 如果文件不存在，倒数第2段作为目录名，查找main.js文件
  * 
  * @param {Request} req 
- * @param {Who} client
+ * @param {Client} client
  */
 function findCtrlAndMethod(req, client) {
     let { path } = req

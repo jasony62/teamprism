@@ -18,7 +18,7 @@ class ResultData extends ResultBase {
 }
 
 class ResultFault extends ResultBase {
-    constructor(msg = '操作无法完成', result = null, code = 1) {
+    constructor(msg = '操作无法完成', code = 1, result = null) {
         super(result, msg, code)
     }
 }

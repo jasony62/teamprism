@@ -5,18 +5,20 @@ const mock = new MockAdapter(axios);
 
 mock.onGet('/ue/auth/token?site=invalidsiteid').reply(200, {
     code: 40013,
-    errmsg: '没有获得有效用户信息'
+    msg: '没有获得有效用户信息'
 })
 mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
     code: 0,
-    access_token: 'mock_access_token',
-    expire_in: 7200
+    result: {
+        access_token: 'mock_access_token',
+        expire_in: 7200
+    }
 })
 mock.onGet(/\/ue\/withaccesstoken/).reply(() => {
-    return [200, { code: 0, data: 'test' }]
+    return [200, { code: 0, result: 'test' }]
 })
 mock.onGet(/\/ue\/returnlogicerror/).reply(() => {
-    return [200, { code: 1, errmsg: '服务端业务逻辑错误' }]
+    return [200, { code: 1, msg: '服务端业务逻辑错误' }]
 })
 
 describe("#apis", () => {

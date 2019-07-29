@@ -24,7 +24,7 @@ function useResponseInterceptor() {
         myResponseInterceptor = axios.interceptors.response.use(res => {
             // 对响应数据做点什么
             if (res.data.code !== 0) {
-                return Promise.reject(res.data.errmsg)
+                return Promise.reject(res.data.msg)
             }
             return res
         }, error => {
@@ -70,7 +70,7 @@ function setupAccessToken(siteid) {
             throw 'Axios2:参数错误'
 
         axios.get(`/ue/auth/token?site=${siteid}`).then((res) => {
-            let { access_token, expire_in } = res.data
+            let { access_token, expire_in } = res.data.result
 
             // 记录过期时间
             let expireAt = parseInt(new Date / 1000) + expire_in - 120

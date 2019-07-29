@@ -12,7 +12,7 @@ describe("#tms", function() {
                 return agent.get(`/ue/auth/token?site=${siteid}`)
                     .set('Cookie', [testdata.tms.routers.auth.cookie])
                     .then((res) => {
-                        token = res.body.access_token
+                        token = res.body.result.access_token
                         done()
                     })
             })

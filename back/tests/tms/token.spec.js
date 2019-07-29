@@ -1,12 +1,14 @@
 describe("#tms", function() {
     describe("#routers.js", function() {
         describe("#token.js", function() {
-            const Token = require('../../../tms/routers/token')
-            let clientId = 'mockeclientid'
-            let oMockUser = { uid: 'mockuid' }
+            let oMockUser = { uid: 'anyuserid' }
+            const { TmsClient } = require('../../tms/client')
+            const tmsClient = new TmsClient('anysiteid', 'anyuserid', oMockUser)
+            const Token = require('../../tms/token')
             let token
+
             test("create", () => {
-                return Token.create(clientId, oMockUser).then(aResult => {
+                return Token.create(tmsClient).then(aResult => {
                     expect(aResult[0]).toBe(true)
                     expect(aResult[1]).toMatchObject(expect.objectContaining({ expire_in: 7200, access_token: expect.stringMatching(/\w*/) }))
                     token = aResult[1].access_token
@@ -15,7 +17,7 @@ describe("#tms", function() {
             test("check-existent", () => {
                 return Token.fetch(token).then(aResult => {
                     expect(aResult[0]).toBe(true)
-                    expect(aResult[1]).toMatchObject(expect.objectContaining({ uid: 'mockuid' }))
+                    expect(aResult[1]).toMatchObject({ siteid: 'anysiteid', id: 'anyuserid', data: oMockUser })
                 })
             })
             test("check-nonexistent", () => {
