@@ -5,9 +5,9 @@ const uuidv4 = require('uuid/v4');
 const EXPIRE_IN = 7200
 
 /**
- * 
+ * 在redis中保存客户端的access_token 
  */
-class TokenRedis {
+class TokenInRedis {
     constructor(client) {
         this.redisClient = client
     }
@@ -16,7 +16,7 @@ class TokenRedis {
         return new Promise((resolve) => {
             const client = redis.createClient()
             client.on('ready', () => {
-                resolve(new TokenRedis(client))
+                resolve(new TokenInRedis(client))
             })
             client.on('error', () => {
                 resolve(false)
@@ -35,7 +35,7 @@ class TokenRedis {
      */
     store(token, clientId, data) {
         let createAt = parseInt(new Date * 1 / 1000)
-        let key = `accessToken:${token}:${clientId}`
+        let key = `AccessToken:${token}:${clientId}`
         return new Promise((resolve) => {
             this.redisClient.set(key, JSON.stringify({ expireAt: createAt + 7200, data: data }), () => {
                 this.redisClient.expire(key, EXPIRE_IN, () => {
@@ -65,22 +65,23 @@ class TokenRedis {
         this.redisClient.del(...keys)
     }
     /**
+     * 根据token获得对应的数据
      * 
      * @param {string} token 
      */
     get(token) {
         return new Promise((resolve, reject) => {
-            this.redisClient.scan('0', 'MATCH', `accessToken:${token}:*`, (err, res) => {
-                if (err) reject('access token error1')
+            this.redisClient.scan('0', 'MATCH', `AccessToken:${token}:*`, (err, res) => {
+                if (err) reject('access token error: redis error')
                 else {
                     if (res[1].length === 1) {
                         let key = res[1][0]
                         this.redisClient.get(key, (err, res) => {
-                            if (err) reject('access token error2')
+                            if (err) reject('access token error:redis error')
                             else resolve(JSON.parse(res))
                         })
                     } else {
-                        reject('access token error3')
+                        reject('没有找到和access_token匹配的数据')
                     }
                 }
             })
@@ -100,7 +101,7 @@ class Token {
      * 
      */
     static async create(clientId, clientData) {
-        const tokenRedis = await TokenRedis.create()
+        const tokenRedis = await TokenInRedis.create()
         if (false === tokenRedis)
             return [false, '连接Redis服务失败']
 
@@ -126,7 +127,7 @@ class Token {
      * @param {*} token 
      */
     static async fetch(token) {
-        let tokenRedis = await TokenRedis.create()
+        let tokenRedis = await TokenInRedis.create()
         if (false === tokenRedis)
             return [false, '连接Redis服务失败']
 

@@ -42,12 +42,13 @@ function findCtrlAndMethod(req, client) {
  * 
  */
 router.all('*', async (req, res) => {
-    if (!req.query.access_token) {
+    const { access_token } = req.query
+    if (!access_token) {
         res.json(new ResultFault('缺少access_token参数'))
         return
     }
 
-    let aResult = await Token.fetch(req.query.access_token)
+    let aResult = await Token.fetch(access_token)
     if (false === aResult[0]) {
         res.json(new ResultFault(aResult[1]))
         return
