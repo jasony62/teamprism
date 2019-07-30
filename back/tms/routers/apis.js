@@ -1,18 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs')
-const Who = require('../who')
-const utilities = require('../utilities')
+const Token = require('./token')
+const { ResultFault } = require('../api')
 
-/**
- * 返回和token匹配的用户
- * 
- * @param {string} token 
- */
-function checkAccessToken(token) {
-    let who = Who()
-    return who;
-}
 /**
  * 根据请求路径找到匹配的控制器和方法
  * 
@@ -20,10 +11,11 @@ function checkAccessToken(token) {
  * 倒数第2端为文件名（加.js）
  * 如果文件不存在，倒数第2段作为目录名，查找main.js文件
  * 
- * @param {string} path 
- * @param {Who} who
+ * @param {Request} req 
+ * @param {Who} client
  */
-function findCtrlAndMethod(path, who) {
+function findCtrlAndMethod(req, client) {
+    let { path } = req
     let pieces = path.split('/')
     if (pieces.length < 2)
         throw new Error('参数错误，请求的对象不存在(1)')
@@ -36,43 +28,40 @@ function findCtrlAndMethod(path, who) {
             throw new Error('参数错误，请求的对象不存在(2)')
     }
 
-    const ctrl = require(ctrlPath)(who)
-    if (ctrl[method] === undefined && typeof ctrl[method] !== 'function')
+    const CtrlClass = require(ctrlPath)
+    const oCtrl = new CtrlClass(req, client)
+    if (oCtrl[method] === undefined && typeof oCtrl[method] !== 'function')
         throw new Error('参数错误，请求的对象不存在(3)')
 
-    return [ctrl, method]
+    return [oCtrl, method]
 }
 /**
- * 检查access_token
- * 根据路由自动匹配api
- * 自动匹配参数
+ * 1. 检查access_token
+ * 2. 根据路由自动匹配api
+ * 3. 自动匹配参数
+ * 
  */
 router.all('*', async (req, res) => {
-    global.utilities = new utilities
-    
-    if (!req.query.access_token)
-        res.json({
-            code: 1,
-            errmsg: '没有access_token'
-        })
-    let who
-    if (false === (who = checkAccessToken(req.query.access_token)))
-        res.json({
-            code: 1,
-            errmsg: 'access_token不可用'
-        })
+    const { access_token } = req.query
+    if (!access_token) {
+        res.json(new ResultFault('缺少access_token参数'))
+        return
+    }
+
+    let aResult = await Token.fetch(access_token)
+    if (false === aResult[0]) {
+        res.json(new ResultFault(aResult[1]))
+        return
+    }
+    let client = aResult[1]
 
     try {
-        const [ctrl, method] = findCtrlAndMethod(req.path, who)
-        const result = await ctrl[method](req)
+        const [oCtrl, method] = findCtrlAndMethod(req, client)
+        const result = await oCtrl[method](req)
         res.json(result)
     } catch (err) {
-console.log(err);
-        res.json({
-            code: 1,
-            errmsg: err.message
-        })
+        res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))
     }
-});
+})
 
-module.exports = router;
+module.exports = router

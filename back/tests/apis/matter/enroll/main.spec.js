@@ -3,10 +3,10 @@ describe("#apis", () => {
         describe("#matter", () => {
             describe("#enroll", () => {
                 describe("#main.js", () => {
-                    let ctrl, testdata
+                    const CtrlClass = require('../../../../apis/matter/enroll/main')
+                    let testdata
                     beforeAll(() => {
-                        ctrl = require('../../../../../apis/matter/enroll/main')()
-                        testdata = require('../../../../../cus/test.data')
+                        testdata = require('../../../../cus/test.data')
                     })
                     test("entryRule()", () => {
                         let mockReq = {
@@ -14,8 +14,10 @@ describe("#apis", () => {
                                 app: testdata.apis.ue.matter.enroll.main.appId
                             }
                         }
-                        let entryRule = ctrl.entryRule(mockReq)
-                        expect(entryRule).not.toBe(false)
+                        let ctrl = new CtrlClass(mockReq)
+                        return ctrl.entryRule().then(rst => {
+                            expect(rst).toMatchObject({ code: 0, result: expect.anything() })
+                        })
                     })
                 })
             })

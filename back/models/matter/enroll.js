@@ -1,6 +1,4 @@
-const {
-    DbModel
-} = require('../../tms/model')
+const { DbModel } = require('../../tms/model')
 
 class Enroll extends DbModel {
     async byId(appId, options = {}) {
@@ -10,7 +8,7 @@ class Enroll extends DbModel {
         dbSelect.where.fieldMatch('id', '=', appId);
         let oApp = await dbSelect.exec()
         if (!oApp)
-            throw new Error('对象不存在')
+            throw new Error('记录活动不存在')
 
         let toJsonProps = ['entry_rule'];
         toJsonProps.forEach((p) => {
@@ -22,6 +20,6 @@ class Enroll extends DbModel {
         return oApp;
     }
 }
-module.exports = function () {
+module.exports = function() {
     return new Enroll()
 }

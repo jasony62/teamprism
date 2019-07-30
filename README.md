@@ -29,3 +29,9 @@ npm install
 ```
 npm run pm2
 ```
+
+启动 Redis 服务
+
+```
+redis-server
+```

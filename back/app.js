@@ -1,14 +1,13 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-//var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
 
-var authRouter = require('./tms/routers/auth')
-var apiRouter = require('./tms/routers/apis')
+const authRouter = require('./tms/routers/auth')
+const apiRouter = require('./tms/routers/apis')
+const wxRouter = require('./tms/routers/wx')
 
-var app = express();
+const app = express();
 
-//app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({
     extended: false
@@ -19,5 +18,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 app.use('/ue/auth', authRouter)
 app.use('/ue/api', apiRouter)
+app.use('/ue/wx', wxRouter)
 
 module.exports = app;

@@ -89,8 +89,32 @@ class Model {
     }
 
 }
+/**
+ * 数据库表
+ */
+// 表名称字段
+const TABLE_NAME = Symbol('table_name')
 
 class DbModel extends Model {
+    constructor(table) {
+        super()
+        this[TABLE_NAME] = table
+    }
+
+    get table() {
+        return this[TABLE_NAME]
+    }
+
+    async select(oOptions = {}) {
+        const fields = oOptions.fields || '*'
+
+        let db = await this.db()
+        let dbSelect = db.newSelect(this.table, fields)
+        dbSelect.where.fieldMatch('1', '=', 1)
+        let rows = await dbSelect.exec()
+
+        return rows
+    }
 
     async db() {
         if (this._db)
