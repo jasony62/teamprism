@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const Who = require('../who')
+const utilities = require('../utilities')
 
 /**
  * 返回和token匹配的用户
@@ -47,6 +48,8 @@ function findCtrlAndMethod(path, who) {
  * 自动匹配参数
  */
 router.all('*', async (req, res) => {
+    global.utilities = new utilities
+    
     if (!req.query.access_token)
         res.json({
             code: 1,
@@ -64,6 +67,7 @@ router.all('*', async (req, res) => {
         const result = await ctrl[method](req)
         res.json(result)
     } catch (err) {
+console.log(err);
         res.json({
             code: 1,
             errmsg: err.message

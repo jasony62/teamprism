@@ -3,9 +3,10 @@ const {
 } = require('../../tms/model')
 
 class Enroll extends DbModel {
-    async byId(appId) {
+    async byId(appId, options = {}) {
+        let fields = (options.fields) ? options.fields : '*';
         let db = await this.db()
-        let dbSelect = db.newSelectOne('xxt_enroll', '*')
+        let dbSelect = db.newSelectOne('xxt_enroll', fields)
         dbSelect.where.fieldMatch('id', '=', appId);
         let oApp = await dbSelect.exec()
         if (!oApp)
