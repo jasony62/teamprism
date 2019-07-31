@@ -1,24 +1,32 @@
 <template>
-    <div id="enroll">
+    <div id="app">
         <div>记录活动</div>
         <div>
-            <button id="checkEntryRule" v-on:click="checkEntryRule">第一步：获取活动进入规则，根据进入规则提示用户进行下一步操作</button>
+            <button id="checkEntryRule" @click="checkEntryRule">第一步：获取活动进入规则，根据进入规则提示用户进行下一步操作</button>
         </div>
         <div>
-            <button id="wxOAuth2" v-on:click="wxOAuth2">微信网页授权获得用户信息</button>
+            <button id="wxOAuth2" @click="wxOAuth2">微信网页授权获得用户信息</button>
+        </div>
+        <div>
+            <router-link to="/repos">Go to Repos</router-link>
+            <router-link to="/cowork">Go to Cowork</router-link>
+            <router-link to="/kanban">Go to Kanban</router-link>
+        </div>
+        <div>
+            <router-view></router-view>
         </div>
     </div>
 </template>
 
 <script>
+import Vue from 'vue'
 import apiApp from '@/apis/matter/enroll/main'
 import apiWx from '@/apis/sns/wx/main'
 import qs from 'query-string'
-import Vue from 'vue'
 import NoticeBox from '@/tms/components/NoticeBox'
 
 export default {
-    name: 'enroll',
+    name: 'app',
     methods: {
         checkEntryRule: () => {
             let params = qs.parse(location.search)
@@ -43,7 +51,8 @@ export default {
                 const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
                 location.href = uri
             } catch (e) {
-                console.log(e)
+                const nbox = new Vue(NoticeBox).$mount()
+                nbox.error(e)
             }
         }
     }
@@ -51,7 +60,7 @@ export default {
 </script>
 
 <style>
-#enroll {
+#app {
     text-align: center;
     color: #2c3e50;
     margin-top: 60px;

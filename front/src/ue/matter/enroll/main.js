@@ -1,6 +1,8 @@
 import Vue from "vue"
-import Enroll from "./Main.vue"
 import { setupAccessToken } from '@/tms/apis/axios2'
+
+import Main from "./Main.vue"
+import router from "./router.js"
 
 Vue.config.productionTip = false
 
@@ -13,6 +15,8 @@ async function initAxios() {
 }
 initAxios()
 
+
 new Vue({
-    render: h => h(Enroll)
+    router,
+    render: h => h(Main)
 }).$mount("#app")
