@@ -11,45 +11,47 @@
 </template>
 
 <script>
-import apiApp from "@/apis/matter/enroll/main";
-import apiWx from "@/apis/sns/wx/main";
-import qs from "query-string";
+import apiApp from '@/apis/matter/enroll/main'
+import apiWx from '@/apis/sns/wx/main'
+import qs from 'query-string'
+import Vue from 'vue'
+import NoticeBox from '@/tms/components/NoticeBox'
 
 export default {
-    name: "enroll",
+    name: 'enroll',
     methods: {
         checkEntryRule: () => {
-            let params = qs.parse(location.search);
+            let params = qs.parse(location.search)
             if (params.app) {
                 apiApp.getEntryRule(params.app).then(rsp => {
-                    alert(JSON.stringify(rsp));
-                });
+                    const nbox = new Vue(NoticeBox).$mount()
+                    nbox.confirm(JSON.stringify(rsp), [
+                        { label: '关闭', value: 'close' }
+                    ])
+                })
             }
         },
         wxOAuth2: async () => {
             try {
-                let params = qs.parse(location.search);
-                const { site } = params;
-                let appid = await apiWx.appid(site);
+                let params = qs.parse(location.search)
+                const { site } = params
+                let appid = await apiWx.appid(site)
                 const redirect_uri = encodeURIComponent(
                     `http://${location.host}/ue/wx/oauth2?site=${site}`
-                );
-                const state = encodeURIComponent(location.href);
-                const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
-                location.href = uri;
+                )
+                const state = encodeURIComponent(location.href)
+                const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
+                location.href = uri
             } catch (e) {
-                console.log(e);
+                console.log(e)
             }
         }
     }
-};
+}
 </script>
 
 <style>
 #enroll {
-    font-family: "Avenir", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
     margin-top: 60px;
