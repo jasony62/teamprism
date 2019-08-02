@@ -20,10 +20,12 @@ export default {
         }
     },
     mounted: function() {
-        document.body.appendChild(this.$el)
+        if (document && document.body && document.body.appendChild)
+            document.body.appendChild(this.$el)
     },
     destroyed: function() {
-        document.body.removeChild(this.$el)
+        if (document && document.body && document.body.appendChild)
+            document.body.removeChild(this.$el)
     },
     methods: {
         error: function(msg) {

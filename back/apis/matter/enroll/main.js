@@ -6,7 +6,7 @@ class Main extends Api {
         super(...args)
     }
     /**
-     * 获得指定记录活动的进入规则
+     * 获得指定记录活动的进入规则以及当前用户的匹配情况
      */
     async entryRule() {
         let { app } = this.request.query

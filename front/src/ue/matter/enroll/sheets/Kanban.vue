@@ -1,3 +1,5 @@
 <template>
-    <div class="kanban">Kanban</div>
+    <div id="kanban">
+        <div>Kanban</div>
+    </div>
 </template>

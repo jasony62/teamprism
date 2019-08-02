@@ -1,17 +1,5 @@
 <template>
-    <div class="repos">
-        <h1>Repos</h1>
-        <hr />
-        <Record />
+    <div id="repos">
+        <div>Repos</div>
     </div>
 </template>
-
-<script>
-import Record from '../common/Record.vue'
-export default {
-    name: 'repos',
-    components: {
-        Record
-    }
-}
-</script>

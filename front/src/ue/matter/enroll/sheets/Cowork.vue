@@ -1,5 +1,5 @@
 <template>
-    <div class="cowork">
+    <div id="cowork">
         <h1>Cowork</h1>
         <hr />
         <Record />

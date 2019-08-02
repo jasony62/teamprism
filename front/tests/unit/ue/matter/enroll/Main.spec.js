@@ -1,22 +1,16 @@
-import { mount } from "@vue/test-utils"
-import EnrollVue from "@/ue/matter/enroll/Main.vue"
-import sinon from "sinon"
+import { shallowMount } from "@vue/test-utils"
+import MainVue from "@/ue/matter/enroll/Main.vue"
+import Vue from "vue"
 
-describe("#ue", () => {
-    describe("#matter", () => {
-        describe("#enroll", () => {
-            describe("#Main.vue", () => {
-                it("获得活动进入规则", () => {
-                    const spy = sinon.spy(EnrollVue.methods, "checkEntryRule")
-                    const wrapper = mount(EnrollVue)
-                    wrapper.find("#checkEntryRule").trigger("click")
-                    sinon.assert.calledOnce(spy)
-                })
-                it("微信网页授权", () => {
-                    const spy = sinon.spy(EnrollVue.methods, "wxOAuth2")
-                    const wrapper = mount(EnrollVue)
-                    wrapper.find("#wxOAuth2").trigger("click")
-                    sinon.assert.calledOnce(spy)
+describe("ue", () => {
+    describe("matter", () => {
+        describe("enroll", () => {
+            describe("Main.vue", () => {
+                const wrapper = shallowMount(MainVue, { stubs: ['router-view', 'router-link'] })
+                it("页面首屏内容", () => {
+                    return Vue.nextTick().then(function() {
+                        expect(wrapper.html()).toContain('这是一个记录活动')
+                    })
                 })
             })
         })

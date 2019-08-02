@@ -15,7 +15,6 @@ async function initAxios() {
 }
 initAxios()
 
-
 new Vue({
     router,
     render: h => h(Main)
