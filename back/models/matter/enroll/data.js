@@ -1,8 +1,5 @@
-const {
-    DbModel
-} = require('../../../tms/model')
+const { DbModel } = require('../../../tms/model')
 
-const utilities =  global.utilities
 const DEFAULT_FIELDS = 'id,state,value,tag,supplement,rid,enroll_key,schema_id,userid,group_id,nickname,submit_at,score,remark_num,last_remark_at,like_num,like_log,modify_log,agreed,agreed_log,multitext_seq,vote_num'
 
 class Data extends DbModel {
@@ -10,14 +7,14 @@ class Data extends DbModel {
      * 获得指定登记记录登记数据的详细信息
      */
 	async byRecord(ek, aOptions = {}) {
-		let fields = aOptions.fields ? aOptions.fields : DEFAULT_FIELDS;
-        let bExcludeRoot = aOptions.excludeRoot ? true : false;
+		let fields = aOptions.fields ? aOptions.fields : DEFAULT_FIELDS
+        let bExcludeRoot = aOptions.excludeRoot ? true : false
 
     	if (-1 === fields.indexOf('schema_id')) {
-            fields += ',schema_id';
+            fields += ',schema_id'
         }
         if (-1 === fields.indexOf('multitext_seq')) {
-            fields += ',multitext_seq';
+            fields += ',multitext_seq'
         }
 
         let db = await this.db()

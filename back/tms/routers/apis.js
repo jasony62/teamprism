@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs')
-const Token = require('./token')
+const Token = require('../token')
 const { ResultFault } = require('../api')
 
 /**
