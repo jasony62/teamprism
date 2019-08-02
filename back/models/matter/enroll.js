@@ -27,7 +27,7 @@ class Enroll extends DbModel {
 
         let url = "http://" + "localhost"
         url += "/rest/site/fe/matter/enroll"
-        $url += "?site=${siteId}&app=" . id
+        url += "?site=" + siteId + "&app=" + id
 
         if (oParams && Object.prototype.toString.call(oParams) === "[object Object]") {
             Object.keys(oParams).forEach((k) => {
