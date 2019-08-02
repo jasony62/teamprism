@@ -1,55 +1,50 @@
 <template>
-    <div id="enroll">
-        <div>记录活动</div>
-        <div>
-            <button id="checkEntryRule" v-on:click="checkEntryRule">第一步：获取活动进入规则，根据进入规则提示用户进行下一步操作</button>
+    <div id="main">
+        <div class="loading" v-if="loading">
+            <div>Loading...</div>
         </div>
-        <div>
-            <button id="wxOAuth2" v-on:click="wxOAuth2">微信网页授权获得用户信息</button>
+        <div v-else>
+            <div>
+                <router-link to="/guide">Go to Guide</router-link>
+                <router-link to="/home">Go to Home</router-link>
+            </div>
+            <div>
+                <router-view :app="app"></router-view>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
-import apiApp from "@/apis/matter/enroll/main";
-import apiWx from "@/apis/sns/wx/main";
-import qs from "query-string";
+import qs from 'query-string'
 
 export default {
-    name: "enroll",
+    name: 'main',
+    data() {
+        return { loading: true, app: { title: 'loading' } }
+    },
+    mounted() {
+        this.fetchApp()
+    },
     methods: {
-        checkEntryRule: () => {
-            let params = qs.parse(location.search);
-            if (params.app) {
-                apiApp.getEntryRule(params.app).then(rsp => {
-                    alert(JSON.stringify(rsp));
-                });
-            }
-        },
-        wxOAuth2: async () => {
-            try {
-                let params = qs.parse(location.search);
-                const { site } = params;
-                let appid = await apiWx.appid(site);
-                const redirect_uri = encodeURIComponent(
-                    `http://${location.host}/ue/wx/oauth2?site=${site}`
-                );
-                const state = encodeURIComponent(location.href);
-                const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
-                location.href = uri;
-            } catch (e) {
-                console.log(e);
-            }
+        fetchApp() {
+            setTimeout(() => {
+                let params = qs.parse(location.search)
+                let loadedApp = {
+                    id: params.app,
+                    title: '这是一个记录活动',
+                    entryRule: { scope: 'group' }
+                }
+                this.app = loadedApp
+                this.loading = false
+            }, 1000)
         }
     }
-};
+}
 </script>
 
 <style>
-#enroll {
-    font-family: "Avenir", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+#main {
     text-align: center;
     color: #2c3e50;
     margin-top: 60px;
