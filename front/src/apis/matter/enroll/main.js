@@ -4,9 +4,9 @@ export default {
     /**
      * 指定活动的进入规则以及当前用户的匹配情况
      * 
-     * @param {*} appId 
+     * @param {String} appId 
      */
-    checkEntryRule: async function(appId) {
+    checkEntryRule: function(appId) {
         return new Promise((resolve, reject) => {
             axios.get(`/ue/api/matter/enroll/entryRule?app=${appId}`).then(rst => {
                 resolve(rst.data.result)

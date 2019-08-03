@@ -1,10 +1,13 @@
 import Vue from "vue"
 import { setupAccessToken } from '@/tms/apis/axios2'
+import Message from '@/tms/components/message'
 
 import Main from "./Main.vue"
 import router from "./router.js"
 
 Vue.config.productionTip = false
+
+Vue.prototype.$message = Message
 
 async function initAxios() {
     try {

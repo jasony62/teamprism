@@ -17,4 +17,4 @@
 
 #components
 
-##提示框（noticebox）
+##提示框（message）
