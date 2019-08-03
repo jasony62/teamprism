@@ -1,5 +1,5 @@
 <template>
-    <div id="main">
+    <div id="enroll">
         <div class="loading" v-if="loading">
             <div>Loading...</div>
         </div>
@@ -17,9 +17,10 @@
 
 <script>
 import qs from 'query-string'
+import apis from '@/apis/matter/enroll'
 
 export default {
-    name: 'main',
+    name: 'enroll',
     data() {
         return { loading: true, app: { title: 'loading' } }
     },
@@ -27,17 +28,23 @@ export default {
         this.fetchApp()
     },
     methods: {
-        fetchApp() {
-            setTimeout(() => {
-                let params = qs.parse(location.search)
-                let loadedApp = {
-                    id: params.app,
-                    title: '这是一个记录活动',
-                    entryRule: { scope: 'group' }
+        async fetchApp() {
+            let params = qs.parse(location.search)
+            try {
+                if (params.app) {
+                    let app = await apis.getApp(params.app)
+                    this.app = app
                 }
-                this.app = loadedApp
+            } catch (e) {
+                this.$message({
+                    message: e,
+                    type: 'error',
+                    duration: 60000,
+                    showClose: true
+                })
+            } finally {
                 this.loading = false
-            }, 1000)
+            }
         }
     }
 }

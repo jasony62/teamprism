@@ -1,4 +1,4 @@
-import api from '@/apis/matter/enroll/main'
+import apis from '@/apis/matter/enroll'
 
 import axios, { setupAccessToken } from '@/tms/apis/axios2';
 import MockAdapter from 'axios-mock-adapter'
@@ -11,20 +11,29 @@ mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
         expire_in: 7200
     }
 })
+mock.onGet(/\/ue\/api\/matter\/enroll\/get.*/).reply(200, {
+    code: 0,
+    result: {},
+})
 mock.onGet(/\/ue\/api\/matter\/enroll\/entryRule.*/).reply(200, {
     code: 0,
     result: {},
 })
 
-describe("#apis", () => {
-    describe("#matter", () => {
-        describe("#enroll", () => {
-            describe("#main.js", () => {
+describe("apis", () => {
+    describe("matter", () => {
+        describe("enroll", () => {
+            describe("index.js", () => {
                 beforeAll(() => {
                     return setupAccessToken('validsiteid')
                 })
+                it("获得活动", () => {
+                    return apis.getApp('anyappid').then(rst => {
+                        expect(rst).toMatchObject({})
+                    })
+                })
                 it("获得活动进入规则", () => {
-                    return api.getEntryRule('anyappid').then(rst => {
+                    return apis.checkEntryRule('anyappid').then(rst => {
                         expect(rst).toMatchObject({})
                     })
                 })

@@ -15,8 +15,8 @@
     </div>
 </template>
 <script>
-import apis from '@/apis/matter/enroll/main'
-import apisWx from '@/apis/sns/wx/main'
+import apis from '@/apis/matter/enroll'
+import apisWx from '@/apis/sns/wx'
 
 export default {
     name: 'guide',
@@ -56,16 +56,18 @@ export default {
         }
     },
     methods: {
-        wxOAuth2: function() {
+        async wxOAuth2() {
             try {
-                let appid = apisWx.appid(this.app.siteid)
-                if (appid) {
-                    const redirect_uri = encodeURIComponent(
-                        `http://${location.host}/ue/wx/oauth2`
-                    )
-                    const state = encodeURIComponent(location.href)
-                    const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
-                    location.href = uri
+                if (this.app && this.app.siteid) {
+                    let appid = await apisWx.appid(this.app.siteid)
+                    if (appid) {
+                        const redirect_uri = encodeURIComponent(
+                            `http://${location.host}/ue/wx/oauth2`
+                        )
+                        const state = encodeURIComponent(location.href)
+                        const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
+                        location.href = uri
+                    }
                 }
             } catch (e) {
                 this.$message({ message: e, type: 'error' })
