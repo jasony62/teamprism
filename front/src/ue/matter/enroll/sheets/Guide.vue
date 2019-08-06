@@ -9,13 +9,14 @@
                 <span>获取活动进入规则，根据进入规则提示用户进行下一步操作</span>
             </div>
             <div>
-                <button id="wxOAuth2" @click="wxOAuth2">微信网页授权获得用户信息</button>
+                <button id="wxOAuth2" @click="wxOAuth2()">微信网页授权获得用户信息</button>
             </div>
         </section>
     </div>
 </template>
 <script>
-import apis from '@/apis/matter/enroll/main'
+import apis from '@/apis/matter/enroll'
+import apisWx from '@/apis/sns/wx'
 
 export default {
     name: 'guide',
@@ -37,37 +38,40 @@ export default {
     },
     watch: {
         appid: {
-            handler(nv) {
+            async handler(nv) {
                 if (nv) {
                     try {
-                        apis.checkEntryRule(this.app.id)
+                        let rule = await apis.checkEntryRule(this.app.id)
+                        this.$message({
+                            message: rule,
+                            duration: 60000,
+                            showClose: true
+                        })
                     } catch (e) {
-                        //console.log(e)
+                        this.$message({ message: e, type: 'error' })
                     }
                 }
             },
             immediate: true
         }
     },
-    mounted() {},
     methods: {
-        wxOAuth2: () => {
-            // try {
-            //     let appid = await apiWx.appid(this.app.siteid)
-            //     if (appid) {
-            //         const redirect_uri = encodeURIComponent(
-            //             `http://${location.host}/ue/wx/oauth2?site=${site}`
-            //         )
-            //         const state = encodeURIComponent(location.href)
-            //         const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
-            //         location.href = uri
-            //     }
-            // } catch (e) {
-            //     if (document) {
-            //         //const nbox = new Vue(NoticeBox).$mount()
-            //         //nbox.error(e)
-            //     }
-            // }
+        async wxOAuth2() {
+            try {
+                if (this.app && this.app.siteid) {
+                    let appid = await apisWx.appid(this.app.siteid)
+                    if (appid) {
+                        const redirect_uri = encodeURIComponent(
+                            `http://${location.host}/ue/wx/oauth2`
+                        )
+                        const state = encodeURIComponent(location.href)
+                        const uri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
+                        location.href = uri
+                    }
+                }
+            } catch (e) {
+                this.$message({ message: e, type: 'error' })
+            }
         }
     }
 }

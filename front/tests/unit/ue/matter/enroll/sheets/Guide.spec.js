@@ -8,7 +8,7 @@ describe("ue", () => {
             describe("sheets", () => {
                 describe("Guide.vue", () => {
                     const spyWxOAuth2 = sinon.spy(GuideVue.methods, "wxOAuth2")
-                    const wrapper = shallowMount(GuideVue, { provide: { app: { id: 'anyappid' } } })
+                    const wrapper = shallowMount(GuideVue)
                     it("微信网页授权", () => {
                         wrapper.find("#wxOAuth2").trigger("click")
                         sinon.assert.calledOnce(spyWxOAuth2)

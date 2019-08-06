@@ -21,8 +21,8 @@ mock.onGet(/\/ue\/returnlogicerror/).reply(() => {
     return [200, { code: 1, msg: '服务端业务逻辑错误' }]
 })
 
-describe("#apis", () => {
-    describe("#axios2.js", () => {
+describe("apis", () => {
+    describe("axios2.js", () => {
         it("创建失败(siteid为空)", () => {
             expect(setupAccessToken()).rejects.toMatch('Axios2:参数错误')
         })
