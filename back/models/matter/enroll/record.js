@@ -1,7 +1,6 @@
-const {
-    DbModel
-} = require('../../../tms/model')
-const utilities =  global.utilities
+const { DbModel } = require('../../../tms/model')
+const Data = require('../../../models/matter/enroll/data')
+const Round = require('../../../models/matter/enroll/round')
 
 class Record extends DbModel {
     async byId(ek, aOptions = {}) {
@@ -46,10 +45,12 @@ class Record extends DbModel {
 			oRecord.dislike_log = oRecord.dislike_log ? {} : JSON.parse(oRecord.dislike_log);
 		}
 		if (verbose === 'Y' && "enroll_key" in oRecord) {
-			oRecord.verbose = await utilities.model('matter\\enroll\\data').byRecord(oRecord.enroll_key);
+			let modelData = new Data()
+			oRecord.verbose = await modelData.byRecord(oRecord.enroll_key);
 		}
-		if ("rid" in oRecord && oRecord.rid !== '') {
-			let oRound = await utilities.model('matter\\enroll\\round').byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'});
+		if (oRecord.rid) {
+			let modelRound = new Round()
+			let oRound = await modelRound.byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'});
 			if (oRound) {
 				oRecord.round = oRound;
 			} else {

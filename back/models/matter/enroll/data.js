@@ -1,5 +1,4 @@
 const { DbModel } = require('../../../tms/model')
-
 const DEFAULT_FIELDS = 'id,state,value,tag,supplement,rid,enroll_key,schema_id,userid,group_id,nickname,submit_at,score,remark_num,last_remark_at,like_num,like_log,modify_log,agreed,agreed_log,multitext_seq,vote_num'
 
 class Data extends DbModel {
@@ -28,7 +27,7 @@ class Data extends DbModel {
         	dbSelect.where.fieldMatch('is_multitext_root', '=', 0)
         }
 
-        let fnHandleData = function(oData) {
+        let fnHandleData = async function(oData) {
             if (oData.tag !== "undefined") {
                 oData.tag = oData.tag ? new Array() : JSON.stringify(oData.tag);
             }
@@ -39,16 +38,19 @@ class Data extends DbModel {
                 oData.agreed_log = oData.agreed_log ? {} : JSON.stringify(Data.agreed_log);
             }
         };
-        let fnHandleResult = function(data, bExcludeRoot, fnHandleData) {
-            oResult = {};
+        let fnHandleResult = async function(data, bExcludeRoot, fnHandleData) {
+            let oResult = {};
             if (data.length) {
-                data.forEach(function(oSchemaData) {
+                data.forEach(async function(oSchemaData) {
                     await fnHandleData(oSchemaData);
                     let schemaId = oSchemaData.schema_id;
                     delete oSchemaData.schema_id;
                     if (bExcludeRoot) {
                         if (oSchemaData.multitext_seq > 0) {
-                            oResult[schemaId].push = oSchemaData;
+                            if (!oResult[schemaId]) {
+                                oResult[schemaId] = new Array();
+                            }
+                            oResult[schemaId].push(oSchemaData);
                         } else {
                             delete oSchemaData.multitext_seq;
                             oResult[schemaId] = oSchemaData;

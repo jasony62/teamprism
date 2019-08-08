@@ -1,14 +1,19 @@
-const {
-    DbModel
-} = require('../../../tms/model')
-const utilities =  global.utilities
+const { DbModel } = require('../../../tms/model')
+const Enroll = require('../../../models/matter/enroll')
+const Round = require('../../../models/matter/enroll/round')
+const { tms_object_merge, tms_array_search, getDeepValue } = require('../../../tms/utilities')
 const TYPENAMEZH = {'baseline' : '目标', 'question' : '提问', 'answer' : '回答', 'vote' : '投票', 'score' : '打分'}
 
 class Task extends DbModel {
 	constructor(oApp = null) {
-        this._oApp = oApp;
+        super()
+        this._oApp = oApp
     }
-
+    /**
+     * 
+     * @param {*} id 
+     * @param {*} aOptions 
+     */
 	async byId(id, aOptions = {}) {
 		let fields = aOptions.fields ? aOptions.fields : 'id,aid,rid,start_at,end_at,config_type,config_id';
 
@@ -19,17 +24,19 @@ class Task extends DbModel {
 
         if (oTask && oTask.config_type && oTask.config_id) {
             if (!this._oApp && oTask.aid) {
-                this._oApp = await utilities.model('matter\\enroll').byId(oTask.aid, {'fields' : '*'});
+                let modelEnl = new Enroll()
+                this._oApp = await modelEnl.byId(oTask.aid, {'fields' : '*'});
             }
             if (this._oApp[oTask.config_type + 'Config']) {
-                let oRuleConfig = await utilities.model('matter\\enroll\\task', this._oApp).configById(oTask.config_type, oTask.config_id);
+                let oRuleConfig = await this.configById(oTask.config_type, oTask.config_id);
                 if (oRuleConfig && oRuleConfig.enabled === 'Y') {
-                    let oTaskRound = await utilities.model('matter\\enroll\\round').byId(oTask.rid);
+                    let modelRound = new Round()
+                    let oTaskRound = await modelRound.byId(oTask.rid);
                     if (oTaskRound) {
                         let oRuleState = await this.getRuleStateByRound(oRuleConfig, oTaskRound);
                         if (true === oRuleState[0]) {
-                            await utilities.tms_object_merge(oTask, oRuleConfig, ['source', 'scoreApp', 'schemas', 'limit']);
-                            await utilities.tms_object_merge(oTask, oRuleState[1], ['state']);
+                            await tms_object_merge(oTask, oRuleConfig, ['source', 'scoreApp', 'schemas', 'limit']);
+                            await tms_object_merge(oTask, oRuleState[1], ['state']);
                         }
                     }
                 }
@@ -38,24 +45,32 @@ class Task extends DbModel {
 
         return oTask;
 	}
-
+    /**
+     * 
+     * @param {*} type 
+     * @param {*} id 
+     */
 	async configById(type, id) {
-        let oConfig = await utilities.tms_array_search(this._oApp[type + 'Config'], function (oRule, id) {return oRule.id === id}, id);
+        let oConfig = await tms_array_search(this._oApp[type + 'Config'], function (oRule, id) {return oRule.id === id}, id);
         if (oConfig) {
             oConfig.type = type
         }
 
         return oConfig
 	}
-
+    /**
+     * 
+     * @param {*} oTaskConfig 
+     * @param {*} oRound 
+     */
 	async getRuleStateByRound(oTaskConfig, oRound) {
         let taskState = 'IP';
         let startAt = endAt = 0;
         let current = time();
-        if (oStartRule = await utilities.getDeepValue(oTaskConfig, 'start.time')) {
-            if (utilities.getDeepValue(oStartRule, 'mode') === 'after_round_start_at') {
-                if (utilities.getDeepValue(oStartRule, 'unit') === 'hour') {
-                    let afterHours = utilities.getDeepValue(oStartRule, 'value', 0);
+        if (oStartRule = await getDeepValue(oTaskConfig, 'start.time')) {
+            if (getDeepValue(oStartRule, 'mode') === 'after_round_start_at') {
+                if (getDeepValue(oStartRule, 'unit') === 'hour') {
+                    let afterHours = getDeepValue(oStartRule, 'value', 0);
                     if (oRound.start_at) {
                         startAt = oRound.start_at + (afterHours * 3600);
                         if (current < startAt) {
@@ -67,10 +82,10 @@ class Task extends DbModel {
                 }
             }
         }
-        if (oEndRule = await utilities.getDeepValue(oTaskConfig, 'end.time')) {
-            if (utilities.getDeepValue(oEndRule, 'mode') === 'after_round_start_at') {
-                if (utilities.getDeepValue(oEndRule, 'unit') === 'hour') {
-                    let afterHours = utilities.getDeepValue(oEndRule, 'value', 0);
+        if (oEndRule = await getDeepValue(oTaskConfig, 'end.time')) {
+            if (getDeepValue(oEndRule, 'mode') === 'after_round_start_at') {
+                if (getDeepValue(oEndRule, 'unit') === 'hour') {
+                    let afterHours = getDeepValue(oEndRule, 'value', 0);
                     if (oRound.start_at) {
                         endAt = oRound.start_at + (afterHours * 3600);
                         if (current > endAt) {
