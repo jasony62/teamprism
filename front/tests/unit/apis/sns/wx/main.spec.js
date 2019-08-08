@@ -1,4 +1,4 @@
-import api from '@/apis/sns/wx/main'
+import api from '@/apis/sns/wx'
 import axios, { setupAccessToken } from '@/tms/apis/axios2';
 import MockAdapter from 'axios-mock-adapter'
 
@@ -15,10 +15,10 @@ mock.onGet(/\/ue\/api\/sns\/wx\/appid/).reply(200, {
     result: 'valid_appid',
 })
 
-describe("#apis", () => {
-    describe("#sns", () => {
-        describe("#wx", () => {
-            describe("#main.js", () => {
+describe("apis", () => {
+    describe("sns", () => {
+        describe("wx", () => {
+            describe("index.js", () => {
                 beforeAll(() => {
                     return setupAccessToken('validsiteid')
                 })
