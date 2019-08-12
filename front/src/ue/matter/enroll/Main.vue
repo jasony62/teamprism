@@ -4,13 +4,7 @@
             <div>Loading...</div>
         </div>
         <div v-else>
-            <div>
-                <router-link to="/guide">Go to Guide</router-link>
-                <router-link to="/home">Go to Home</router-link>
-            </div>
-            <div>
-                <router-view :app="app"></router-view>
-            </div>
+            <router-view :app="app"></router-view>
         </div>
     </div>
 </template>
@@ -50,7 +44,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #main {
     text-align: center;
     color: #2c3e50;
