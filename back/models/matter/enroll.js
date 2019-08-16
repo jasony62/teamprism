@@ -15,6 +15,21 @@ class Enroll extends DbModel {
     async table() {
         return 'xxt_enroll';
     }
+    // /**
+    //  * 获得记录活动
+    //  */
+    // async get() {
+    //     let { app } = this.request.query
+    //     let modelApp = new Enroll()
+    //     const oApp = await modelApp.byId(app)
+    //     modelApp.end()
+
+    //     if (!oApp) {
+    //         return new ResultObjectNotFound()
+    //     }
+
+    //     return new ResultData(oApp)
+    // }
     /**
      * 活动进入链接
      */

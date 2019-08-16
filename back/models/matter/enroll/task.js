@@ -99,7 +99,53 @@ class Task extends DbModel {
         }
 
         return [true, {'state' : taskState, 'start_at' : startAt, 'end_at' : endAt}];
-	}
+    }
+    /**
+     * 需要进行投票的题目
+     */
+    async getVoteRule(oUser = null, oRound = null) {
+        let oApp = this._oApp
+        // if (!isset($oApp->dynaDataSchemas) || !isset($oApp->voteConfig)) {
+        //     $oApp = $this->model('matter\enroll')->byId($oApp->id, ['cascaded' => 'N', 'fields' => 'id,data_schemas,vote_config']);
+        // }
+        // if (empty($oRound)) {
+        //     if (empty($oApp->appRound)) {
+        //         return [];
+        //     }
+        //     $oRound = $oApp->appRound;
+        // }
+
+        let aVoteRules = {}
+        // foreach ($oApp->voteConfig as $oVoteConfig) {
+        //     if ($this->getDeepValue($oVoteConfig, 'enabled') !== 'Y') {
+        //         continue;
+        //     }
+        //     if (!empty($oVoteConfig->role->groups)) {
+        //         if (empty($oUser->group_id) || !in_array($oUser->group_id, $oVoteConfig->role->groups)) {
+        //             continue;
+        //         }
+        //     }
+        //     $aValid = $this->getRuleStateByRound($oVoteConfig, $oRound);
+        //     if (false === $aValid[0]) {
+        //         continue;
+        //     }
+        //     foreach ($oApp->dynaDataSchemas as $oSchema) {
+        //         if (in_array($oSchema->id, $oVoteConfig->schemas)) {
+        //             $oVoteRule = new \stdClass;
+        //             $oVoteRule->id = $oVoteConfig->id;
+        //             $oVoteRule->type = 'vote';
+        //             $oVoteRule->rid = $oRound->rid;
+        //             tms_object_merge($oVoteRule, $aValid[1]);
+        //             $oVoteRule->limit = $this->getDeepValue($oVoteConfig, 'limit');
+        //             $oVoteRule->groups = $this->getDeepValue($oVoteConfig, 'role.groups');
+        //             $oVoteRule->schema = $oSchema;
+        //             $aVoteRules[$oSchema->id] = $oVoteRule;
+        //         }
+        //     }
+        // }
+
+        return aVoteRules
+    }
 }
 
 module.exports = function () {

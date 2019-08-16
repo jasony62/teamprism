@@ -18,7 +18,7 @@ describe("#models", () => {
                     console.log(data)
                 })
                 afterAll(done => {
-                    modelData.end(done)
+                    roundModel.end(done)
                 })
             })
         })

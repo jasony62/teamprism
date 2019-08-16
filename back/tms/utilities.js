@@ -63,9 +63,9 @@ function tms_array_search(array, callback, callbackParam) {
  */
 function getDeepValue(deepObj, deepProp, notSetVal = null) {
 	let props = deepProp.split('.')
-	let val = deepObj;
+	let val = deepObj
 	props.forEach(function(prop) {
-		if (val[prop] === 'undefined') {
+		if (!val[prop]) {
 			return notSetVal;
 		} else if (val[prop].length === 0) {
 			return val[prop]
@@ -74,7 +74,24 @@ function getDeepValue(deepObj, deepProp, notSetVal = null) {
 		}
 	})
 
-	return val;
+	return val
+}
+/**
+     * 替换字符串中的html标签
+     * $brValue <br>标签要替换成的值
+     */
+function replaceHTMLTags(text, brValue = '') {
+	if (typeof text !== 'string') {
+		return false
+	}
+
+	text = text.replace('<br>', brValue)
+	text = text.replace('</br>', "")
+	text = text.replace(/<[\/\!]*[^<>]*>/ig,"")
+	text = text.replace('&nbsp;', ' ')
+	text = text.replace('&amp;', '&')
+
+	return text;
 }
 
-module.exports = {model, tms_object_merge, tms_array_search, getDeepValue}
+module.exports = {model, tms_object_merge, tms_array_search, getDeepValue, replaceHTMLTags}

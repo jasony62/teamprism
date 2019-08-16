@@ -103,6 +103,22 @@ class Round extends DbModel {
 
         return oAppRound;
     }
+    /**
+     * 
+     */
+    async getAssignedActive() {
+        // $fields = isset($aOptions['fields']) ? $aOptions['fields'] : '*';
+
+        // $q = [
+        //     $fields,
+        //     'xxt_enroll_round',
+        //     ['aid' => $oApp->id, 'purpose' => 'C', 'start_at' => 0, 'end_at' => 0, 'state' => 1],
+        // ];
+        // $oRound = $this->query_obj_ss($q);
+
+        // return $oRound;
+        return {}
+    }
 }
 
 module.exports = function () {

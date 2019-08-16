@@ -45,12 +45,13 @@ class Main extends Base {
         /* 要打开的记录 */
         let modelRec = new Record();
 
+        let oOpenedRecord
         if (query.ek) {
-            let oOpenedRecord = await modelRec.byId(query.ek, {'verbose' : 'Y', 'state' : 1});
+            oOpenedRecord = await modelRec.byId(query.ek, {'verbose' : 'Y', 'state' : 1});
         }
 
         /* 要打开的应用 */
-        let aOptions = {'cascaded' : query.cascaded, 'fields' : '*', 'appRid' : ((typeof(oOpenedRecord) !== "undefined") && oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid};
+        let aOptions = {'cascaded' : query.cascaded, 'fields' : '*', 'appRid' : (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid};
         // if (query.task) {
         //     let modelTask = new Task();
         //     let oTask = await modelTask.byId(query.task);
@@ -70,7 +71,7 @@ class Main extends Base {
         params.app = oApp;
 
         /* 当前访问用户的基本信息 */
-        let oUser = await this.getUser(oApp);
+        let oUser = await this.getUser(oApp)
         params.user = oUser;
 
         /* 进入规则 */
@@ -146,6 +147,7 @@ class Main extends Base {
         //     }
         // }
 
+        modelEnl.end()
         return new ResultData(params)
     }
 }

@@ -14,7 +14,7 @@ describe("#models", () => {
                     // expect(data.enroll_key).toBe(ek)
                 })
                 afterAll(done => {
-                    modelData.end(done)
+                    schemaModel.end(done)
                 })
             })
         })

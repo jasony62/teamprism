@@ -1,9 +1,10 @@
 const { DbModel } = require('../../../tms/model')
-const Enroll = require('../../../models/matter/enroll')()
+const Enroll = require('../../../models/matter/enroll')
 const Data = require('../../../models/matter/enroll/data')
 const Round = require('../../../models/matter/enroll/round')
-const Schema = require('../../../models/matter/enroll/schema')()
-const GroupRecord = require('../../../models/matter/group/record')()
+const Schema = require('../../../models/matter/enroll/schema')
+// const GroupRecord = require('../../../models/matter/group/record')()
+// const Groupteam = require('../../../models/matter/group/team')
 
 const REPOS_FIELDS = 'id,enroll_key,aid,rid,purpose,userid,nickname,group_id,first_enroll_at,enroll_at,enroll_key,data,agreed,agreed_log,dislike_data_num,dislike_log,dislike_num,favor_num,like_data_num,like_log,like_num,rec_remark_num,remark_num,score,supplement,tags,vote_cowork_num,vote_schema_num'
 
@@ -51,11 +52,13 @@ class Record extends DbModel {
 		}
 		if (verbose === 'Y' && "enroll_key" in oRecord) {
 			let modelData = new Data()
-			oRecord.verbose = await modelData.byRecord(oRecord.enroll_key);
+			oRecord.verbose = await modelData.byRecord(oRecord.enroll_key)
+			modelData.end()
 		}
 		if (oRecord.rid) {
 			let modelRound = new Round()
-			let oRound = await modelRound.byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'});
+			let oRound = await modelRound.byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'})
+			modelRound.end()
 			if (oRound) {
 				oRecord.round = oRound;
 			} else {
@@ -84,20 +87,23 @@ class Record extends DbModel {
 	 */
 	async byApp(oApp, oOptions = {}, oCriteria = {}, oUser = null) {
 		if (typeof oApp === "string") {
-			oApp = await Enroll.byId(oApp, {'cascaded' : 'N'})
+			let modelEnroll = new Enroll()
+			oApp = await modelEnroll.byId(oApp, {'cascaded' : 'N'})
+			modelEnroll.end()
 		}
 		if (false === oApp && !oApp.dynaDataSchemas) {
 			return false
 		}
-
-		let aSchemasById = await Schema.asAssoc(oApp.dynaDataSchemas)
+		let modelSchema = new Schema()
+		let aSchemasById = await modelSchema.asAssoc(oApp.dynaDataSchemas)
+		modelSchema.end()
 
 		// 指定记录活动下的记录记录
 		let w = "r.state=1 and r.aid='" + oApp.id + "'"
 
 		/* 指定轮次，或者当前激活轮次 */
 		if (!oCriteria.record || !oCriteria.record.rid) {
-			if (oApp.appRound.rid) {
+			if (oApp.appRound && oApp.appRound.rid) {
 				let rid = oApp.appRound.rid
 				w += " and (r.rid='" + rid + "')"
 			}
@@ -217,9 +223,9 @@ class Record extends DbModel {
 							whereByData += ')'
 						})
 					} else if (oSchema.type === 'single'){
-						whereByData += 'data like \'%"' . k . '":"' . v . '"%\''
+						whereByData += 'data like \'%"' + k + '":"' + v + '"%\''
 					} else {
-						whereByData += 'data like \'%"' . k . '":"%' . v . '%"%\''
+						whereByData += 'data like \'%"' + k + '":"%' + v + '%"%\''
 					}
 					whereByData += ')'
 				}
@@ -259,6 +265,7 @@ class Record extends DbModel {
 
 		// 查询参数
 		let fields = ''
+		let table = "xxt_enroll_record r"
 		if (oOptions.fields) {
 			fields = oOptions.fields
 		} else {
@@ -268,7 +275,7 @@ class Record extends DbModel {
 		let q2 = {}
 		// 查询结果分页
 		if (oOptions.page && oOptions.size) {
-			q2.r = {'o' : (oOptions.page - 1) * $oOptions.size, 'l' : oOptions.size}
+			q2.r = {'o' : (oOptions.page - 1) * oOptions.size, 'l' : oOptions.size}
 		}
 
 		// 查询结果排序
@@ -276,7 +283,7 @@ class Record extends DbModel {
 			if (oOptions.schemaId) {
 				let schemaId = oOptions.schemaId
 				let orderby = oOptions.orderby
-				fields += ",xxt_enroll_record_data d"
+				table += ",xxt_enroll_record_data d"
 				w += " and r.enroll_key = d.enroll_key and d.schema_id = '$schemaId' and d.multitext_seq = 0"
 				q2.o = 'd.' + orderby + ' desc'
 			} else {
@@ -328,16 +335,25 @@ class Record extends DbModel {
 		 */
 		let oResult = {} // 返回的结果
 		let db = await this.db()
-        let dbSelect = db.newSelectOne('xxt_enroll_record', fields)
-        dbSelect.where.fieldMatch(w)
+		let dbSelect = db.newSelect(table, fields)
+		let where = [w]
+        dbSelect.where.and(where)
+		if (q2.r) {
+			await dbSelect.limit(q2.r.o, q2.r.l)
+		}
+		if (q2.o) {
+			await dbSelect.order(q2.o)
+		}
 		
 		let records = await dbSelect.exec()
+
 		/* 检查题目是否可见 */
 		oResult.records = await this.parse(oApp, records)
 
 		// 符合条件的数据总数
-		$q[0] = 'count(*)';
-		let total = (int) $this.query_val_ss($q)
+		dbSelect = db.newSelectOneVal(table, 'count(*)')
+        dbSelect.where.and(where)
+		let total = await dbSelect.exec()
 		oResult.total = total
 
 		return oResult
@@ -359,11 +375,13 @@ class Record extends DbModel {
 			})
 		}
 		// 关联的分组题
-		let oAssocGrpTeamSchema = Schema.getAssocGroupTeamSchema(oApp)
+		let modelSchema = new Schema()
+		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema(oApp)
+		modelSchema.end()
 		let aGroupsById = []; // 缓存分组数据
 		let aRoundsById = []; // 缓存轮次数据
 
-		let fnCheckSchemaVisibility = (oSchemas, oRecordData) => {
+		let fnCheckSchemaVisibility = async (oSchemas, oRecordData) => {
 			oSchemas.forEach( (oSchema) => {
 				for (let i = 0; i < oSchema.visibility.rules.length; i++) {
 					let oRule = oSchema.visibility.rules[i]
@@ -421,7 +439,9 @@ class Record extends DbModel {
 		// 	}
 		// }
 		// aFnHandlers.push(userGroupFuc)
-		records.foreach ((oRec) => {
+		let modelRound = new Round()
+		for (let ri = 0; ri < records.length; ri++) {
+			let oRec = records[ri]
 			if (oRec.like_log) {
 				oRec.like_log = !oRec.like_log ? {} : JSON.parse(oRec.like_log)
 			}
@@ -431,7 +451,7 @@ class Record extends DbModel {
 			//附加说明
 			if (oRec.supplement) {
 				let supplement = oRec.supplement.replace("\n", ' ')
-				let supplement = JSON.parse(supplement);
+				supplement = JSON.parse(supplement);
 
 				if (supplement) {
 					oRec.supplement = supplement
@@ -443,29 +463,24 @@ class Record extends DbModel {
 					data = JSON.parse(data)
 					if (data) {
 						oRec.data = data;
-
-
-
-
-						
 						/* 处理提交数据后分组的问题 */
-						if (!empty($oAssocGrpTeamSchema)) {
-							if (!empty($oRec->group_id) && !isset(oRec.data->{$oAssocGrpTeamSchema->id})) {
-								oRec.data->{$oAssocGrpTeamSchema->id} = $oRec->group_id;
+						if (oAssocGrpTeamSchema) {
+							if (oRec.group_id && !oRec.data[oAssocGrpTeamSchema.id]) {
+								oRec.data[oAssocGrpTeamSchema.id] = oRec.group_id
 							}
 						}
 						/* 处理提交数据后指定昵称题的问题 */
-						if ($oRec->nickname && isset($oApp->assignedNickname->valid) && $oApp->assignedNickname->valid === 'Y') {
-							if (isset($oApp->assignedNickname->schema->id)) {
-								$nicknameSchemaId = $oApp->assignedNickname->schema->id;
-								if (!$this->getDeepValue(oRec.data, $nicknameSchemaId)) {
-									$this->setDeepValue(oRec.data, $nicknameSchemaId, $oRec->nickname);
+						if (oRec.nickname && oApp.assignedNickname.valid && oApp.assignedNickname.valid === 'Y') {
+							if (oApp.assignedNickname.schema.id) {
+								let nicknameSchemaId = oApp.assignedNickname.schema.id;
+								if (!oRec.data[nicknameSchemaId]) {
+									oRec.data[nicknameSchemaId] = oRec.nickname
 								}
 							}
 						}
 						/* 根据题目的可见性处理数据 */
-						if ($this->getDeepValue($oRec, 'purpose') === 'C' && count($visibilitySchemas)) {
-							$fnCheckSchemaVisibility($visibilitySchemas, oRec.data);
+						if (oRec.purpose && oRec.purpose === 'C' && visibilitySchemas.length > 0) {
+							await fnCheckSchemaVisibility(visibilitySchemas, oRec.data)
 						}
 					}
 				} else {
@@ -473,44 +488,44 @@ class Record extends DbModel {
 				}
 			}
 			// 记录的分组
-			if (!empty($oRec->group_id)) {
-				if (!isset($aGroupsById[$oRec->group_id])) {
-					if (!isset($modelGrpTeam)) {
-						$modelGrpTeam = $this->model('matter\group\team');
-					}
-					$oGroup = $modelGrpTeam->byId($oRec->group_id, ['fields' => 'title']);
-					unset($oGroup->type);
-					$aGroupsById[$oRec->group_id] = $oGroup;
-				} else {
-					$oGroup = $aGroupsById[$oRec->group_id];
-				}
-				if ($oGroup) {
-					$oRec->group = $oGroup;
-				}
-			}
+			// if (oRec.group_id) {
+			// 	if (!aGroupsById[oRec.group_id]) {
+					// let modelGroupteam = new Groupteam()
+			// 		let oGroup = modelGroupteam.byId(oRec.group_id, {'fields' : 'title')
+					// modelGroupteam.end()
+			// 		delete oGroup.type
+			// 		aGroupsById[oRec.group_id] = oGroup
+			// 	} else {
+			// 		oGroup = aGroupsById[oRec.group_id]
+			// 	}
+			// 	if (oGroup) {
+			// 		oRec.group = oGroup
+			// 	}
+			// }
 			// 记录的记录轮次
-			if (!empty($oRec->rid)) {
-				if (!isset($aRoundsById[$oRec->rid])) {
-					if (!isset($modelRnd)) {
-						$modelRnd = $this->model('matter\enroll\round');
-					}
-					$round = $modelRnd->byId($oRec->rid, ['fields' => 'rid,title,purpose,start_at,end_at,state']);
-					$aRoundsById[$oRec->rid] = $round;
+			if (oRec.rid) {
+				let round2
+				if (!aRoundsById[oRec.rid]) {
+					round2 = await modelRound.byId(oRec.rid, {'fields' : 'rid,title,purpose,start_at,end_at,state'})
+					aRoundsById[oRec.rid] = round2
 				} else {
-					$round = $aRoundsById[$oRec->rid];
+					round2 = aRoundsById[oRec.rid]
 				}
-				if ($round) {
-					$oRec->round = $round;
+				if (round2) {
+					oRec.round = round2;
 				}
 			}
 
 			for (let i = 0; i < aFnHandlers.length; i++) {
-				aFnHandlers[i]($oRec)
+				aFnHandlers[i](oRec)
 			}
 		}
 
-		return $records;
-	})
+		modelRound.end()
+		// GroupRecord.end()
+
+		return records
+	}
 }
 
 module.exports = function () {
