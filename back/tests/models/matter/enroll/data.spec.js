@@ -8,7 +8,7 @@ describe("#models", () => {
                     testdata = require('../../../cus/test.data')
                 })
                 test("byRecord()", async () => {
-                    let ek = testdata.models.matter.enroll.ek
+                    let ek = testdata.models.ue.matter.enroll.ek
                     let data = await modelData.byRecord(ek)
                     expect(data.enroll_key).toBe(ek)
                 })

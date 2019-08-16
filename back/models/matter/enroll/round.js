@@ -1,7 +1,7 @@
 const { DbModel } = require('../../../tms/model')
 const Enroll = require('../enroll')
-const Mission = require('../mission')
-const MissionRound = require('../mission/round')
+// const Mission = require('../mission')
+// const MissionRound = require('../mission/round')
 
 class Round extends DbModel {
     /**
@@ -35,42 +35,42 @@ class Round extends DbModel {
         if (aRequireAppFields.length > 0) {
             let modelEnl = new Enroll();
             let oApp2 = await modelEnl.byId(oApp.id, {'fields' : aRequireAppFields.join(','), 'notDecode' : true});
-            Object.keys(oApp2).foreach((k) => {
+            Object.keys(oApp2).forEach((k) => {
                 oApp[k] = oApp2[k];
             })
         }
 
-        if (oApp.sync_mission_round === 'Y') {
-            /* 根据项目的轮次规则生成轮次 */
-            if (!oApp.mission_id) {
-                throw new Error('没有提供活动所属项目的信息');
-            }
-            let modelMission = new Mission();
-            // let oMission = await modelMission.byId(oApp.mission_id, {'fields' : 'id,siteid,round_cron'});
-            let modelMissRoud = new MissionRound();
-            // let oMisRound = await modelMissRoud.getActive(oMission, {'fields' : 'id,rid,title,start_at,end_at'});
-            if (oMisRound) {
-                // let oAppRound = await this.byMissionRid(oApp, oMisRound.rid, {'state' : 1, 'fields' : fields});
-                if (false === oAppRound) {
-                    /* 创建和项目轮次绑定的轮次 */
-                    let oNewRound = {};
-                    oNewRound.title = oMisRound.title;
-                    oNewRound.start_at = oMisRound.start_at;
-                    oNewRound.end_at = oMisRound.end_at;
-                    oNewRound.state = 1;
-                    oNewRound.mission_rid = oMisRound.rid;
-                    // let oResult = await this.create(oApp, oNewRound, null, true);
-                    if (false === oResult[0]) {
-                        throw new Error(oResult[1]);
-                    }
-                    oAppRound = oResult[1];
-                }
-                return oAppRound;
-            }
-        }
+        // if (oApp.sync_mission_round === 'Y') {
+        //     /* 根据项目的轮次规则生成轮次 */
+        //     if (!oApp.mission_id) {
+        //         throw new Error('没有提供活动所属项目的信息');
+        //     }
+        //     let modelMission = new Mission();
+        //     let oMission = await modelMission.byId(oApp.mission_id, {'fields' : 'id,siteid,round_cron'});
+        //     let modelMissRoud = new MissionRound();
+        //     let oMisRound = await modelMissRoud.getActive(oMission, {'fields' : 'id,rid,title,start_at,end_at'});
+        //     if (oMisRound) {
+        //         let oAppRound = await this.byMissionRid(oApp, oMisRound.rid, {'state' : 1, 'fields' : fields});
+        //         if (false === oAppRound) {
+        //             /* 创建和项目轮次绑定的轮次 */
+        //             let oNewRound = {};
+        //             oNewRound.title = oMisRound.title;
+        //             oNewRound.start_at = oMisRound.start_at;
+        //             oNewRound.end_at = oMisRound.end_at;
+        //             oNewRound.state = 1;
+        //             oNewRound.mission_rid = oMisRound.rid;
+        //             // let oResult = await this.create(oApp, oNewRound, null, true);
+        //             if (false === oResult[0]) {
+        //                 throw new Error(oResult[1]);
+        //             }
+        //             oAppRound = oResult[1];
+        //         }
+        //         return oAppRound;
+        //     }
+        // }
 
         /* 已经存在的，用户指定的当前轮次 */
-        // let oAppRound = await this.getAssignedActive(oApp, aOptions)
+        let oAppRound = await this.getAssignedActive(oApp, aOptions)
         if (oAppRound) {
             return oAppRound;
         }

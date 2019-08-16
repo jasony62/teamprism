@@ -9,21 +9,6 @@ class Main extends Base {
         super(...args)
     }
     /**
-     * 获得记录活动
-     */
-    async get() {
-        let { app } = this.request.query
-        let modelApp = new Enroll()
-        const oApp = await modelApp.byId(app)
-        modelApp.end()
-
-        if (!oApp) {
-            return new ResultObjectNotFound()
-        }
-
-        return new ResultData(oApp)
-    }
-    /**
      * 获得指定记录活动的进入规则以及当前用户的匹配情况
      */
     async entryRule() {
@@ -50,7 +35,7 @@ class Main extends Base {
      */
     // $app, $rid = '', $page = null, $ek = null, $ignoretime = 'N', $cascaded = 'N', $task = null
     async get() {
-        let query = this.request
+        let query = this.request.query
         if (!query.app) {
             return new ResultFault('参数错误')
         }
@@ -65,23 +50,18 @@ class Main extends Base {
         }
 
         /* 要打开的应用 */
-        let aOptions = {'cascaded' : query.cascaded, 'fields' : '*', 'appRid' : (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid};
-        if (query.task) {
-            let modelTask = new Task();
-            let oTask = await modelTask.byId(query.task);
-            if (oTask) {
-                aOptions.task = oTask;
-            }
-        }
+        let aOptions = {'cascaded' : query.cascaded, 'fields' : '*', 'appRid' : ((typeof(oOpenedRecord) !== "undefined") && oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid};
+        // if (query.task) {
+        //     let modelTask = new Task();
+        //     let oTask = await modelTask.byId(query.task);
+        //     if (oTask) {
+        //         aOptions.task = oTask;
+        //     }
+        // }
 
-        
-
-
-
-        
         let modelEnl = new Enroll()
         let oApp = await modelEnl.byId(query.app, aOptions);
-        if (!oApp || oApp.state !== '1') {
+        if (!oApp || oApp.state != '1') {
             return new ResultObjectNotFound();
         }
         if (oApp.appRound && oApp.appRound.rid) {
@@ -94,11 +74,11 @@ class Main extends Base {
         params.user = oUser;
 
         /* 进入规则 */
-        let oEntryRuleResult = this.checkEntryRule2(oApp);
+        let oEntryRuleResult = await this.checkEntryRule2(oApp);
         params.entryRuleResult = oEntryRuleResult;
 
         /* 站点页面设置 */
-        if (oApp.use_site_header === 'Y' || oApp.use_site_footer === 'Y') {
+        // if (oApp.use_site_header === 'Y' || oApp.use_site_footer === 'Y') {
             // params.site = await utilities.model('site').byId(
             //     oApp.siteid,
             //     {
@@ -106,7 +86,7 @@ class Main extends Base {
             //         'cascaded' : 'header_page_name,footer_page_name'
             //     }
             // );
-        }
+        // }
 
         // /* 项目页面设置 */
         // if ($oApp->use_mission_header === 'Y' || $oApp->use_mission_footer === 'Y') {
@@ -166,7 +146,7 @@ class Main extends Base {
         //     }
         // }
 
-        // return new \ResponseData($params);
+        return new ResultData(params)
     }
 }
 

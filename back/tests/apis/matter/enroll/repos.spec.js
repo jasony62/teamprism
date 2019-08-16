@@ -6,7 +6,7 @@ describe("#apis", () => {
         describe("#matter", () => {
             describe("#enroll", () => {
                 describe("#main.js", () => {
-                    const CtrlClass = require('../../../../apis/matter/enroll/main')
+                    const Repos = require('../../../../apis/matter/enroll/repos')
                     let testdata,mockReq
                     beforeAll(() => {
                         testdata = require('../../../../cus/test.data')
@@ -17,15 +17,10 @@ describe("#apis", () => {
                             }
                         }
                     })
-                    test("entryRule()", () => {
-                        let ctrl = new CtrlClass(mockReq)
-                        return ctrl.entryRule().then(rst => {
-                            expect(rst).toMatchObject({ code: 0, result: expect.anything() })
-                        })
-                    })
-                    test("get()", () => {
-                        let ctrl = new CtrlClass(mockReq)
-                        return ctrl.get().then(rst => {
+                    test("dirSchemasGet()", () => {
+                        let ctrl = new Repos(mockReq)
+                        return ctrl.dirSchemasGet().then(rst => {
+                            console.log(rst)
                             expect(rst).toMatchObject({ code: 0, result: expect.anything() })
                         })
                     })

@@ -22,6 +22,7 @@ class Base extends Api {
      */
     async checkEntryRule2() {
         
+        return {}
     }
 }
 
