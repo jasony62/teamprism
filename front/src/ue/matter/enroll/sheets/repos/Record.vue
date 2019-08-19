@@ -9,23 +9,57 @@
     </div>
 </template>
 <script>
-import TmsList from '@/tms/components/List.vue'
-import RecordListItem from '../../common/RecordListItem'
+import qs from 'query-string'
+import TmsList from "@/tms/components/List.vue";
+import RecordListItem from "../../common/RecordListItem";
+import apis from "@/apis/matter/enroll/sheets/repos.js";
 
 export default {
-    components: { TmsList, RecordListItem },
+    props: {
+        app: Object
+    },
     data: function() {
         return {
-            records: [
-                { id: 1, label: 'record-1' },
-                { id: 2, label: 'record-2' },
-                { id: 3, label: 'record-3' },
-                { id: 4, label: 'record-4' },
-                { id: 5, label: 'record-5' },
-                { id: 6, label: 'record-6' },
-                { id: 7, label: 'record-7' },
-            ]
+            records: []
+        }
+    },
+    components: { TmsList, RecordListItem },
+    computed: {
+        schemas: function() {
+            var _aShareableSchemas = [];
+            this.app.dynaDataSchemas.forEach((oSchema) => {
+                if (oSchema.shareable === 'Y') {
+                    _aShareableSchemas.push(oSchema);
+                    return _aShareableSchemas;
+                }
+            })
+        }
+    },
+    created() {
+        this.fetchList();
+    },
+    watch: {
+        '$route': fetchList
+    },
+    methods: {
+        async fetchList() {
+            let params = qs.parse(location.search);
+            try {
+                if (params.app) {
+                    let records = await apis.getList('record', params.app)
+                    this.records = records
+                }
+            } catch (e) {
+                this.$message({
+                    message: e,
+                    type: 'error',
+                    duration: 60000,
+                    showClose: true
+                })
+            } finally {
+                
+            }
         }
     }
-}
+};
 </script>
