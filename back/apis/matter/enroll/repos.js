@@ -362,7 +362,7 @@ class Repos extends Base {
                 }
 
                 /* 获取记录的投票信息 */
-                if (Object.keys(aVoteRules).length > 0) {
+                if (aVoteRules && Object.keys(aVoteRules).length > 0) {
                     // let oVoteResult = {}
                     // foreach ($aVoteRules as $schemaId => $oVoteRule) {
                     //     if ($processType === 'coworkDataList') {

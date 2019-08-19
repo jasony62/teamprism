@@ -470,7 +470,7 @@ class Record extends DbModel {
 							}
 						}
 						/* 处理提交数据后指定昵称题的问题 */
-						if (oRec.nickname && oApp.assignedNickname.valid && oApp.assignedNickname.valid === 'Y') {
+						if (oRec.nickname && oApp.assignedNickname && oApp.assignedNickname.valid && oApp.assignedNickname.valid === 'Y') {
 							if (oApp.assignedNickname.schema.id) {
 								let nicknameSchemaId = oApp.assignedNickname.schema.id;
 								if (!oRec.data[nicknameSchemaId]) {
