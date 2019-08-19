@@ -1,5 +1,4 @@
 import axios from 'axios'
-import queryString from 'query-string'
 
 let myRequestInterceptor, myResponseInterceptor
 
@@ -44,6 +43,8 @@ if (!myResponseInterceptor)
  * @param {String} siteid 
  */
 function setupAccessToken(siteid) {
+    if (!siteid)
+        return Promise.reject('axios2:参数错误')
     return new Promise((resolve, reject) => {
         let cached = sessionStorage.getItem('access_token')
         if (cached) {
@@ -60,15 +61,6 @@ function setupAccessToken(siteid) {
             }
         }
 
-        // 从url中获取siteid
-        if (!siteid) {
-            const parsed = queryString.parse(location.search);
-            if (parsed.site)
-                siteid = parsed.site
-        }
-        if (!siteid)
-            throw 'Axios2:参数错误'
-
         axios.get(`/ue/auth/token?site=${siteid}`).then((res) => {
             let { access_token, expire_in } = res.data.result
 
@@ -84,7 +76,7 @@ function setupAccessToken(siteid) {
 
             resolve(axios)
         }).catch(err => {
-            reject(`Axios2:${err}`)
+            reject(`axios2:${err}`)
         })
     })
 }

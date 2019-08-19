@@ -22,9 +22,9 @@ const AnalyzeKanban = () => import('./sheets/analyze/Kanban.vue')
 Vue.use(VueRouter)
 
 const routes = [
-    { path: '/guide', name: 'guide', component: Guide },
+    { path: '/:site/:app/guide', name: 'guide', component: Guide, props: true },
     {
-        path: '/repos',
+        path: '/:site/:app/repos',
         name: 'repos',
         component: Repos,
         children: [
@@ -32,19 +32,21 @@ const routes = [
             { path: 'cowork', name: 'repos-cowork', component: ReposCowork },
             { path: 'remark', name: 'repos-remark', component: ReposRemark },
             { path: 'topic', name: 'repos-topic', component: ReposTopic }
-        ]
+        ],
+        props: true
     },
     {
-        path: '/record',
+        path: '/:site/:app/record',
         name: 'record',
         component: Record,
         children: [
             { path: 'input', name: 'record-input', component: RecordInput },
             { path: 'result', name: 'record-result', component: RecordResult },
             { path: 'cowork', name: 'record-cowork', component: RecordCowork }
-        ]
+        ],
+        props: true
     },
-    { path: '/event', name: 'event', component: Event },
+    { path: '/:site/:app/event', name: 'event', component: Event },
     {
         path: '/analyze',
         name: 'analyze',
@@ -52,10 +54,11 @@ const routes = [
         children: [
             { path: 'rank', name: 'analyze-rank', component: AnalyzeRank },
             { path: 'kanban', name: 'analyze-kanban', component: AnalyzeKanban }
-        ]
+        ],
+        props: true
     },
-    { path: '/topic', name: 'topic', component: Topic },
-    { path: '/share', name: 'share', component: Share }
+    { path: '/:site/:app/topic', name: 'topic', component: Topic, props: true },
+    { path: '/:site/:app/share', name: 'share', component: Share, props: true }
 ]
 
 const router = new VueRouter({ routes })

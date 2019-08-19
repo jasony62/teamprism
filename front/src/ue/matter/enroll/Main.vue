@@ -23,10 +23,10 @@ export default {
     },
     methods: {
         async fetchApp() {
-            let params = qs.parse(location.search)
+            let params = this.$route.params
             try {
                 if (params.app) {
-                    let app = await apis.getApp(params.app)
+                    let app = await apis.getApp(this.$route.params.app)
                     this.app = app
                 }
             } catch (e) {
