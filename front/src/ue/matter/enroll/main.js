@@ -21,6 +21,6 @@ new Vue({
     router,
     render: h => h(Main),
     created: async function() {
-        await initAxios(this.$route.params.site)
+        await initAxios(this.$route.params.siteId)
     }
 }).$mount("#app")

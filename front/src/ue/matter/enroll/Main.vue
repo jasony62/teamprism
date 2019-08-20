@@ -10,11 +10,9 @@
 </template>
 
 <script>
-import qs from 'query-string'
 import apis from '@/apis/matter/enroll'
 
 export default {
-    name: 'enroll',
     data() {
         return { loading: true, app: { title: 'loading' } }
     },
@@ -25,8 +23,8 @@ export default {
         async fetchApp() {
             let params = this.$route.params
             try {
-                if (params.app) {
-                    let app = await apis.getApp(this.$route.params.app)
+                if (params.appId) {
+                    let app = await apis.getApp(this.$route.params.appId)
                     this.app = app
                 }
             } catch (e) {

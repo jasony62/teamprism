@@ -22,9 +22,9 @@ const AnalyzeKanban = () => import('./sheets/analyze/Kanban.vue')
 Vue.use(VueRouter)
 
 const routes = [
-    { path: '/:site/:app/guide', name: 'guide', component: Guide, props: true },
+    { path: '/:siteId/:appId/guide', name: 'guide', component: Guide, props: true },
     {
-        path: '/:site/:app/repos',
+        path: '/:siteId/:appId/repos',
         name: 'repos',
         component: Repos,
         children: [
@@ -36,7 +36,7 @@ const routes = [
         props: true
     },
     {
-        path: '/:site/:app/record',
+        path: '/:siteId/:appId/record/:ek',
         name: 'record',
         component: Record,
         children: [
@@ -46,7 +46,7 @@ const routes = [
         ],
         props: true
     },
-    { path: '/:site/:app/event', name: 'event', component: Event },
+    { path: '/:siteId/:appId/event', name: 'event', component: Event },
     {
         path: '/analyze',
         name: 'analyze',
@@ -57,8 +57,8 @@ const routes = [
         ],
         props: true
     },
-    { path: '/:site/:app/topic', name: 'topic', component: Topic, props: true },
-    { path: '/:site/:app/share', name: 'share', component: Share, props: true }
+    { path: '/:siteId/:appId/topic', name: 'topic', component: Topic, props: true },
+    { path: '/:siteId/:appId/share', name: 'share', component: Share, props: true }
 ]
 
 const router = new VueRouter({ routes })

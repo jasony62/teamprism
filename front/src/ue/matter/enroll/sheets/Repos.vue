@@ -1,5 +1,6 @@
 <template>
     <div id="repos">
+        <div>{{app.title}}</div>
         <div>Repos</div>
         <div>
             <router-link :to="{name:'repos-record'}">Go to Record</router-link>
