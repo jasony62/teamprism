@@ -3,20 +3,21 @@
         <div>Repos Record</div>
         <tms-list :items="records">
             <template v-slot:item="{ item }">
-                <record-list-item :record="item"></record-list-item>
+                <record-list-item :record="item" :schemas="schemas" :user="user"></record-list-item>
             </template>
         </tms-list>
     </div>
 </template>
 <script>
 import qs from 'query-string'
-import TmsList from "@/tms/components/List.vue";
-import RecordListItem from "../../common/RecordListItem";
-import apis from "@/apis/matter/enroll/sheets/repos.js";
+import apis from "@/apis/matter/enroll/sheets/repos.js"
+import TmsList from "@/tms/components/List.vue"
+import RecordListItem from "../../common/RecordListItem"
 
 export default {
     props: {
-        app: Object
+        app: Object,
+        user: Object
     },
     data: function() {
         return {
@@ -30,24 +31,21 @@ export default {
             this.app.dynaDataSchemas.forEach((oSchema) => {
                 if (oSchema.shareable === 'Y') {
                     _aShareableSchemas.push(oSchema);
-                    return _aShareableSchemas;
                 }
-            })
+            });
+            return _aShareableSchemas;
         }
     },
-    created() {
-        this.fetchList();
-    },
-    watch: {
-        '$route': fetchList
+    mounted() {
+        this.fetchList()
     },
     methods: {
         async fetchList() {
-            let params = qs.parse(location.search);
+            let params = qs.parse(location.search)
             try {
                 if (params.app) {
-                    let records = await apis.getList('record', params.app)
-                    this.records = records
+                    let result = await apis.getList('recordList', params.app)
+                    this.records = result.records
                 }
             } catch (e) {
                 this.$message({
@@ -56,9 +54,7 @@ export default {
                     duration: 60000,
                     showClose: true
                 })
-            } finally {
-                
-            }
+            } 
         }
     }
 };

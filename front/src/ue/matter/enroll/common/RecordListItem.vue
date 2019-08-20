@@ -6,26 +6,23 @@
                 <van-button type="danger" size="mini" v-if="record.agreed==='Y'">推荐</van-button>
             </van-cell>
             <van-cell class="record-content">
-                <template>
-                    <record-data :rec="record" :schema="this.$parent.schema"></record-data>
-                </template>
+                <record-data :rec="record" :schemas="schemas"></record-data>
             </van-cell>
-            <van-cell :title="record.datetime*1000 | formatDate" class="record-footer">                  
+            <van-cell :title="record.enroll_at*1000 | formatDate" class="record-footer">                  
                 <span class="record-indicator" v-if="record.like_num!='0'" :class="{'like': record.like_log[user.uid]}">
-                    <van-icon name="thumb-circle-o" tag="span"/> <span :value="record.like_num"></span>
+                    <van-icon name="thumb-circle-o" tag="span"/>&nbsp;<span v-text="record.like_num"></span>
                 </span>
                 <span class="record-indicator" v-if="record.dislike_num!='0'" :class="{'like': record.dislike_log[user.uid]}">
-                    <van-icon name="thumb-circle-o" tag="span"/> <span :value="record.dislike_num"></span>
+                    <van-icon name="thumb-circle-o" tag="span"/>&nbsp;<span v-text="record.dislike_num"></span>
                 </span>
                 <span class="record-indicator" v-if="record.remark_num!='0'">
-                    <van-icon name="chat-o" tag="span"/> <span :value="record.remark_num"></span>
+                    <van-icon name="chat-o" tag="span"/>&nbsp;<span v-text="record.remark_num"></span>
                 </span>
                 <span class="record-indicator" v-if="record.coworkDataTotal&&record.coworkDataTotal!='0'">
-                    <van-icon name="envelop-o" tag="span"/> <span :value="record.coworkDataTotal"></span>
+                    <van-icon name="envelop-o" tag="span"/>&nbsp;<span v-text="record.coworkDataTotal"></span>
                 </span>
                 <span class="record-indicator" >
                     <van-icon name="ellipsis" tag="span" />
-
                 </span>
             </van-cell>
             <van-cell class="record-tag" v-if="record.tags||record.userTags">
@@ -38,9 +35,13 @@
 
 <script>
 import { Col, Icon, Button, Cell, CellGroup} from "vant"
-import RecordData from "./RecordData.vue"
+import RecordData from "@/ue/matter/enroll/common/RecordData"
 export default {
-    props: { record: Object },
+    props: { 
+        record: Object,
+        user: Object,
+        schemas: Array
+    },
     components: {
         [Col.name]: Col,
         [Icon.name]: Icon,
@@ -79,10 +80,16 @@ export default {
     }
 };
 </script>
-<style scoped>
-.record .record-indicator{
-    flex: 1;
-    display: inline-block;
-    margin-left: 5px;
+<style lang="scss">
+.record {
+    &-indicator{
+        flex: 1;
+        display: inline-block;
+        margin-left: 10px;
+
+        &.like {
+            color: #ff8018;
+        }
+    }
 }
 </style>

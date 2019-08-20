@@ -20,5 +20,11 @@ export default {
     }
 };
 </script>
-<style scoped>
+<style >
+#tms-list {
+    background-color: #ddd;
+}
+#tms-list ul li {
+    margin-bottom: 20px;
+}
 </style>

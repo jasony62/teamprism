@@ -15,7 +15,7 @@
         </div>
         <hr />
         <div>
-            <router-view :app="app"></router-view>
+            <router-view :app="app" :user="user"></router-view>
         </div>
         <div>
             <hr />
@@ -27,6 +27,10 @@
 import PrimaryNav from '../common/PrimaryNav'
 
 export default {
-    components: { PrimaryNav }
+    components: { PrimaryNav },
+    props: {
+        app: Object,
+        user: Object
+    }
 }
 </script>

@@ -4,9 +4,9 @@ export default {
     /* 获取所有类型的记录 */
     getList(type, appId) {
         return new Promise((resolve, reject) => {
-            axios.get(`/ue/api/matter/enroll/repos/${type}/list?app=${appId}`).then(rst => {
+            axios.get(`/ue/api/matter/enroll/repos/${type}?app=${appId}`).then(rst => {
                 resolve(rst.data.result);
-            }).catche(err => {
+            }).catch(err => {
                 reject(err);
             })
         })
