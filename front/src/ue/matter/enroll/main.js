@@ -9,16 +9,18 @@ Vue.config.productionTip = false
 
 Vue.prototype.$message = Message
 
-async function initAxios() {
+async function initAxios(siteId) {
     try {
-        await setupAccessToken("359a703d0e7dcf8679182770d0fc219d")
+        await setupAccessToken(siteId)
     } catch (e) {
         alert(`初始化失败：${e}`)
     }
 }
-initAxios()
 
 new Vue({
     router,
-    render: h => h(Main)
+    render: h => h(Main),
+    created: async function() {
+        await initAxios(this.$route.params.siteId)
+    }
 }).$mount("#app")

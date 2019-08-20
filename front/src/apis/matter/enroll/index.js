@@ -1,4 +1,7 @@
 import axios from '@/tms/apis/axios2'
+import Record from './record'
+
+export { Record }
 
 export default {
     /**
