@@ -60,7 +60,6 @@ router.all('*', async (req, res) => {
         const result = await oCtrl[method](req)
         res.json(result)
     } catch (err) {
-        console.log(err);
         res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))
     }
 })
