@@ -37,11 +37,7 @@
 import { Col, Icon, Button, Cell, CellGroup} from "vant"
 import RecordData from "@/ue/matter/enroll/common/RecordData"
 export default {
-    props: { 
-        record: Object,
-        user: Object,
-        schemas: Array
-    },
+    props: ['record', 'user', 'schemas'],
     components: {
         [Col.name]: Col,
         [Icon.name]: Icon,

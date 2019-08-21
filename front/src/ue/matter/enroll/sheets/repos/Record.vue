@@ -9,16 +9,12 @@
     </div>
 </template>
 <script>
-import qs from 'query-string'
-import apis from "@/apis/matter/enroll/sheets/repos.js"
+import {Repos as ReposApis} from "@/apis/matter/enroll/repos"
 import TmsList from "@/tms/components/List.vue"
 import RecordListItem from "../../common/RecordListItem"
 
 export default {
-    props: {
-        app: Object,
-        user: Object
-    },
+    props: ['app', 'user'],
     data: function() {
         return {
             records: []
@@ -26,6 +22,9 @@ export default {
     },
     components: { TmsList, RecordListItem },
     computed: {
+        appid() {
+            return this.app.id
+        },
         schemas: function() {
             var _aShareableSchemas = [];
             this.app.dynaDataSchemas.forEach((oSchema) => {
@@ -36,15 +35,20 @@ export default {
             return _aShareableSchemas;
         }
     },
-    mounted() {
-        this.fetchList()
+    watch: {
+        appid: {
+            async handler(nv) {
+                if (nv) this.fetchList(nv)
+            },
+            immediate: true
+        }
     },
     methods: {
         async fetchList() {
             let params = qs.parse(location.search)
             try {
                 if (params.app) {
-                    let result = await apis.getList('recordList', params.app)
+                    let result = await RecordApis.getList('recordList', appid)
                     this.records = result.records
                 }
             } catch (e) {

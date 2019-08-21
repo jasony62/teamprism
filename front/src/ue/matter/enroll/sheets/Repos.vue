@@ -26,12 +26,8 @@
 </template>
 <script>
 import PrimaryNav from '../common/PrimaryNav'
-
 export default {
     components: { PrimaryNav },
-    props: {
-        app: Object,
-        user: Object
-    }
+    props: ['app', 'user']
 }
 </script>
