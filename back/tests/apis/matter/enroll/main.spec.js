@@ -10,7 +10,7 @@ describe("#apis", () => {
                         testdata = require('../../../../cus/test.data')
                         mockReq = {
                             query: {
-                                app: testdata.apis.ue.matter.enroll.main.appId,
+                                app: testdata.apis.ue.matter.enroll.main.appId
                             }
                         }
                     })
