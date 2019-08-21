@@ -10,7 +10,7 @@ describe("#models", () => {
                 test("setDynaSchemas()", async () => {
                     let oApp = testdata.models.ue.matter.enroll
                     let rst = await schemaModel.setDynaSchemas(oApp)
-                    console.log(rst)
+                    // console.log(rst)
                     // expect(data.enroll_key).toBe(ek)
                 })
                 afterAll(done => {

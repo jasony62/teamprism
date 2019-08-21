@@ -1,5 +1,3 @@
-// const request = require("supertest")
-// const app = require("../../../app")
 
 describe("#apis", () => {
     describe("#ue", () => {

@@ -79,73 +79,17 @@ class Main extends Base {
         params.entryRuleResult = oEntryRuleResult;
 
         /* 站点页面设置 */
-        // if (oApp.use_site_header === 'Y' || oApp.use_site_footer === 'Y') {
-            // params.site = await utilities.model('site').byId(
-            //     oApp.siteid,
-            //     {
-            //         'fields' : 'id,name,summary,heading_pic,header_page_name,footer_page_name',
-            //         'cascaded' : 'header_page_name,footer_page_name'
-            //     }
-            // );
-        // }
 
-        // /* 项目页面设置 */
-        // if ($oApp->use_mission_header === 'Y' || $oApp->use_mission_footer === 'Y') {
-        //     if ($oApp->mission_id) {
-        //         $params['mission'] = $this->model('matter\mission')->byId(
-        //             $oApp->mission_id,
-        //             ['cascaded' => 'header_page_name,footer_page_name']
-        //         );
-        //     }
-        // }
+        /* 项目页面设置 */
+       
 
-        // /* 要打开的页面 */
-        // if (!in_array($page, ['task', 'event', 'kanban', 'repos', 'cowork', 'share', 'rank', 'score', 'votes', 'marks', 'favor', 'topic', 'stat'])) {
-        //     $modelPage = $this->model('matter\enroll\page');
-        //     $oUserEnrolled = $modelRec->lastByUser($oApp, $oUser, ['rid' => $rid]);
-        //     /* 计算打开哪个页面 */
-        //     if (empty($page)) {
-        //         $oOpenPage = $this->_defaultPage($oApp, $rid, false, $ignoretime);
-        //     } else {
-        //         $oOpenPage = $modelPage->byName($oApp, $page);
-        //     }
-        //     if (empty($oOpenPage)) {
-        //         return new \ResponseError('页面不存在');
-        //     }
-        //     /* 根据动态题目更新页面定义 */
-        //     $modelPage->setDynaSchemas($oApp, $oOpenPage);
-        //     /* 根据动态选项更新页面定义 */
-        //     $modelPage->setDynaOptions($oApp, $oOpenPage);
+        /* 要打开的页面 */
+        
 
-        //     $params['page'] = $oOpenPage;
-        // }
-
-        // /**
-        //  * 获得当前活动的分组和当前用户所属的分组，是否为组长，及同组成员
-        //  */
-        // if (!empty($oApp->entryRule->group->id)) {
-        //     $assocGroupAppId = $oApp->entryRule->group->id;
-        //     /* 获得的分组信息 */
-        //     $modelGrpTeam = $this->model('matter\group\team');
-        //     $groups = $modelGrpTeam->byApp($assocGroupAppId, ['fields' => "team_id,title,team_type"]);
-        //     $params['groups'] = $groups;
-        //     /* 用户所属分组 */
-        //     $modelGrpRec = $this->model('matter\group\record');
-        //     $oGrpApp = (object) ['id' => $assocGroupAppId];
-        //     $oGrpUsr = $modelGrpRec->byUser($oGrpApp, $oUser->uid, ['fields' => 'is_leader,team_id,team_title,userid,nickname', 'onlyOne' => true]);
-        //     if ($oGrpUsr) {
-        //         $params['groupUser'] = $oGrpUsr;
-        //         $params['groupOthers'] = [];
-        //         if (!empty($oGrpUsr->team_id)) {
-        //             $others = $modelGrpRec->byTeam($oGrpUsr->team_id, ['fields' => 'is_leader,userid,nickname']);
-        //             foreach ($others as $other) {
-        //                 if ($other->userid !== $oGrpUsr->userid) {
-        //                     $params['groupOthers'][] = $other;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        /**
+         * 获得当前活动的分组和当前用户所属的分组，是否为组长，及同组成员
+         */
+        
 
         modelEnl.end()
         return new ResultData(params)

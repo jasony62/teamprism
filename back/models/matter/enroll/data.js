@@ -97,48 +97,7 @@ class Data extends DbModel {
      * 获得多项填写题数据
      */
     async getCowork(ek, schemaId, oOptions = {}) {
-        // $fields = isset($oOptions['fields']) ? $oOptions['fields'] : self::DEFAULT_FIELDS . ',multitext_seq';
-
-        // $q = [
-        //     $fields,
-        //     'xxt_enroll_record_data',
-        //     ['enroll_key' => $ek, 'state' => 1, 'schema_id' => $schemaId],
-        // ];
-        // if (isset($oOptions['excludeRoot']) && $oOptions['excludeRoot']) {
-        //     $q[2]['multitext_seq'] = (object) ['op' => '>', 'pat' => 0];
-        // }
-        // if (isset($oOptions['agreed'])) {
-        //     $q[2]['agreed'] = $oOptions['agreed'];
-        // }
-        // if (isset($oOptions['user'])) {
-        //     $oUser = $oOptions['user'];
-        // }
-
-        // $fnHandler = function (&$oData) {
-        //     if (property_exists($oData, 'tag')) {
-        //         $oData->tag = empty($oData->tag) ? [] : json_decode($oData->tag);
-        //     }
-        //     if (property_exists($oData, 'like_log')) {
-        //         $oData->like_log = empty($oData->like_log) ? new \stdClass : json_decode($oData->like_log);
-        //     }
-        //     if (property_exists($oData, 'agreed_log')) {
-        //         $oData->agreed_log = empty($oData->agreed_log) ? new \stdClass : json_decode($oData->agreed_log);
-        //     }
-        // };
-
-        // $q2 = [];
-        // // 排序规则
-        // $q2['o'] = "multitext_seq";
-        // $data = $this->query_objs_ss($q);
-        // if (count($data)) {
-        //     foreach ($data as $schemaData) {
-        //         if (isset($fnHandler)) {
-        //             $fnHandler($schemaData);
-        //         }
-        //     }
-        // }
-
-        // return data
+        
         return []
     }
 }

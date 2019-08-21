@@ -1,5 +1,3 @@
-// const request = require("supertest")
-// const app = require("../../../app")
 
 describe("#apis", () => {
     describe("#ue", () => {
@@ -13,7 +11,6 @@ describe("#apis", () => {
                         mockReq = {
                             query: {
                                 app: testdata.apis.ue.matter.enroll.main.appId,
-                                // access_token: testdata.access_token
                             }
                         }
                     })
