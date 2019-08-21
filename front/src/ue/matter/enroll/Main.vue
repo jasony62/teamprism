@@ -24,8 +24,9 @@ export default {
             let params = this.$route.params
             try {
                 if (params.appId) {
-                    let app = await apis.getApp(this.$route.params.appId)
-                    this.app = app
+                    let result = await apis.getApp(this.$route.params.appId)
+                    this.app = result.app
+                    this.user = result.user
                 }
             } catch (e) {
                 this.$message({

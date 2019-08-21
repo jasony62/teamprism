@@ -79,9 +79,6 @@ export default {
         schemas: Array,
         rec: Object
     },
-    created() {
-        console.log(this.rec);
-    },
     methods: {
         open(file) {
             let url, appID, data;
