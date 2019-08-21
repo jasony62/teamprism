@@ -9,7 +9,7 @@
     </div>
 </template>
 <script>
-import {Repos as ReposApis} from "@/apis/matter/enroll/repos"
+import {Repos as RepApis} from "@/apis/matter/enroll"
 import TmsList from "@/tms/components/List.vue"
 import RecordListItem from "../../common/RecordListItem"
 
@@ -44,13 +44,10 @@ export default {
         }
     },
     methods: {
-        async fetchList() {
-            let params = qs.parse(location.search)
+        async fetchList(appid) {
             try {
-                if (params.app) {
-                    let result = await RecordApis.getList('recordList', appid)
-                    this.records = result.records
-                }
+                let result = await RepApis.getList('recordList', appid)
+                this.records = result.records
             } catch (e) {
                 this.$message({
                     message: e,
