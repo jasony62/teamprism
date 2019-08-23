@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require('fs')
 const Token = require('../token')
 const { ResultFault } = require('../api')
-
+const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
 /**
  * 根据请求路径找到匹配的控制器和方法
  * 
@@ -57,7 +57,24 @@ router.all('*', async (req, res) => {
 
     try {
         const [oCtrl, method] = findCtrlAndMethod(req, client)
+        /**
+         * 是否需要事物？
+         */
+        let moTrans, trans
+        if (oCtrl.tmsRequireTransaction && typeof oCtrl.tmsRequireTransaction === 'function') {
+            let transMethodes = oCtrl.tmsRequireTransaction()
+            if (transMethodes && transMethodes[method]) {
+                moTrans = new ReqTrans(req)
+                trans = await moTrans.begin()
+            }
+        }
         const result = await oCtrl[method](req)
+        /**
+         * 结束事物
+         */
+        if (moTrans && trans)
+            moTrans.end(trans.id)
+
         res.json(result)
     } catch (err) {
         res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))

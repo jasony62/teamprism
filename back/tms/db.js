@@ -10,6 +10,11 @@ function connect(readonly, options) {
     const oCusConfig = JSON.parse(fileConfig)
     let oConnConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
 
+    if (oConnConfig.supportBigNumbers === undefined)
+        oConnConfig.supportBigNumbers = true
+    if (oConnConfig.bigNumberStrings === undefined)
+        oConnConfig.bigNumberStrings = true
+
     let conn = mysql.createConnection(oConnConfig)
 
     return new Promise((resolve, reject) => {
@@ -106,8 +111,8 @@ class SqlAction {
 
     exec() {
         return new Promise((resolve, reject) => {
-            this.conn.query(this.sql, (error, result, fields) => {
-                if(error){
+            this.conn.query(this.sql, (error, result) => {
+                if (error) {
                     reject(error)
                 } else {
                     resolve(result)
@@ -130,8 +135,20 @@ class Insert extends SqlAction {
 
         return `insert into ${this.table}(${fields.join(',')}) values('${values.join("','")}')`
     }
-
-
+    exec(isAutoIncId = false) {
+        return new Promise((resolve, reject) => {
+            this.conn.query(this.sql, (error, result) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    if (isAutoIncId)
+                        resolve(result.insertId)
+                    else
+                        resolve(result.affectedRows)
+                }
+            })
+        })
+    }
 }
 
 class SqlActionWithWhere extends SqlAction {
@@ -172,6 +189,17 @@ class Update extends SqlActionWithWhere {
 
         return `update ${this.table} set ${pairs.join(",")} where ${this.where.sql}`
     }
+    exec() {
+        return new Promise((resolve, reject) => {
+            this.conn.query(this.sql, (error, result) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(result.affectedRows)
+                }
+            })
+        })
+    }
 }
 
 class Select extends SqlActionWithWhere {
@@ -195,7 +223,7 @@ class Select extends SqlActionWithWhere {
             this.orderBy = ` ORDER BY ` + order
         }
     }
-    
+
     async limit(offset = null, limit = null) {
         if ((typeof offset === 'number' && !isNaN(offset)) && (typeof limit === 'number' && !isNaN(limit))) {
             this.limitVal = ` LIMIT ${offset},${limit}`
@@ -203,7 +231,13 @@ class Select extends SqlActionWithWhere {
     }
 
     get sql() {
-        let sql = `select ${this.fields} from ${this.table} where ${this.where.sql} ${this.groupBy} ${this.orderBy} ${this.limitVal}`
+        let sql = `select ${this.fields} from ${this.table} where ${this.where.sql}`
+        if (this.groupBy)
+            sql += ` ${this.groupBy}`
+        if (this.orderBy)
+            sql += ` ${this.orderBy}`
+        if (this.limitVal)
+            sql += ` ${this.limitVal}`
         return sql
     }
 }

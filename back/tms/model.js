@@ -94,15 +94,33 @@ class Model {
  */
 // 表名称字段
 const TABLE_NAME = Symbol('table_name')
+// 表ID字段
+const TABLE_ID = Symbol('table_id')
+// 是否使用自增ID
+const TABLE_AUTO_INC_ID = Symbol('table_auto_inc_id')
+
 
 class DbModel extends Model {
-    constructor(table) {
+    /**
+     * 
+     * @param {String} table 表名称 
+     * @param {Boolean} autoIncId 是否为自增id 
+     */
+    constructor(table, autoIncId = true, id = 'id') {
         super()
         this[TABLE_NAME] = table
+        this[TABLE_ID] = id
+        this[TABLE_AUTO_INC_ID] = autoIncId
     }
 
     get table() {
         return this[TABLE_NAME]
+    }
+    get id() {
+        return this[TABLE_ID]
+    }
+    get isAutoIncId() {
+        return this[TABLE_AUTO_INC_ID]
     }
 
     async select(oOptions = {}) {
@@ -112,6 +130,23 @@ class DbModel extends Model {
         let dbSelect = db.newSelect(this.table, fields)
         dbSelect.where.fieldMatch('1', '=', 1)
         let rows = await dbSelect.exec()
+
+        return rows
+    }
+
+    async insert(data) {
+        let db = await this.db()
+        let dbIns = db.newInsert(this.table, data)
+        let idOrRows = await dbIns.exec(this.isAutoIncId)
+
+        return idOrRows
+    }
+
+    async updateById(id, data) {
+        let db = await this.db()
+        let dbUpd = db.newUpdate(this.table, data)
+        dbUpd.where.fieldMatch(this.id, '=', id)
+        let rows = await dbUpd.exec()
 
         return rows
     }

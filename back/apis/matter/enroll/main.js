@@ -47,11 +47,11 @@ class Main extends Base {
 
         let oOpenedRecord
         if (query.ek) {
-            oOpenedRecord = await modelRec.byId(query.ek, {'verbose' : 'Y', 'state' : 1});
+            oOpenedRecord = await modelRec.byId(query.ek, { 'verbose': 'Y', 'state': 1 });
         }
 
         /* 要打开的应用 */
-        let aOptions = {'cascaded' : query.cascaded, 'fields' : '*', 'appRid' : (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid};
+        let aOptions = { 'cascaded': query.cascaded, 'fields': '*', 'appRid': (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid };
         // if (query.task) {
         //     let modelTask = new Task();
         //     let oTask = await modelTask.byId(query.task);
@@ -81,15 +81,15 @@ class Main extends Base {
         /* 站点页面设置 */
 
         /* 项目页面设置 */
-       
+
 
         /* 要打开的页面 */
-        
+
 
         /**
          * 获得当前活动的分组和当前用户所属的分组，是否为组长，及同组成员
          */
-        
+
 
         modelEnl.end()
         return new ResultData(params)

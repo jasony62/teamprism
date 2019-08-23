@@ -1,11 +1,11 @@
-describe("#tms", function () {
-    describe("#db.js", function () {
+describe("#tms", function() {
+    describe("#db.js", function() {
         let db;
         test("connect", async () => {
             db = await require("../../tms/db")()
             expect(db.conn).not.toBe(false)
         })
-        describe("#Where", function () {
+        describe("#Where", function() {
             let select, where
             beforeAll(() => {
                 select = db.newSelect('test', 'a,b,c')
@@ -47,7 +47,7 @@ describe("#tms", function () {
                 expect(where.sql).toBe(`f='a' and f in('a','b','c') and f not in('a','b','c') and f between 1 and 2 and f not between 1 and 2 and exists('select c from t') and (a=1 and b=2) and (a=1 or b=2)`)
             })
         })
-        describe("#Select", function () {
+        describe("#Select", function() {
             let select
             beforeAll(() => {
                 select = db.newSelect('account_group', 'group_id,group_name')
@@ -62,7 +62,7 @@ describe("#tms", function () {
                 })
             })
         })
-        describe("#Insert", function () {
+        describe("#Insert", function() {
             let insAct;
             beforeAll(() => {
                 insAct = db.newInsert('xxt_log', {
@@ -76,12 +76,12 @@ describe("#tms", function () {
                 expect(insAct.sql).toBe(`insert into xxt_log(siteid,create_at,method,data) values('1','1','insert','测试数据')`)
             })
             test("execute", async () => {
-                return insAct.exec().then(result => {
-                    expect(result.affectedRows).toBe(1)
+                return insAct.exec(true).then(autoIncId => {
+                    expect(autoIncId).toBeGreaterThan(0)
                 })
             })
         })
-        describe("#Delete", function () {
+        describe("#Delete", function() {
             let delAct
             beforeAll(() => {
                 delAct = db.newDelete('xxt_log')
@@ -96,7 +96,7 @@ describe("#tms", function () {
                 })
             })
         })
-        describe("#Update", function () {
+        describe("#Update", function() {
             let updAct
             beforeAll(() => {
                 updAct = db.newUpdate('xxt_log')

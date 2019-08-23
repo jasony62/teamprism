@@ -5,6 +5,11 @@ class Record extends Api {
     constructor(...args) {
         super(...args)
     }
+    tmsRequireTransaction() {
+        return {
+            submit: true
+        }
+    }
     /**
      * 获得记录
      */
@@ -19,6 +24,12 @@ class Record extends Api {
         }
 
         return new ResultData(oRecord)
+    }
+    /**
+     * 提交记录
+     */
+    async submit() {
+
     }
 }
 
