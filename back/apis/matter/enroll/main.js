@@ -9,49 +9,47 @@ class Main extends Base {
         super(...args)
     }
     /**
-     * 获得指定记录活动的进入规则以及当前用户的匹配情况
+     * 在调用方法前被执行的公共方法
      */
-    async entryRule() {
+    async tmsBeforeEach() {
         let { app } = this.request.query
+        if (!app)
+            return new ResultFault(`参数错误`)
+
         let modelApp = new Enroll()
         const oApp = await modelApp.byId(app)
         modelApp.end()
+        if (!oApp || oApp.state !== 1)
+            return new ResultFault(`数据错误`)
 
-        if (!oApp) {
-            return new ResultObjectNotFound()
-        }
+        this.app = oApp
 
-        return new ResultData(oApp.entryRule)
+        return true
+    }
+    /**
+     * 获得指定记录活动的进入规则以及当前用户的匹配情况
+     */
+    async entryRule() {
+        return Promise.resolve(this.app.entryRule)
     }
     /**
      * 返回记录活动定义
-     *
-     * @param string $appid
-     * @param string $rid
-     * @param string $page page's name
-     * @param string $ek record's enroll key
-     * @param int $task 活动任务id
-     *
      */
     // $app, $rid = '', $page = null, $ek = null, $ignoretime = 'N', $cascaded = 'N', $task = null
     async get() {
-        let query = this.request.query
-        if (!query.app) {
-            return new ResultFault('参数错误')
-        }
-        let rid = (query.rid) ? query.rid : ''
+        let { rid, ek } = this.request.query
 
         let params = {}; // 返回的结果
         /* 要打开的记录 */
         let modelRec = new Record();
 
         let oOpenedRecord
-        if (query.ek) {
-            oOpenedRecord = await modelRec.byId(query.ek, { 'verbose': 'Y', 'state': 1 });
+        if (ek) {
+            oOpenedRecord = await modelRec.byId(ek, { 'verbose': 'Y', 'state': 1 });
         }
 
         /* 要打开的应用 */
-        let aOptions = { 'cascaded': query.cascaded, 'fields': '*', 'appRid': (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid };
+        //let aOptions = { 'cascaded': query.cascaded, 'fields': '*', 'appRid': (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid };
         // if (query.task) {
         //     let modelTask = new Task();
         //     let oTask = await modelTask.byId(query.task);
@@ -59,12 +57,9 @@ class Main extends Base {
         //         aOptions.task = oTask;
         //     }
         // }
+        //TODO:单独获取轮次信息，替换掉公共方法中应用数据的内容（appRound）
 
-        let modelEnl = new Enroll()
-        let oApp = await modelEnl.byId(query.app, aOptions);
-        if (!oApp || oApp.state != '1') {
-            return new ResultObjectNotFound();
-        }
+        let oApp = this.app
         if (oApp.appRound && oApp.appRound.rid) {
             rid = oApp.appRound.rid;
         }
@@ -90,8 +85,6 @@ class Main extends Base {
          * 获得当前活动的分组和当前用户所属的分组，是否为组长，及同组成员
          */
 
-
-        modelEnl.end()
         return new ResultData(params)
     }
 }

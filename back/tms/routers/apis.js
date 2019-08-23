@@ -68,6 +68,16 @@ router.all('*', async (req, res) => {
                 trans = await moTrans.begin()
             }
         }
+        /**
+         * 前置操作
+         */
+        if (oCtrl.tmsBeforeEach && typeof oCtrl.tmsBeforeEach === 'function') {
+            const resultBefore = await oCtrl.tmsBeforeEach(method)
+            if (resultBefore instanceof ResultFault) {
+                res.json(resultBefore)
+                return
+            }
+        }
         const result = await oCtrl[method](req)
         /**
          * 结束事物
