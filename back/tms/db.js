@@ -107,7 +107,11 @@ class SqlAction {
     exec() {
         return new Promise((resolve, reject) => {
             this.conn.query(this.sql, (error, result, fields) => {
-                resolve(result)
+                if(error){
+                    reject(error)
+                } else {
+                    resolve(result)
+                }
             })
         })
     }
@@ -175,10 +179,32 @@ class Select extends SqlActionWithWhere {
     constructor(conn, table, fields) {
         super(conn, table)
         this.fields = fields
+        this.groupBy = ''
+        this.orderBy = ''
+        this.limitVal = ''
+    }
+
+    async group(group = null) {
+        if (group && typeof group === 'string') {
+            this.groupBy = ` GROUP BY ` + group
+        }
+    }
+
+    async order(order = null) {
+        if (order && typeof order === 'string') {
+            this.orderBy = ` ORDER BY ` + order
+        }
+    }
+    
+    async limit(offset = null, limit = null) {
+        if ((typeof offset === 'number' && !isNaN(offset)) && (typeof limit === 'number' && !isNaN(limit))) {
+            this.limitVal = ` LIMIT ${offset},${limit}`
+        }
     }
 
     get sql() {
-        return `select ${this.fields} from ${this.table} where ${this.where.sql}`
+        let sql = `select ${this.fields} from ${this.table} where ${this.where.sql} ${this.groupBy} ${this.orderBy} ${this.limitVal}`
+        return sql
     }
 }
 class SelectOne extends Select {
@@ -195,7 +221,20 @@ class SelectOne extends Select {
         })
     }
 }
-
+class SelectOneVal extends Select {
+    exec() {
+        return new Promise((resolve, reject) => {
+            super.exec().then((rows) => {
+                if (rows.length === 1)
+                    resolve(Object.values(rows[0])[0])
+                else if (rows.length === 0)
+                    resolve(false)
+                else
+                    reject('查询条件错误，获得多条数据')
+            })
+        })
+    }
+}
 class Db {
     constructor(conn) {
         this.conn = conn;
@@ -224,6 +263,10 @@ class Db {
 
     newSelectOne(table, fields) {
         return new SelectOne(this.conn, table, fields)
+    }
+
+    newSelectOneVal(table, fields) {
+        return new SelectOneVal(this.conn, table, fields)
     }
 }
 

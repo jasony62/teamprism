@@ -12,7 +12,7 @@ const { ResultFault } = require('../api')
  * 如果文件不存在，倒数第2段作为目录名，查找main.js文件
  * 
  * @param {Request} req 
- * @param {Client} client
+ * @param {Who} client
  */
 function findCtrlAndMethod(req, client) {
     let { path } = req
