@@ -4,15 +4,27 @@
             <li v-for="item in items" :key="item.id">
                 <slot name="item" :item="item"></slot>
             </li>
-        </ul>
+        </ul> 
     </div>
 </template>
 <script>
 export default {
     props: {
         items: Array
+    },
+    data() {
+        return {
+            loading: false,
+            finished: false
+        };
     }
-}
+};
 </script>
-<style scoped>
+<style >
+#tms-list {
+    background-color: #ddd;
+}
+#tms-list ul li {
+    margin-bottom: 20px;
+}
 </style>

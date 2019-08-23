@@ -4,7 +4,7 @@
             <div>Loading...</div>
         </div>
         <div v-else>
-            <router-view :app="app"></router-view>
+            <router-view :app="app" :user="user"></router-view>
         </div>
     </div>
 </template>
@@ -14,7 +14,7 @@ import apis from '@/apis/matter/enroll'
 
 export default {
     data() {
-        return { loading: true, app: { title: 'loading' } }
+        return { loading: true, app: { title: 'loading' }, user: {} }
     },
     mounted() {
         this.fetchApp()
@@ -24,8 +24,9 @@ export default {
             let params = this.$route.params
             try {
                 if (params.appId) {
-                    let app = await apis.getApp(this.$route.params.appId)
-                    this.app = app
+                    let result = await apis.getApp(this.$route.params.appId)
+                    this.app = result.app
+                    this.user = result.user
                 }
             } catch (e) {
                 this.$message({
@@ -42,7 +43,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 #main {
     text-align: center;
     color: #2c3e50;

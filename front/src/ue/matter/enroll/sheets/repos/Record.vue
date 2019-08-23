@@ -3,24 +3,60 @@
         <div>Repos Record</div>
         <tms-list :items="records">
             <template v-slot:item="{ item }">
-                <record-list-item :record="item"></record-list-item>
+                <record-list-item :record="item" :schemas="schemas" :user="user"></record-list-item>
             </template>
         </tms-list>
     </div>
 </template>
 <script>
-import TmsList from '@/tms/components/List.vue'
-import RecordListItem from '../../common/RecordListItem'
+import {Repos as RepApis} from "@/apis/matter/enroll"
+import TmsList from "@/tms/components/List.vue"
+import RecordListItem from "../../common/RecordListItem"
 
 export default {
-    components: { TmsList, RecordListItem },
+    props: ['app', 'user'],
     data: function() {
         return {
-            records: [
-                { id: 1, label: 'record-1' },
-                { id: 2, label: 'record-2' }
-            ]
+            records: []
+        }
+    },
+    components: { TmsList, RecordListItem },
+    computed: {
+        appid() {
+            return this.app.id
+        },
+        schemas: function() {
+            var _aShareableSchemas = [];
+            this.app.dynaDataSchemas.forEach((oSchema) => {
+                if (oSchema.shareable === 'Y') {
+                    _aShareableSchemas.push(oSchema);
+                }
+            });
+            return _aShareableSchemas;
+        }
+    },
+    watch: {
+        appid: {
+            async handler(nv) {
+                if (nv) this.fetchList(nv)
+            },
+            immediate: true
+        }
+    },
+    methods: {
+        async fetchList(appid) {
+            try {
+                let result = await RepApis.getList('recordList', appid)
+                this.records = result.records
+            } catch (e) {
+                this.$message({
+                    message: e,
+                    type: 'error',
+                    duration: 60000,
+                    showClose: true
+                })
+            } 
         }
     }
-}
+};
 </script>

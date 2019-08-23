@@ -16,7 +16,7 @@
         </div>
         <hr />
         <div>
-            <router-view :app="app"></router-view>
+            <router-view :app="app" :user="user"></router-view>
         </div>
         <div>
             <hr />
@@ -26,8 +26,8 @@
 </template>
 <script>
 import PrimaryNav from '../common/PrimaryNav'
-
 export default {
-    components: { PrimaryNav }
+    components: { PrimaryNav },
+    props: ['app', 'user']
 }
 </script>
