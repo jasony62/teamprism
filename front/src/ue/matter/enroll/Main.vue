@@ -11,6 +11,7 @@
 
 <script>
 import apis from '@/apis/matter/enroll'
+import { Notify } from 'vant'
 
 export default {
     data() {

@@ -12,6 +12,7 @@
 import {Repos as RepApis} from "@/apis/matter/enroll"
 import TmsList from "@/tms/components/List.vue"
 import RecordListItem from "../../common/RecordListItem"
+import { Notify } from 'vant'
 
 export default {
     props: ['app', 'user'],
@@ -49,12 +50,11 @@ export default {
                 let result = await RepApis.getList('recordList', appid)
                 this.records = result.records
             } catch (e) {
-                this.$message({
+                Notify({
                     message: e,
-                    type: 'error',
-                    duration: 60000,
-                    showClose: true
-                })
+                    type: 'danger'
+                });
+                
             } 
         }
     }
