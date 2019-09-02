@@ -8,6 +8,8 @@ import router from "./router.js"
 Vue.config.productionTip = false
 
 Vue.prototype.$message = Message
+// 全局的事件广播接收机制
+Vue.prototype.$eventHub = Vue.prototype.$eventHub || new Vue()
 
 async function initAxios(siteId) {
     try {
@@ -20,7 +22,8 @@ async function initAxios(siteId) {
 new Vue({
     router,
     render: h => h(Main),
-    created: async function() {
+    mounted: async function() {
         await initAxios(this.$route.params.siteId)
+        this.$eventHub.$emit('main-mounted')
     }
 }).$mount("#app")

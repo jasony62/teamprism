@@ -1,7 +1,6 @@
 import axios from 'axios'
 
-let myRequestInterceptor, myResponseInterceptor
-
+let myRequestInterceptor
 // 给所有的请求都加上access_token
 function useRequestInterceptor(access_token) {
     if (!myRequestInterceptor) {
@@ -17,7 +16,10 @@ function useRequestInterceptor(access_token) {
         })
     }
 }
+
 // 处理所有的响应
+let myResponseInterceptor
+
 function useResponseInterceptor() {
     if (!myResponseInterceptor) {
         myResponseInterceptor = axios.interceptors.response.use(res => {
