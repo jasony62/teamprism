@@ -24,10 +24,10 @@ mock.onGet(/\/ue\/returnlogicerror/).reply(() => {
 describe("apis", () => {
     describe("axios2.js", () => {
         it("创建失败(siteid为空)", () => {
-            expect(setupAccessToken()).rejects.toMatch('Axios2:参数错误')
+            expect(setupAccessToken()).rejects.toMatch('axios2:参数错误')
         })
         it("根据siteid创建失败", () => {
-            return expect(setupAccessToken('invalidsiteid')).rejects.toMatch('Axios2:没有获得有效用户信息')
+            return expect(setupAccessToken('invalidsiteid')).rejects.toMatch('axios2:没有获得有效用户信息')
         })
         it("根据siteid创建成功", () => {
             return setupAccessToken('validsiteid').then(data => {
