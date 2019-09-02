@@ -22,9 +22,9 @@ const AnalyzeKanban = () => import('./sheets/analyze/Kanban.vue')
 Vue.use(VueRouter)
 
 const routes = [
-    { path: '/:siteId/:appId/guide', name: 'guide', component: Guide, props: true },
+    { path: '/ue/matter/enroll/:siteId/:appId/guide', name: 'guide', component: Guide, props: true },
     {
-        path: '/:siteId/:appId/repos',
+        path: '/ue/matter/enroll/:siteId/:appId/repos',
         name: 'repos',
         component: Repos,
         children: [
@@ -36,7 +36,7 @@ const routes = [
         props: true
     },
     {
-        path: '/:siteId/:appId/record/:ek',
+        path: '/ue/matter/enroll/:siteId/:appId/record/:ek',
         name: 'record',
         component: Record,
         children: [
@@ -46,7 +46,7 @@ const routes = [
         ],
         props: true
     },
-    { path: '/:siteId/:appId/event', name: 'event', component: Event },
+    { path: '/ue/matter/enroll/:siteId/:appId/event', name: 'event', component: Event },
     {
         path: '/analyze',
         name: 'analyze',
@@ -57,10 +57,10 @@ const routes = [
         ],
         props: true
     },
-    { path: '/:siteId/:appId/topic', name: 'topic', component: Topic, props: true },
-    { path: '/:siteId/:appId/share', name: 'share', component: Share, props: true }
+    { path: '/ue/matter/enroll/:siteId/:appId/topic', name: 'topic', component: Topic, props: true },
+    { path: '/ue/matter/enroll/:siteId/:appId/share', name: 'share', component: Share, props: true }
 ]
 
-const router = new VueRouter({ routes })
+const router = new VueRouter({ mode: 'history', routes })
 
 export default router

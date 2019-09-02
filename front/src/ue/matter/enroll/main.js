@@ -12,6 +12,7 @@ Vue.prototype.$message = Message
 Vue.prototype.$eventHub = Vue.prototype.$eventHub || new Vue()
 
 async function initAxios(siteId) {
+    console.log('ssss', siteId)
     try {
         await setupAccessToken(siteId)
     } catch (e) {
