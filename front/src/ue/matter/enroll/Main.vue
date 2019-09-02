@@ -17,7 +17,9 @@ export default {
         return { loading: true, app: { title: 'loading' }, user: {} }
     },
     mounted() {
-        this.fetchApp()
+        this.$eventHub.$on('main-mounted', () => {
+            this.fetchApp()
+        })
     },
     methods: {
         async fetchApp() {
