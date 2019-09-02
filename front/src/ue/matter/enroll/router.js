@@ -15,6 +15,7 @@ import Event from './sheets/Event.vue'
 import Analyze from './sheets/Analyze.vue'
 import Topic from './sheets/Topic.vue'
 import Share from './sheets/Share.vue'
+import NotFound from './sheets/404.vue'
 
 const AnalyzeRank = () => import('./sheets/analyze/Rank.vue')
 const AnalyzeKanban = () => import('./sheets/analyze/Kanban.vue')
@@ -58,7 +59,8 @@ const routes = [
         props: true
     },
     { path: '/ue/matter/enroll/:siteId/:appId/topic', name: 'topic', component: Topic, props: true },
-    { path: '/ue/matter/enroll/:siteId/:appId/share', name: 'share', component: Share, props: true }
+    { path: '/ue/matter/enroll/:siteId/:appId/share', name: 'share', component: Share, props: true },
+    { path: '/ue/matter/enroll/*', name: 'notfound', component: NotFound, props: true }
 ]
 
 const router = new VueRouter({ mode: 'history', routes })
