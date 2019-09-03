@@ -18,12 +18,12 @@ describe("#tms", function() {
             })
             test("empty access_token", () => {
                 return request(app).get('/ue/api/version?app=abc').then(res => {
-                    expect(res.body).toMatchObject(expect.objectContaining({ code: 1, msg: expect.anything() }))
+                    expect(res.body).toMatchObject(expect.objectContaining({ code: 10001, msg: expect.anything() }))
                 })
             })
             test("invalid access_token", () => {
                 return request(app).get('/ue/api/version?access_token=nosuchtoken&app=abc').then(res => {
-                    expect(res.body).toMatchObject(expect.objectContaining({ code: 1, msg: expect.anything() }))
+                    expect(res.body).toMatchObject(expect.objectContaining({ code: 20001, msg: expect.anything() }))
                 })
             })
             test("pass access_token", () => {
