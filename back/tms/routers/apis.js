@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const Token = require('../token')
-const { ResultFault } = require('../api')
+const { ResultFault, AccessTokenFault } = require('../api')
 const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
 /**
  * 根据请求路径找到匹配的控制器和方法
@@ -50,7 +50,7 @@ router.all('*', async (req, res) => {
 
     let aResult = await Token.fetch(access_token)
     if (false === aResult[0]) {
-        res.json(new ResultFault(aResult[1]))
+        res.json(new AccessTokenFault(aResult[1]))
         return
     }
     let client = aResult[1]

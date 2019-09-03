@@ -20,6 +20,9 @@ export default {
         this.$eventHub.$on('main-mounted', () => {
             this.fetchApp()
         })
+        this.$eventHub.$on('main-failed', () => {
+            this.loading = false
+        })
     },
     methods: {
         async fetchApp() {

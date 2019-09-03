@@ -8,7 +8,7 @@ class ResultBase {
     constructor(result, msg, code) {
         this.msg = msg
         this.code = code
-        this.result = result
+        if (result) this.result = result
     }
 }
 class ResultData extends ResultBase {
@@ -16,15 +16,27 @@ class ResultData extends ResultBase {
         super(result, msg, code)
     }
 }
-
+/**
+ * 一般错误
+ * 前2位编码从10开始
+ */
 class ResultFault extends ResultBase {
-    constructor(msg = '操作无法完成', code = 1, result = null) {
+    constructor(msg = '操作无法完成', code = 10001, result = null) {
         super(result, msg, code)
     }
 }
 class ResultObjectNotFound extends ResultFault {
-    constructor(msg = '指定的对象不存在', result = null, code = 2) {
+    constructor(msg = '指定的对象不存在', result = null, code = 10002) {
         super(msg, result, code)
+    }
+}
+/**
+ * access_token失败
+ * 前2位编码从20开始
+ */
+class AccessTokenFault extends ResultBase {
+    constructor(msg = '', code = 20001, result = null) {
+        super(result, msg, code)
     }
 }
 /**
@@ -50,4 +62,4 @@ class Api {
     }
 }
 
-module.exports = { Api, ResultData, ResultFault, ResultObjectNotFound, Client }
+module.exports = { Api, ResultData, ResultFault, ResultObjectNotFound, AccessTokenFault, Client }
