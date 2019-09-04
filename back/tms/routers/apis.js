@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const Token = require('../token')
-const { ResultFault } = require('../api')
+const { ResultFault, Api } = require('../api')
 const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
+const Log = require('../../models/log')
+const { tms_get_server } = require('../../tms/utilities')
+
 /**
  * 根据请求路径找到匹配的控制器和方法
  * 
@@ -87,7 +90,15 @@ router.all('*', async (req, res) => {
 
         res.json(result)
     } catch (err) {
-        res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))
+        let errMesg = typeof err === 'string' ? err : err.toString()
+        let modelLog = new Log()
+        let errStack =  Api.escape(err.stack ? err.stack : errMesg)
+        let referer =  Api.escape(req.url)
+
+        modelLog.log('error', req.path, errStack, tms_get_server(req, 'user-agent'), referer)
+        modelLog.end()
+
+        res.json(new ResultFault(errMesg))
     }
 })
 

@@ -1,7 +1,7 @@
 const { DbModel } = require('../../tms/model')
 const Schema = require("./enroll/schema")
 const Round = require('./enroll/round')
-const config = require('../../config.js')
+const Config = require('../../config')
 
 /**
  * 记录日志时需要的列
@@ -9,11 +9,8 @@ const config = require('../../config.js')
 const LOG_FIELDS = 'siteid,id,title,summary,pic,mission_id'
 
 class Enroll extends DbModel {
-    /**
-     *
-     */
-    async table() {
-        return 'xxt_enroll';
+    constructor() {
+        super('xxt_enroll')
     }
     /**
      * 活动进入链接
@@ -22,14 +19,14 @@ class Enroll extends DbModel {
         if (siteId === 'platform') {
             let oApp = this.byId(id, {'cascaded' : 'N', 'notDecode' : true})
             if (!oApp) {
-                return config.APP_PROTOCOL + config.APP_HTTP_HOST + '/404.html'
+                return Config.APP_PROTOCOL + Config.APP_HTTP_HOST + '/404.html'
             } else {
                 siteId = oApp.siteid
             }
         }
 
-        let url = config.APP_PROTOCOL + config.APP_HTTP_HOST
-        url += "/rest/site/fe/matter/enroll"
+        let url = Config.APP_PROTOCOL + Config.APP_HTTP_HOST
+        url += "api/matter/enroll"
         url += "?site=" + siteId + "&app=" + id
 
         if (oParams && Object.prototype.toString.call(oParams) === "[object Object]") {

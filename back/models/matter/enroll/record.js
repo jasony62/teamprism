@@ -108,12 +108,12 @@ class Record extends DbModel {
 				w += " and (r.rid='" + rid + "')"
 			}
 		} else if (oCriteria.record && oCriteria.record.rid) {
-			if (oCriteria.record.rid === 'string') {
+			if (typeof oCriteria.record.rid === 'string') {
 				if (oCriteria.record.rid.toLowerCase() !== 'all') {
 					let rid = oCriteria.record.rid
 					w += " and (r.rid='" + rid + "')"
 				}
-			} else if (Object.prototype.toString.call(oCriteria.record.rid) === '[object Array]') {
+			} else if (Array.isArray(oCriteria.record.rid)) {
 				let rids = oCriteria.record.rid
 				w += " and r.rid in('" + rids.join("','") + "')"
 			}
@@ -138,7 +138,7 @@ class Record extends DbModel {
 			}
 			// 指定了记录标签
 			if (oCriteria.record.tags) {
-				if (Object.prototype.toString.call(oCriteria.record.tags) === '[object Array]') {
+				if (Array.isArray(oCriteria.record.tags)) {
 					oCriteria.record.tags.forEach((tagId) => {
 						w += " and exists(select 1 from xxt_enroll_tag_target tt where tt.target_id=r.id and tt.target_type=1 and tt.tag_id=" + tagId + ")"
 					})

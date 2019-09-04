@@ -1,16 +1,15 @@
-const {
-    DbModel
-} = require('../../../tms/model')
-const utilities =  global.utilities
+const { DbModel } = require('../../../tms/model')
 
 class Site extends DbModel {
     async byId(siteId, aOptions = {}) {
 		let fields = aOptions.fields && aOptions.fields != "undefined" ? aOptions.fields : '*';
 		let cascaded = aOptions.cascaded && aOptions.cascaded != "undefined" ? aOptions.cascaded : '';
         let db = await this.db()
-        let dbSelect = db.newSelect('xxt_site', fields)
-        dbSelect.where.fieldMatch('id', '=', siteId)
-        dbSelect.where.fieldMatch('state', '=', 1)
+		let dbSelect = db.newSelect('xxt_site', fields)
+		let where = []
+		where['id'] = siteId
+		where['state'] = 1
+        dbSelect.where.and(where)
         let site = await dbSelect.exec()
 		if (site && cascaded) {
 			cascaded = cascaded.split(",");

@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const mysql = require("mysql")
 
 const Encrypt_Encode = Symbol('encrypt.encode')
 const Encrypt_Decode = Symbol('encrypt.decode')
@@ -87,6 +88,26 @@ class Model {
     static encryptDec(str, key) {
         return encrypt(str, Encrypt_Decode, key)
     }
+    /**
+     * sql注入过滤
+     */
+    static escape(data) {
+        if (typeof data === 'string') {
+            return mysql.escape(data).slice(1, -1)
+        } else if (Array.isArray(data)) {
+            data.forEach ((v, k) => {
+                data[k] = Model.escape(v)
+            })
+            return data
+        } else if (Object.prototype.toString.call(data) === '[object Object]') {
+            Object.keys(data).forEach ((k) => {
+                data[k] = Model.escape(data[k])
+            })
+            return data
+        } else {
+            return data
+        }
+    }
 
 }
 /**
@@ -98,7 +119,6 @@ const TABLE_NAME = Symbol('table_name')
 const TABLE_ID = Symbol('table_id')
 // 是否使用自增ID
 const TABLE_AUTO_INC_ID = Symbol('table_auto_inc_id')
-
 
 class DbModel extends Model {
     /**

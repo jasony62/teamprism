@@ -64,8 +64,8 @@ class Data extends DbModel {
             return oResult;
         };
 
-        if (!aOptions.schema || Object.prototype.toString.call(aOptions.schema) === "[object Array]") {
-	        if (aOptions.schema && Object.prototype.toString.call(aOptions.schema) === "[object Array]") {
+        if (!aOptions.schema || Array.isArray(aOptions.schema)) {
+	        if (aOptions.schema && Array.isArray(aOptions.schema)) {
                 dbSelect.where.fieldIn('schema_id', aOptions.schema)
 	        }
 			let data = await dbSelect.exec()

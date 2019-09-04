@@ -1,4 +1,5 @@
 const { DbModel } = require('../../../tms/model')
+const { getDeepValue } = require('../../../tms/utilities')
 const Round = require('./round')
 // const Enroll = require('../enroll')
 
@@ -51,7 +52,7 @@ class Schema extends DbModel {
      * 
      */
     async getAssocGroupTeamSchema(oApp) {
-        if (!oApp.entryRule.group.id) {
+        if (!getDeepValue(oApp, 'entryRule.group.id')) {
             /* 没有关联分组活动 */
             return false
         }

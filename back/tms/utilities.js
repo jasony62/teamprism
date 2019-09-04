@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { Model } = require("./model")
 
 // 自动加载并实例化model
 function model(model_path, data = '') {
@@ -45,7 +46,7 @@ function tms_object_merge(oHost, oNew, fromProps = []) {
  * 数组中查找对象并返回
  */
 function tms_array_search(array, callback, callbackParam) {
-	if (Object.prototype.toString.call(array) !== "[object Array]" || array.length === 0) {
+	if (Array.isArray(array) || array.length === 0) {
 		return false;
 	}
 
@@ -93,5 +94,20 @@ function replaceHTMLTags(text, brValue = '') {
 
 	return text;
 }
+/**
+ * 获取SERVER数据
+ */
+function tms_get_server(request, key, escape = true){
+	let { headers } = request
+	if (headers[key]) {
+		if (escape === true) {
+    		return Model.escape(headers[key]);
+		} else {
+			return headers[key];
+		}
+	} else {
+		return null;
+	}
+}
 
-module.exports = {model, tms_object_merge, tms_array_search, getDeepValue, replaceHTMLTags}
+module.exports = {model, tms_object_merge, tms_array_search, getDeepValue, replaceHTMLTags, tms_get_server}
