@@ -14,11 +14,14 @@ mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
         expire_in: 7200
     }
 })
-mock.onGet(/\/ue\/withaccesstoken/).reply(() => {
+mock.onGet(/\/ue\/api\/accesstokenfailed/).reply(() => {
+    return [200, { code: 20001, msg: 'getting access_token failed' }]
+})
+mock.onGet(/\/ue\/api\/withaccesstoken/).reply(() => {
     return [200, { code: 0, result: 'test' }]
 })
-mock.onGet(/\/ue\/returnlogicerror/).reply(() => {
-    return [200, { code: 1, msg: '服务端业务逻辑错误' }]
+mock.onGet(/\/ue\/api\/returnlogicerror/).reply(() => {
+    return [200, { code: 10001, msg: '服务端业务逻辑错误' }]
 })
 
 describe("apis", () => {
@@ -35,12 +38,17 @@ describe("apis", () => {
             })
         })
         it("发送请求，添加access_token", () => {
-            return axios.get('/ue/withaccesstoken').then(res => {
+            return axios.get('/ue/api/withaccesstoken').then(res => {
                 expect(res.config.params).toMatchObject({ access_token: 'mock_access_token' })
             })
         })
+        it("发送请求，获取access_token失败", () => {
+            return axios.get('/ue/api/accesstokenfailed').catch(err => {
+                expect(err).toBe('getting access_token failed')
+            })
+        })
         it("发送请求，返回业务逻辑错误", () => {
-            return axios.get('/ue/returnlogicerror').catch(err => {
+            return axios.get('/ue/api/returnlogicerror').catch(err => {
                 expect(err).toBe('服务端业务逻辑错误')
             })
         })
