@@ -1,5 +1,12 @@
 import axios from 'axios'
-
+/**
+ * access_token无效
+ */
+class AccessTokenFault {
+    constructor(msg) {
+        this.msg = msg
+    }
+}
 let myApiRequestInterceptor
 // 给所有的请求都加上access_token
 function useApiRequestInterceptor(access_token) {
@@ -29,7 +36,7 @@ function useResponseInterceptor() {
                 switch (res.data.code) {
                     case 20001:
                         // 如何进行重发？
-                        return Promise.reject(res.data.msg)
+                        return Promise.reject(new AccessTokenFault(res.data.msg))
                     default:
                         return Promise.reject(res.data.msg)
                 }
