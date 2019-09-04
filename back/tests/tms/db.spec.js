@@ -108,7 +108,7 @@ describe("#tms", function() {
             })
             test("execute", async () => {
                 return updAct.exec().then(result => {
-                    expect(result.affectedRows).toBe(0)
+                    expect(result).toBe(0)
                 })
             })
         })

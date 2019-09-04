@@ -1,14 +1,15 @@
 import axios from 'axios'
 
-let myRequestInterceptor, myResponseInterceptor
-
+let myApiRequestInterceptor
 // 给所有的请求都加上access_token
-function useRequestInterceptor(access_token) {
-    if (!myRequestInterceptor) {
-        myRequestInterceptor = axios.interceptors.request.use(config => {
+function useApiRequestInterceptor(access_token) {
+    if (!myApiRequestInterceptor) {
+        myApiRequestInterceptor = axios.interceptors.request.use(config => {
             if (config) {
-                if (config.params === undefined) config.params = {}
-                config.params.access_token = access_token
+                if (config.url.indexOf('/ue/api/') === 0) {
+                    if (config.params === undefined) config.params = {}
+                    config.params.access_token = access_token
+                }
             }
             return config
         }, error => {
@@ -17,17 +18,24 @@ function useRequestInterceptor(access_token) {
         })
     }
 }
+
 // 处理所有的响应
+let myResponseInterceptor
+
 function useResponseInterceptor() {
     if (!myResponseInterceptor) {
         myResponseInterceptor = axios.interceptors.response.use(res => {
-            // 对响应数据做点什么
             if (res.data.code !== 0) {
-                return Promise.reject(res.data.msg)
+                switch (res.data.code) {
+                    case 20001:
+                        // 如何进行重发？
+                        return Promise.reject(res.data.msg)
+                    default:
+                        return Promise.reject(res.data.msg)
+                }
             }
             return res
         }, error => {
-            // 对响应错误做点什么
             return Promise.reject(error)
         })
     }
@@ -37,6 +45,8 @@ function useResponseInterceptor() {
 if (!myResponseInterceptor)
     useResponseInterceptor()
 
+// 最后一次设置access_token时的siteId
+let lastSiteId
 /**
  * 给请求自动添加access_token参数
  * 
@@ -45,6 +55,9 @@ if (!myResponseInterceptor)
 function setupAccessToken(siteid) {
     if (!siteid)
         return Promise.reject('axios2:参数错误')
+
+    lastSiteId = siteid
+
     return new Promise((resolve, reject) => {
         let cached = sessionStorage.getItem('access_token')
         if (cached) {
@@ -52,9 +65,9 @@ function setupAccessToken(siteid) {
             let now = parseInt(new Date / 1000)
             // 没有关闭页面，刷新或者重新进入页面
             if (access_token && expireAt > now) {
-                if (myRequestInterceptor)
-                    axios.interceptors.resquest.eject(myRequestInterceptor)
-                useRequestInterceptor(access_token)
+                if (myApiRequestInterceptor)
+                    axios.interceptors.resquest.eject(myApiRequestInterceptor)
+                useApiRequestInterceptor(access_token)
 
                 resolve(axios)
                 return
@@ -70,9 +83,9 @@ function setupAccessToken(siteid) {
             sessionStorage.setItem('access_token', `${access_token}:${expireAt}`)
 
             // 统一处理所有请求
-            if (myRequestInterceptor)
-                axios.interceptors.request.eject(myRequestInterceptor)
-            useRequestInterceptor(access_token)
+            if (myApiRequestInterceptor)
+                axios.interceptors.request.eject(myApiRequestInterceptor)
+            useApiRequestInterceptor(access_token)
 
             resolve(axios)
         }).catch(err => {

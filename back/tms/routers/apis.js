@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const Token = require('../token')
-const { ResultFault, Api } = require('../api')
+const { ResultFault, AccessTokenFault, Api } = require('../api')
 const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
 const Log = require('../../models/log')
 const { tms_get_server } = require('../../tms/utilities')
@@ -53,7 +53,7 @@ router.all('*', async (req, res) => {
 
     let aResult = await Token.fetch(access_token)
     if (false === aResult[0]) {
-        res.json(new ResultFault(aResult[1]))
+        res.json(new AccessTokenFault(aResult[1]))
         return
     }
     let client = aResult[1]
