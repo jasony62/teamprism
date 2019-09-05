@@ -3,16 +3,7 @@
         <div>{{app.title}}</div>
         <div>Repos</div>
         <van-tabs v-model="activeName" swipeable @change="changeRouter(activeName)">
-            <van-tab name="record" title="Go to Record">
-                <router-view :app="app" :user="user"></router-view>
-            </van-tab>
-            <van-tab name="cowork" title="Go to Cowork">
-                <router-view :app="app" :user="user"></router-view>
-            </van-tab>
-            <van-tab name="remark" title="Go to Remark">
-                <router-view :app="app" :user="user"></router-view>
-            </van-tab>
-            <van-tab name="topic" title="Go to topic">
+            <van-tab v-for="tab in tabs" :key="tab" :title="tab.title" :name="tab.value">
                 <router-view :app="app" :user="user"></router-view>
             </van-tab>
         </van-tabs>
@@ -35,8 +26,24 @@ export default {
     props: ['app', 'user'],
     data() {
         return {
-            activeName: "cowork"
+            tabs: [{
+                title: '问题',
+                value: 'record'
+            },{
+                title: '答案',
+                value: 'cowork'
+            },{
+                title: '评论',
+                value: 'remark'
+            },{
+                title: '专题',
+                value: 'topic'
+            }],
+            activeName: "record"
         }
+    },
+    mounted(){
+        this.$router.push(this.activeName)
     },
     methods: {
         changeRouter: function(name) {
@@ -45,3 +52,7 @@ export default {
     }
 }
 </script>
+
+<style >
+
+</style>
