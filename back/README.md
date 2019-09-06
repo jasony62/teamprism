@@ -20,6 +20,15 @@ server {
         location /ue/matter/enroll/ {
             proxy_pass http://localhost:3000/ue/matter/enroll/main.html#;
         }
+        location /ue/matter/article/ {
+            proxy_pass http://localhost:3000/ue/matter/article/main.html#;
+        }
+        location /ue/matter/channel/ {
+            proxy_pass http://localhost:3000/ue/matter/channel/main.html#;
+        }
+        location /ue/matter/link/ {
+            proxy_pass http://localhost:3000/ue/matter/link/main.html#;
+        }
         ...
     }
 ```
