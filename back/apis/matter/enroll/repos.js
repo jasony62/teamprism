@@ -420,7 +420,6 @@ class Repos extends Base {
                     }
                 }
                 rawData.data = processedData
-                console.log(processedData)
 
                 if (Object.keys(aCoworkState).length > 0) {
                     rawData.coworkState = aCoworkState
