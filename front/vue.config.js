@@ -29,6 +29,27 @@ module.exports = {
             filename: "./matter/enroll/main.html",
             title: "记录活动",
             chunks: ["chunk-vendors", "chunk-common", "matter.enroll"]
+        },
+        "matter.article": {
+            entry: "src/ue/matter/article/main.js",
+            template: "public/index.html",
+            filename: "./matter/article/main.html",
+            title: "单图文",
+            chunks: ["chunk-vendors", "chunk-common", "matter.article"]
+        },
+        "matter.channel": {
+            entry: "src/ue/matter/channel/main.js",
+            template: "public/index.html",
+            filename: "./matter/channel/main.html",
+            title: "频道",
+            chunks: ["chunk-vendors", "chunk-common", "matter.channel"]
+        },
+        "matter.link": {
+            entry: "src/ue/matter/link/main.js",
+            template: "public/index.html",
+            filename: "./matter/link/main.html",
+            title: "链接",
+            chunks: ["chunk-vendors", "chunk-common", "matter.link"]
         }
     },
     // enabled by default if the machine has more than 1 cores

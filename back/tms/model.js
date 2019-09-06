@@ -113,24 +113,44 @@ class Model {
 /**
  * 数据库表
  */
+// 数据库连接实例
+const DEBUG_MODE = Symbol('debug_mode')
+// 数据库连接实例
+const DB_INSTANCE = Symbol('db_instance')
 // 表名称字段
 const TABLE_NAME = Symbol('table_name')
 // 表ID字段
 const TABLE_ID = Symbol('table_id')
 // 是否使用自增ID
 const TABLE_AUTO_INC_ID = Symbol('table_auto_inc_id')
+/**
+ * 添加where条件
+ * @param {*} dbSqlAction 
+ * @param {*} whereParts 
+ */
+function _makeWhere(dbSqlAction, whereParts) {
+    if (whereParts && Array.isArray(whereParts)) {
+        whereParts.forEach(part => {
+            let [method, ...args] = part
+            if (dbSqlAction.where[method]) {
+                dbSqlAction.where[method].apply(dbSqlAction.where, args);
+            }
+        })
+    }
+    return dbSqlAction
+}
 
 class DbModel extends Model {
     /**
      * 
      * @param {String} table 表名称 
-     * @param {Boolean} autoIncId 是否为自增id 
      */
-    constructor(table, autoIncId = true, id = 'id') {
+    constructor(table, { autoIncId = true, id = 'id', debug = false } = {}) {
         super()
         this[TABLE_NAME] = table
         this[TABLE_ID] = id
         this[TABLE_AUTO_INC_ID] = autoIncId
+        this[DEBUG_MODE] = debug
     }
 
     get table() {
@@ -142,16 +162,55 @@ class DbModel extends Model {
     get isAutoIncId() {
         return this[TABLE_AUTO_INC_ID]
     }
-
-    async select(oOptions = {}) {
-        const fields = oOptions.fields || '*'
-
+    get debug() {
+        return this[DEBUG_MODE]
+    }
+    get execSqlStack() {
+        return this[DB_INSTANCE].execSqlStack
+    }
+    /**
+     * 返回符合条件的记录 
+     * 
+     * @param {Function} fnMapKey 若指定，返回结果为map，key由该方法生成
+     */
+    async select(fields, wheres, { limit = null, orderby = null, groupby = null, fnMapKey = false } = {}) {
         let db = await this.db()
         let dbSelect = db.newSelect(this.table, fields)
-        dbSelect.where.fieldMatch('1', '=', 1)
+
+        if (limit && Array.isArray(limit) && limit.length === 2)
+            dbSelect.limit(...limit)
+
+        if (orderby)
+            dbSelect.order(orderby)
+
+        if (groupby)
+            dbSelect.group(groupby)
+
+        _makeWhere(dbSelect, wheres)
+
         let rows = await dbSelect.exec()
+        if (rows && rows.length) {
+            if (fnMapKey && typeof fnMapKey === 'function') {
+                let map = new Map()
+                rows.forEach(r => {
+                    map.set(fnMapKey(r), r)
+                })
+                return map
+            }
+        }
 
         return rows
+    }
+    /**
+     * 返回1条记录 
+     */
+    async selectOne(fields, wheres) {
+        let db = await this.db()
+        let dbSelect = db.newSelectOne(this.table, fields)
+        _makeWhere(dbSelect, wheres)
+        let row = await dbSelect.exec()
+
+        return row
     }
 
     async insert(data) {
@@ -172,18 +231,25 @@ class DbModel extends Model {
     }
 
     async db() {
-        if (this._db)
-            return this._db
+        let db
+        if (this[DB_INSTANCE]) {
+            db = this[DB_INSTANCE]
+        } else {
+            db = await require('./db')({ debug: this.debug })
+            this[DB_INSTANCE] = db
+        }
 
-        const db = await require('./db')()
-        this._db = db
-
-        return this._db
+        return db
     }
+
     end(done) {
-        if (this._db) this._db.conn.end(done)
+        if (this[DB_INSTANCE] && this[DB_INSTANCE].conn)
+            this[DB_INSTANCE].conn.end(done)
+        else if (done)
+            done()
     }
 }
+
 module.exports = {
     Model,
     DbModel
