@@ -1,12 +1,16 @@
 const mysql = require("mysql")
 const fs = require("fs")
-
-function connect(readonly, options) {
-    if (!fs.existsSync(options.path)) {
+/**
+ * 连接数据库
+ * 
+ * @param {Boolean} readonly 
+ * @param {String} path 
+ */
+function connect(readonly, path) {
+    if (!fs.existsSync(path)) {
         return false
     }
-
-    const fileConfig = fs.readFileSync(options.path)
+    const fileConfig = fs.readFileSync(path)
     const oCusConfig = JSON.parse(fileConfig)
     let oConnConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
 
@@ -101,31 +105,34 @@ class WhereAssembler {
         return this.pieces.join(' and ');
     }
 }
-
 class SqlAction {
-
-    constructor(conn, table) {
-        this.conn = conn
+    constructor(db, table) {
+        this.db = db
+        this.conn = db.conn
         this.table = table
     }
 
     exec() {
         return new Promise((resolve, reject) => {
-            this.conn.query(this.sql, (error, result) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve(result)
-                }
-            })
+            if (this.db.debug) {
+                this.db.execSqlStack = this.sql
+                resolve([])
+            } else
+                this.conn.query(this.sql, (error, result) => {
+                    if (error) {
+                        reject(error)
+                    } else {
+                        resolve(result)
+                    }
+                })
         })
     }
 }
 
 class Insert extends SqlAction {
 
-    constructor(conn, table, data = {}) {
-        super(conn, table)
+    constructor(db, table, data = {}) {
+        super(db, table)
         this.data = data
     }
 
@@ -137,24 +144,28 @@ class Insert extends SqlAction {
     }
     exec(isAutoIncId = false) {
         return new Promise((resolve, reject) => {
-            this.conn.query(this.sql, (error, result) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    if (isAutoIncId)
-                        resolve(result.insertId)
-                    else
-                        resolve(result.affectedRows)
-                }
-            })
+            if (this.db.debug) {
+                this.db.execSqlStack = this.sql
+                resolve()
+            } else
+                this.conn.query(this.sql, (error, result) => {
+                    if (error) {
+                        reject(error)
+                    } else {
+                        if (isAutoIncId)
+                            resolve(result.insertId)
+                        else
+                            resolve(result.affectedRows)
+                    }
+                })
         })
     }
 }
 
 class SqlActionWithWhere extends SqlAction {
 
-    constructor(conn, table) {
-        super(conn, table)
+    constructor(db, table) {
+        super(db, table)
     }
 
     get where() {
@@ -166,8 +177,8 @@ class SqlActionWithWhere extends SqlAction {
 
 class Delete extends SqlActionWithWhere {
 
-    constructor(conn, table) {
-        super(conn, table)
+    constructor(db, table) {
+        super(db, table)
     }
 
     get sql() {
@@ -178,8 +189,8 @@ class Delete extends SqlActionWithWhere {
 
 class Update extends SqlActionWithWhere {
 
-    constructor(conn, table, data = {}) {
-        super(conn, table)
+    constructor(db, table, data = {}) {
+        super(db, table)
         this.data = data
     }
 
@@ -191,53 +202,57 @@ class Update extends SqlActionWithWhere {
     }
     exec() {
         return new Promise((resolve, reject) => {
-            this.conn.query(this.sql, (error, result) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve(result.affectedRows)
-                }
-            })
+            if (this.db.debug) {
+                this.db.execSqlStack = this.sql
+                resolve(0)
+            } else
+                this.conn.query(this.sql, (error, result) => {
+                    if (error) {
+                        reject(error)
+                    } else {
+                        resolve(result.affectedRows)
+                    }
+                })
         })
     }
 }
 
 class Select extends SqlActionWithWhere {
 
-    constructor(conn, table, fields) {
-        super(conn, table)
+    constructor(db, table, fields) {
+        super(db, table)
         this.fields = fields
         this.groupBy = ''
         this.orderBy = ''
         this.limitVal = ''
     }
 
-    async group(group = null) {
+    group(group = null) {
         if (group && typeof group === 'string') {
             this.groupBy = ` GROUP BY ` + group
         }
     }
 
-    async order(order = null) {
+    order(order = null) {
         if (order && typeof order === 'string') {
             this.orderBy = ` ORDER BY ` + order
         }
     }
 
-    async limit(offset = null, limit = null) {
-        if ((typeof offset === 'number' && !isNaN(offset)) && (typeof limit === 'number' && !isNaN(limit))) {
-            this.limitVal = ` LIMIT ${offset},${limit}`
+    limit(offset = null, length = null) {
+        if ((typeof offset === 'number' && !isNaN(offset)) && (typeof length === 'number' && !isNaN(length))) {
+            this.limitVal = ` LIMIT ${offset},${length}`
         }
     }
 
     get sql() {
-        let sql = `select ${this.fields} from ${this.table} where ${this.where.sql}`
+        let sql = `SELECT ${this.fields} FROM ${this.table} WHERE ${this.where.sql}`
         if (this.groupBy)
-            sql += ` ${this.groupBy}`
+            sql += `${this.groupBy}`
         if (this.orderBy)
-            sql += ` ${this.orderBy}`
+            sql += `${this.orderBy}`
         if (this.limitVal)
-            sql += ` ${this.limitVal}`
+            sql += `${this.limitVal}`
         return sql
     }
 }
@@ -269,47 +284,84 @@ class SelectOneVal extends Select {
         })
     }
 }
+// 执行模式，debug=true连接数据库
+const DEBUG_MODE = Symbol('debug_mode')
+// 数据库连接
+const MYSQL_CONN = Symbol('mysql_conn')
+// 记录执行的SQL
+const EXEC_SQL_STACK = Symbol('exec_sql_stack')
+
 class Db {
-    constructor(conn) {
-        this.conn = conn;
+    constructor(conn, debug = false) {
+        this[MYSQL_CONN] = conn
+        this[DEBUG_MODE] = debug
+    }
+    get conn() {
+        return this[MYSQL_CONN]
+    }
+    get debug() {
+        return this[DEBUG_MODE]
+    }
+    set execSqlStack(sql) {
+        if (undefined === this[EXEC_SQL_STACK]) this[EXEC_SQL_STACK] = []
+        this[EXEC_SQL_STACK].push(sql)
+    }
+    get execSqlStack() {
+        return this[EXEC_SQL_STACK]
     }
 
-    static async build(readonly, options) {
-        let conn = await connect(readonly, options);
-        return new Db(conn)
+    static async build(readonly, path, debug) {
+        let conn
+        if (debug)
+            conn = null
+        else
+            conn = await connect(readonly, path);
+
+        return new Db(conn, debug)
+    }
+
+    end(done) {
+        if (this.conn)
+            this.conn.end(done)
+        else if (done)
+            done()
+        delete this[EXEC_SQL_STACK]
     }
 
     newInsert(table, data) {
-        return new Insert(this.conn, table, data)
+        return new Insert(this, table, data)
     }
 
     newDelete(table) {
-        return new Delete(this.conn, table)
+        return new Delete(this, table)
     }
 
     newUpdate(table, data) {
-        return new Update(this.conn, table, data)
+        return new Update(this, table, data)
     }
 
     newSelect(table, fields) {
-        return new Select(this.conn, table, fields)
+        return new Select(this, table, fields)
     }
 
     newSelectOne(table, fields) {
-        return new SelectOne(this.conn, table, fields)
+        return new SelectOne(this, table, fields)
     }
 
     newSelectOneVal(table, fields) {
-        return new SelectOneVal(this.conn, table, fields)
+        return new SelectOneVal(this, table, fields)
     }
 }
 
-module.exports = async function(readonly = false, options = {
-    path: process.cwd() + "/cus/db.json"
-}) {
+module.exports = async function({
+    readonly = false,
+    path = process.cwd() + "/cus/db.json",
+    debug = false
+} = {}) {
     try {
-        return Db.build(readonly, options);
+        let db = Db.build(readonly, path, debug)
+        return db
     } catch (err) {
         return false
     }
-};
+}

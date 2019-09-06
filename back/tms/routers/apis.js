@@ -88,6 +88,7 @@ router.all('*', async (req, res) => {
         res.json(result)
     } catch (err) {
         res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))
+        console.log(err)
     }
 })
 

@@ -7,6 +7,13 @@ module.exports = {
                 'css-loader',
                 'sass-loader'
             ]
+        }, {
+            test: /\.less$/,
+            use: [
+                'vue-style-loader',
+                'css-loader',
+                'less-loader'
+            ]
         }]
     }
 }
