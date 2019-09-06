@@ -1,9 +1,6 @@
-import { mount, createLocalVue } from "@vue/test-utils"
-import {Tab, Tabs} from "Vant"
-import ReposVue from "@/ue/matter/enroll/sheets/Repos"
+import { shallowMount } from "@vue/test-utils"
 
-const localVue = createLocalVue()
-localVue.use(Tabs).use(Tab)
+import ReposVue from "@/ue/matter/enroll/sheets/Repos"
 
 describe("ue", () => {
     describe("matter", () => {
@@ -11,7 +8,7 @@ describe("ue", () => {
             describe("sheets", () => {
                 describe("repos.js", () => {
                     it("点击后，当前路由、activeName是否改变", ()=> {
-                        const wrapper = mount(ReposVue);
+                        const wrapper = shallowMount(ReposVue);
 
                         //1、获得点击的按钮
                         //2、触发点击事件
