@@ -207,7 +207,6 @@ class Repos extends Base {
         modelRec.end()
         return new ResultData(oResult)
     }
-    
     /**
      * 返回指定活动的填写记录的共享内容
      * 答案视图
