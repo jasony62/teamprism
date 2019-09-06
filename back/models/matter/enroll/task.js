@@ -5,7 +5,7 @@ const { tms_object_merge, tms_array_search, getDeepValue } = require('../../../t
 const TYPENAMEZH = {'baseline' : '目标', 'question' : '提问', 'answer' : '回答', 'vote' : '投票', 'score' : '打分'}
 
 class Task extends DbModel {
-	constructor(oApp = null) {
+	constructor(oApp) {
         super()
         this._oApp = oApp
     }
@@ -148,6 +148,6 @@ class Task extends DbModel {
     }
 }
 
-module.exports = function () {
-    return new Task()
+module.exports = function (oApp = null) {
+    return new Task(oApp)
 }

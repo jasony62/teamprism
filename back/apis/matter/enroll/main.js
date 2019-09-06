@@ -9,24 +9,6 @@ class Main extends Base {
         super(...args)
     }
     /**
-     * 在调用方法前被执行的公共方法
-     */
-    async tmsBeforeEach() {
-        let { app } = this.request.query
-        if (!app)
-            return new ResultFault(`参数错误`)
-
-        let modelApp = new Enroll()
-        const oApp = await modelApp.byId(app)
-        modelApp.end()
-        if (!oApp || oApp.state !== 1)
-            return new ResultFault(`数据错误`)
-
-        this.app = oApp
-
-        return true
-    }
-    /**
      * 获得指定记录活动的进入规则以及当前用户的匹配情况
      */
     async entryRule() {

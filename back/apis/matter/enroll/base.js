@@ -1,19 +1,38 @@
 const { Api, ResultData, ResultObjectNotFound } = require('../../../tms/api')
 const User = require('../../../models/matter/enroll/user')
+const Enroll = require('../../../models/matter/enroll')
 
 class Base extends Api {
     constructor(...args) {
         super(...args)
+	}
+	/**
+     * 在调用方法前被执行的公共方法
+     */
+    async tmsBeforeEach() {
+        let { app } = this.request.query
+        if (!app)
+            return new ResultFault(`参数错误`)
+
+        let modelApp = new Enroll()
+        const oApp = await modelApp.byId(app)
+        modelApp.end()
+        if (!oApp || oApp.state !== 1)
+            return new ResultFault(`数据错误`)
+
+        this.app = oApp
+
+        return true
     }
     /**
 	 * 获得当前用户的完整信息
 	 * 1、活动中指定的用户昵称
 	 * 2、用户在活动中所属的分组
 	 */
-    async getUser(oApp, oEnrolledData = null) {
+    async getUser(oEnrolledData = null) {
         let who = await this.client.data
 		let modelUsr = new User()
-		let oUser = await modelUsr.detail(oApp, who, oEnrolledData)
+		let oUser = await modelUsr.detail(this.app, who, oEnrolledData)
 
         modelUsr.end()
 		return oUser

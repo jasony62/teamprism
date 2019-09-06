@@ -5,6 +5,8 @@ const Enroll = require('../../../models/matter/enroll')
 const Record = require('../../../models/matter/enroll/record')
 const Data = require('../../../models/matter/enroll/data')
 const Task = require('../../../models/matter/enroll/task')
+// const Tag2 = require('../../../models/matter/enroll/tag2')
+// const Assoc = require('../../../models/matter/enroll/assoc')
 
 class Repos extends Base {
     constructor(...args) {
@@ -14,14 +16,7 @@ class Repos extends Base {
      * 获得活动中作为内容分类目录使用的题目
      */
     async dirSchemasGet() {
-        let { app } = this.request.query
-        let modelApp = new Enroll()
-        let oApp = await modelApp.byId(app, {'cascaded' : 'N', 'fields' : 'id,state,data_schemas'})
-        modelApp.end()
-        if (oApp === false || oApp.state != '1') {
-            return new ResultObjectNotFound()
-        }
-
+        let oApp = this.app
         let dirSchemas = [] // 作为分类的题目
         let oSchemasById = {}
         let dataSchemasKeys = Object.keys(oApp.dataSchemas)
@@ -112,20 +107,16 @@ class Repos extends Base {
      * 返回指定活动的填写记录的共享内容
      */
     async recordList() {
-        let {app, page, size} = this.request.query
-        let modelApp = new Enroll()
-        let oApp = await modelApp.byId(app, {'cascaded' : 'N'})
-        if (false === oApp || oApp.state != '1') {
-            return new ResultObjectNotFound()
-        }
+        let { page, size} = this.request.query
         if (!page || !size) {
             page = 1
             size = 30
         }
-
-        let oUser = await this.getUser(oApp)
+        
+        let oApp = this.app
+        let oUser = await this.getUser()
         // 填写记录过滤条件
-        let oPosted = this.request.body
+        let oPosted = this.request.body ? this.request.body : {}
         // 填写记录过滤条件
         let oOptions = {}
         oOptions.page = page
@@ -168,33 +159,32 @@ class Repos extends Base {
 
         /* 指定了分组过滤条件 */
         if (oPosted.userGroup)
-            oCriteria.record.group_id = $oPosted.userGroup
+            oCriteria.record.group_id = oPosted.userGroup
 
         /* 记录的创建人 */
         if (oPosted.mine && oPosted.mine === 'creator') {
-            oCriteria.record.userid = $oUser.uid
+            oCriteria.record.userid = oUser.uid
         } else if (oPosted.mine && oPosted.mine === 'favored') {
             // 当前用户收藏
             oCriteria.record.favored = true
         }
         /* 记录的表态 */
         if (oPosted.agreed && oPosted.agreed.toLowerCase() === 'all')
-            oCriteria.record.agreed = $oPosted.agreed
+            oCriteria.record.agreed = oPosted.agreed
             
         /* 记录的标签 */
         if (oPosted.tags)
-            $oCriteria.record.tags = $oPosted.tags
+            oCriteria.record.tags = oPosted.tags
 
         if (oPosted.data)
             oCriteria.data = oPosted.data
 
         /* 答案的筛选 */
         if (oPosted.coworkAgreed && oPosted.coworkAgreed.toLowerCase() === 'all') {
-            for (let i = 0; i < oApp.dynaDataSchemas.length; i++) {
-                let oSchema = oApp.dynaDataSchemas[i]
+            for (let oSchema of oApp.dynaDataSchemas) {
                 if (oSchema.cowork && oSchema.cowork === 'Y') {
                     oCriteria.cowork = {}
-                    oCriteria.cowork.agreed = $oPosted.coworkAgreed
+                    oCriteria.cowork.agreed = oPosted.coworkAgreed
                     break
                 }
             }
@@ -214,23 +204,109 @@ class Repos extends Base {
         //     modelEvent.searchRecord(oApp, rest['search'], oUser)
         // }
 
-        modelApp.end()
         modelRec.end()
+        return new ResultData(oResult)
+    }
+    
+    /**
+     * 返回指定活动的填写记录的共享内容
+     * 答案视图
+     */
+    async coworkDataList() {
+        let { page, size} = this.request.query
+        let oApp = this.app
+        if (!page || !size) {
+            page = 1
+            size = 30
+        }
+        
+        let coworkSchemaIds = [];
+        for (const k in oApp.dynaDataSchemas) {
+            let oSchema = oApp.dynaDataSchemas[k]
+            if (getDeepValue(oSchema, 'cowork') === 'Y') {
+                coworkSchemaIds.push(oSchema.id)
+            }
+        }
+        if (coworkSchemaIds.length === 0) {
+            return new ResultFault('活动中没有协作题')
+        }
+
+        let oUser = await this.getUser()
+        // 填写记录过滤条件
+        let oOptions = {page : page, size : size}
+        oOptions.regardRemarkRoundAsRecordRound = true // 将留言的轮次作为记录的轮次
+
+        let oPosted = this.request.body ? this.request.body : {}
+        if (oPosted.orderby) {
+            switch (oPosted.orderby) {
+            case 'earliest':
+                oOptions.orderby = ['submit_at asc']
+                break
+            case 'lastest':
+                oOptions.orderby = ['submit_at']
+                break
+            case 'mostvoted':
+                oOptions.orderby = ['vote_num', 'submit_at']
+                break
+            case 'mostliked':
+                oOptions.orderby = ['like_num', 'submit_at']
+                break
+            case 'agreed':
+                oOptions.orderby = ['agreed', 'submit_at']
+                break
+            }
+        }
+
+        let oCriteria = {}
+        if (oPosted.keyword) oCriteria.keyword = oPosted.keyword
+        // 按指定题的值筛选
+        if (oPosted.data) oCriteria.data = oPosted.data
+        //对答案得筛选
+        oCriteria.recordData = {}
+        oCriteria.recordData.rid = oPosted.rid ? oPosted.rid : 'all'
+        /* 指定了分组过滤条件 */
+        if (oPosted.userGroup)
+            oCriteria.recordData.group_id = oPosted.userGroup
+
+        /* 答案的创建人 */
+        if (oPosted.mine && oPosted.mine === 'creator')
+            oCriteria.recordData.userid = oUser.uid
+
+        /* 答案的表态 */
+        if (oPosted.agreed && oPosted.agreed.toLowerCase() !== 'all')
+            oCriteria.recordData.agreed = oPosted.agreed
+
+        // 查询结果
+        let modelRecDat = new Data(oApp)
+        let oResult = await modelRecDat.coworkDataByApp(oOptions, oCriteria, oUser)
+        // 处理数据
+        if (oResult.recordDatas)
+            await this._processDatas(oApp, oUser, oResult.recordDatas, 'coworkDataList')
+
+        // 记录搜索事件
+        // if (oPosted.keyword) {
+        //     let rest = this.model('matter\enroll\search').addUserSearch(oApp, oUser, oPosted.keyword);
+        //     // 记录日志
+        //     this.model('matter\enroll\event').searchRecord(oApp, rest['search'], oUser);
+        // }
+
+        modelRecDat.end()
         return new ResultData(oResult)
     }
     /**
      * 
      */
     async _processDatas(oApp, oUser, rawDatas, processType = 'recordList', voteRules = null) {
-        let modelData = new Data()
         if (oApp.voteConfig) {
             var modelTask = new Task(oApp)
         }
         /* 是否设置了编辑组 */
         let oEditorGrp = await this.getEditorGroup(oApp)
-
-        for (let i = 0; i < rawDatas.length; i++) {
-            let rawData = rawDatas[i]
+        
+        let modelData = new Data()
+        // let modelTag = new Tag2()
+        // let modelAss = new Assoc()
+        for (let rawData of rawDatas) {
             /* 获取记录的投票信息 */
             let aVoteRules
             if (oApp.voteConfig) {
@@ -244,11 +320,10 @@ class Repos extends Base {
             let recordDirs = []
             if (rawData.data) {
                 let processedData = {}
-                for (let ddi = 0; i < oApp.dynaDataSchemas.length; i++) {
-                    let oSchema = oApp.dynaDataSchemas[i]
+                for (let oSchema of oApp.dynaDataSchemas) {
                     let schemaId = oSchema.id
                     // 分类目录
-                    if (oSchema.asdir && oSchema.asdir === 'Y' && oSchema.ops && oSchema.ops.length && rawData.data[schemaId]) {
+                    if (getDeepValue(oSchema, 'asdir') === 'Y' && oSchema.ops && oSchema.ops.length && rawData.data[schemaId]) {
                         oSchema.ops.forEach((op) => {
                             if (op.v === rawData.data[schemaId]) {
                                 recordDirs.push(op.l)
@@ -256,81 +331,80 @@ class Repos extends Base {
                         })
                     }
                     /* 清除非共享数据 */
-                    if (!oSchema.shareable || oSchema.shareable !== 'Y') {
+                    if (getDeepValue(oSchema, 'shareable') !== 'Y') {
                         continue
                     }
                     // 过滤空数据
-                    let rawDataVal = await getDeepValue(rawData.data, schemaId, null)
+                    let rawDataVal = getDeepValue(rawData.data, schemaId, null)
                     if (null === rawDataVal) {
                         continue
                     }
                     // 选择题题目可见性规则
-                    if (oSchema.visibility && oSchema.visibility.rules) {
+                    if (getDeepValue(oSchema, "visibility.rules")) {
                         let checkSchemaVisibility = true;
-                        Object.keys(oSchema.visibility.rules).forEach ((k) => {
+                        for (let k in oSchema.visibility.rules) {
                             let oRule = oSchema.visibility.rules[k]
                             if (schemaId.indexOf('member.extattr') === 0) {
                                 let memberSchemaId = schemaId.replace('member.extattr.', '')
-                                if (!rawData.data.member.extattr[memberSchemaId] || (rawData.data.member.extattr[$memberSchemaId] !== oRule.op && !rawData.data.member.extattr[memberSchemaId])) {
+                                if (!rawData.data.member.extattr[memberSchemaId] || (rawData.data.member.extattr[memberSchemaId] !== oRule.op && !rawData.data.member.extattr[memberSchemaId])) {
                                     checkSchemaVisibility = false
                                 }
                             } else if (!rawData.data[oRule.schema] || (rawData.data[oRule.schema] !== oRule.op && !rawData.data[oRule.schema][oRule.op])) {
                                 checkSchemaVisibility = false
                             }
-                        })
+                        }
                         if (checkSchemaVisibility === false) {
                             continue
                         }
                     }
 
                     /* 协作填写题 */
-                    if (await getDeepValue(oSchema, 'cowork') === 'Y') {
+                    if (getDeepValue(oSchema, 'cowork') === 'Y') {
                         if (processType === 'recordByTopic') {
-                            // $items = $modelData->getCowork($rawData->enroll_key, $schemaId, ['excludeRoot' => true, 'agreed' => ['Y', 'A'], 'fields' => 'id,agreed,like_num,nickname,value']);
-                            // $aCoworkState[$schemaId] = (object) ['length' => count($items)];
-                            // $processedData->{$schemaId} = $items;
+                            // let items = modelData.getCowork(rawData.enroll_key, schemaId, {'excludeRoot' : true, 'agreed' : ['Y', 'A'], 'fields' : 'id,agreed,like_num,nickname,value'})
+                            // aCoworkState[schemaId] = {'length' : items.length}
+                            // processedData[schemaId] = items
                         } else if (processType === 'coworkDataList') {
-                            // $item = new \stdClass;
-                            // $item->id = $rawData->data_id;
-                            // $item->value = $this->replaceHTMLTags($rawData->value);
-                            // $this->setDeepValue($processedData, $schemaId, [$item]);
-                            // unset($rawData->value);
+                            let item = {}
+                            item.id = rawData.data_id;
+                            item.value = replaceHTMLTags(rawData.value);
+                            processedData[schemaId] = [item]
+                            delete rawData.value
                         } else {
                             let aOptions = {'fields' : 'id', 'agreed' : ['Y', 'A']}
                             let countItems = await modelData.getCowork(rawData.enroll_key, schemaId, aOptions)
                             aCoworkState[schemaId] = {'length' : countItems.length}
                         }
-                    } else if (await getDeepValue(oSchema, 'type') === 'multitext') {
+                    } else if (getDeepValue(oSchema, 'type') === 'multitext') {
                         let newData = [];
-                        for (let rdvi = 0; rdvi < rawDataVal.length; rdvi++) {
-                            let val = rawDataVal[rdvi]
+                        for (let val of rawDataVal) {
                             let val2 = {}
                             val2.id = val.id
-                            val2.value = await replaceHTMLTags(val.value)
+                            val2.value = replaceHTMLTags(val.value)
                             newData.push(val2)
                         }
                         processedData[schemaId] = newData
-                    } else if (await getDeepValue(oSchema, 'type') === 'single') {
+                    } else if (getDeepValue(oSchema, 'type') === 'single') {
                         oSchema.ops.forEach ((val) => {
                             if (val.v === rawDataVal) {
                                 processedData[schemaId] = val.l
                             }
                         })
-                    } else if (await getDeepValue(oSchema, 'type') === 'score') {
+                    } else if (getDeepValue(oSchema, 'type') === 'score') {
                         let ops = {}
                         oSchema.ops.forEach ((val) => {
                             ops[val.v] = val.l
                         })
                         let newData = []
-                        Object.keys(rawDataVal).forEach ((key) => {
+                        for (let key in rawDataVal) {
                             let val = rawDataVal[key]
                             let data2 = {}
                             data2.title = ops[key]
                             data2.score = val
                             newData.push(data2)
-                        })
+                        }
                         processedData[schemaId] = newData
-                    } else if (await getDeepValue(oSchema, 'type') === 'multiple') {
+                    } else if (getDeepValue(oSchema, 'type') === 'multiple') {
                         let rawDataVal2 = rawDataVal.split(',')
                         let ops = {}
                         oSchema.ops.forEach ((val) => {
@@ -346,6 +420,7 @@ class Repos extends Base {
                     }
                 }
                 rawData.data = processedData
+                console.log(processedData)
 
                 if (Object.keys(aCoworkState).length > 0) {
                     rawData.coworkState = aCoworkState
@@ -364,28 +439,28 @@ class Repos extends Base {
                 /* 获取记录的投票信息 */
                 if (aVoteRules && Object.keys(aVoteRules).length > 0) {
                     // let oVoteResult = {}
-                    // foreach ($aVoteRules as $schemaId => $oVoteRule) {
-                    //     if ($processType === 'coworkDataList') {
+                    // foreach (aVoteRules as schemaId => oVoteRule) {
+                    //     if (processType === 'coworkDataList') {
                     //         continue;
-                    //     } else if ($processType === 'recordByTopic') {
-                    //         if ($this->await getDeepValue($oVoteRule->schema, 'cowork') === 'Y') {continue;}
-                    //         $oRecData = $modelData->byRecord($rawData->enroll_key, ['schema' => $schemaId, 'fields' => 'id,vote_num']);
-                    //         if ($oRecData) {
-                    //             $vote_at = (int) $modelData->query_val_ss(['vote_at', 'xxt_enroll_vote', ['rid' => $oApp->appRound->rid, 'data_id' => $oRecData->id, 'state' => 1, 'userid' => $oUser->uid]]);
-                    //             $oRecData->vote_at = $vote_at;
-                    //             $oRecData->state = $oVoteRule->state;
-                    //             $oVoteResult->{$schemaId} = $oRecData;
+                    //     } else if (processType === 'recordByTopic') {
+                    //         if (this.getDeepValue(oVoteRule->schema, 'cowork') === 'Y') {continue;}
+                    //         oRecData = modelData->byRecord(rawData->enroll_key, ['schema' => schemaId, 'fields' => 'id,vote_num']);
+                    //         if (oRecData) {
+                    //             vote_at = (int) modelData->query_val_ss(['vote_at', 'xxt_enroll_vote', ['rid' => oApp->appRound->rid, 'data_id' => oRecData->id, 'state' => 1, 'userid' => oUser->uid]]);
+                    //             oRecData->vote_at = vote_at;
+                    //             oRecData->state = oVoteRule->state;
+                    //             oVoteResult->{schemaId} = oRecData;
                     //         }
                     //     } else {
-                    //         $oVoteResult = new \stdClass;
-                    //         if ($this->await getDeepValue($oVoteRule->schema, 'cowork') === 'Y') {continue;}
-                    //         $oRecData = $modelData->byRecord($rawData->enroll_key, ['schema' => $schemaId, 'fields' => 'id,vote_num']);
-                    //         if ($oRecData) {
-                    //             $oVoteResult->{$schemaId} = $oRecData;
+                    //         oVoteResult = new \stdClass;
+                    //         if (this->getDeepValue(oVoteRule->schema, 'cowork') === 'Y') {continue;}
+                    //         oRecData = modelData->byRecord(rawData->enroll_key, ['schema' => schemaId, 'fields' => 'id,vote_num']);
+                    //         if (oRecData) {
+                    //             oVoteResult->{schemaId} = oRecData;
                     //         }
                     //     }
                     // }
-                    // $rawData->voteResult = $oVoteResult;
+                    // rawData->voteResult = oVoteResult;
                 }
             }
             /* 设置昵称 */
@@ -395,54 +470,50 @@ class Repos extends Base {
             delete rawData.verified
 
             /* 是否已经被当前用户收藏 */
-            // if ($processType === 'recordList' || $processType === 'recordByTopic') {
-            //     if (!empty($oUser->unionid) && $rawData->favor_num > 0) {
-            //         $q = ['id', 'xxt_enroll_record_favor', ['record_id' => $rawData->id, 'favor_unionid' => $oUser->unionid, 'state' => 1]];
-            //         if ($modelData->query_obj_ss($q)) {
-            //             $rawData->favored = true;
-            //         }
-            //     }
-            // }
+            if (processType === 'recordList' || processType === 'recordByTopic') {
+                if (oUser.unionid && rawData.favor_num > 0) {
+                    let db = await modelData.db()
+                    let dbSelect = db.newSelectOne('xxt_enroll_record_favor', 'id')
+                    dbSelect.where.and(['record_id = ' + rawData.id, "favor_unionid = '" + oUser.unionid + "'", 'state = 1'])
+                    let rst = await dbSelect.exec()
+                    if (rst)
+                        rawData.favored = true
+                }
+            }
             /* 记录的标签 */
-            // if ($processType === 'recordList') {
-            //     if (!isset($modelTag)) {
-            //         $modelTag = $this->model('matter\enroll\tag2');
-            //     }
-            //     $oRecordTags = $modelTag->byRecord($rawData, $oUser, ['UserAndPublic' => empty($oPosted->favored)]);
-            //     if (!empty($oRecordTags->user)) {
-            //         $rawData->userTags = $oRecordTags->user;
-            //     }
-            //     if (!empty($oRecordTags->public)) {
-            //         $rawData->tags = $oRecordTags->public;
-            //     }
-            // }
+            if (processType === 'recordList') {
+                // let oRecordTags = await modelTag.byRecord(rawData, oUser, {'UserAndPublic' : (oPosted.favored)})
+                // if (oRecordTags.user)
+                //     rawData.userTags = oRecordTags.user
+                // if (oRecordTags.public)
+                //     rawData.tags = oRecordTags.public;
+            }
             /* 答案关联素材 */
-            // if ($processType === 'coworkDataList') {
-            //     if (!isset($modelAss)) {
-            //         $modelAss = $this->model('matter\enroll\assoc');
-            //         $oAssocsOptions = [
-            //             'fields' => 'id,assoc_mode,assoc_num,first_assoc_at,last_assoc_at,entity_a_id,entity_a_type,entity_b_id,entity_b_type,public,assoc_text,assoc_reason',
-            //         ];
-            //     }
-            //     $entityA = new \stdClass;
-            //     $entityA->id = $rawData->data_id;
-            //     $entityA->type = 'data';
-            //     $oAssocsOptions['entityA'] = $entityA;
-            //     $record = new \stdClass;
-            //     $record->id = $rawData->record_id;
-            //     $oAssocs = $modelAss->byRecord($record, $oUser, $oAssocsOptions);
-            //     if (count($oAssocs)) {
-            //         foreach ($oAssocs as $oAssoc) {
-            //             $modelAss->adapt($oAssoc);
-            //         }
-            //     }
-            //     $rawData->oAssocs = $oAssocs;
-            //     //
-            //     $rawData->id = $rawData->record_id;
-            // }
+            if (processType === 'coworkDataList') {
+                // let oAssocsOptions = {
+                //     'fields' : 'id,assoc_mode,assoc_num,first_assoc_at,last_assoc_at,entity_a_id,entity_a_type,entity_b_id,entity_b_type,public,assoc_text,assoc_reason'
+                // }
+                // let entityA = {}
+                // entityA.id = rawData.data_id
+                // entityA.type = 'data'
+                // oAssocsOptions.entityA = entityA
+                // let record = {}
+                // record.id = rawData.record_id
+                // let oAssocs = await modelAss.byRecord(record, oUser, oAssocsOptions)
+                // if (oAssocs.length) {
+                //     for (let oAssoc of oAssocs) {
+                //         await modelAss.adapt(oAssoc)
+                //     }
+                // }
+                // rawData.oAssocs = oAssocs
+                // //
+                // rawData.id = rawData.record_id
+            }
         }
 
         modelData.end()
+        // modelTag.end()
+        // modelAss.end()
         if (oApp.voteConfig) {
             modelTask.end()
         }

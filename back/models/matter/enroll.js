@@ -108,11 +108,12 @@ class Enroll extends DbModel {
                 } else {
                     /* 应用的动态题目 */
                     let oApp2 =  {'id' : oApp.id, 'appRound' : oApp.appRound, 'dataSchemas' : oApp.dataSchemas, 'mission_id' : oApp.mission_id}
-                    let modelSch =new Schema()
-                    // oApp2 = await modelSch.setDynaSchemas(oApp2, aOptions.task ? aOptions.task : null);
+                    let modelSch =new Schema(oApp2)
+                    // oApp2 = await modelSch.setDynaSchemas(aOptions.task ? aOptions.task : null);
                     oApp.dynaDataSchemas = oApp2.dataSchemas;
                     /* 设置活动的动态选项 */
                     // oApp = await modelSch.setDynaOptions(oApp, oAppRnd);
+                    modelSch.end()
                 }
             } else {
                 oApp.dataSchemas = oApp.dynaDataSchemas = [];

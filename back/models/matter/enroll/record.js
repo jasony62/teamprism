@@ -1,4 +1,5 @@
 const { DbModel } = require('../../../tms/model')
+const { getDeepValue } = require('../../../tms/utilities')
 const Enroll = require('../../../models/matter/enroll')
 const Data = require('../../../models/matter/enroll/data')
 const Round = require('../../../models/matter/enroll/round')
@@ -85,7 +86,9 @@ class Record extends DbModel {
 	 * records 数据列表
 	 * total 数据总条数
 	 */
-	async byApp(oApp, oOptions = {}, oCriteria = {}, oUser = null) {
+	async byApp(oApp, oOptions = null, oCriteria = null, oUser = null) {
+		if (!oOptions) oOptions = {}
+		if (!oCriteria) oCriteria = {}
 		if (typeof oApp === "string") {
 			let modelEnroll = new Enroll()
 			oApp = await modelEnroll.byId(oApp, {'cascaded' : 'N'})
@@ -94,6 +97,7 @@ class Record extends DbModel {
 		if (false === oApp && !oApp.dynaDataSchemas) {
 			return false
 		}
+
 		let modelSchema = new Schema()
 		let aSchemasById = await modelSchema.asAssoc(oApp.dynaDataSchemas)
 		modelSchema.end()
@@ -159,7 +163,7 @@ class Record extends DbModel {
 		// 讨论状态的记录仅提交人，同组用户或超级用户可见
 		if (oUser) {
 			// 当前用户收藏的
-			if (oUser.unionid && oCriteria.record && oCriteria.record.favored) {
+			if (oUser.unionid && getDeepValue(oCriteria, "record.favored")) {
 				w += " and exists(select 1 from xxt_enroll_record_favor f where r.id=f.record_id and f.favor_unionid='" + oUser.unionid + "' and f.state=1)"
 			}
 			// 当前用户角色
@@ -184,54 +188,56 @@ class Record extends DbModel {
 		}
 
 		// 指定了记录数据过滤条件
-		if (oCriteria.data) {
-			let whereByData = ''
-			Object.keys(oCriteria.data).forEach( (k) => {
-				let v = oCriteria.data[k]
-				if (v && aSchemasById[k]) {
-					let oSchema = aSchemasById[k]
-					whereByData += ' and (';
-					if (oSchema.type === 'multiple') {
-						// 选项ID是否互斥，不存在，例如：v1和v11
-						let bOpExclusive = true
-						let strOpVals = ''
-						oSchema.ops.forEach ((op) => {
-							strOpVals += ',' + op.v
-						})
-						oSchema.ops.forEach ((op) => {
-							if (strOpVals.indexOf(op.v) !== -1) {
-								bOpExclusive = false
-							}
-						})
-						// 拼写sql
-						let v2 = v.split(',')
-						v2.forEach ((v2v, index) => {
-							if (index > 0) {
-								whereByData += ' and '
-							}
-							// 获得和题目匹配的子字符串
-							let dataBySchema = 'substr(substr(data,locate(\'"' + k + '":"\',data)),1,locate(\'"\',substr(data,locate(\'"' + k + '":"\',data)),' + (k.length + 5) + '))'
-							whereByData += '('
-							if (bOpExclusive) {
-								whereByData += dataBySchema + ' like \'%' + v2v + '%\''
-							} else {
-								whereByData += dataBySchema + ' like \'%"' + v2v + '"%\''
-								whereByData += ' or ' + dataBySchema + ' like \'%"' + v2v + ',%\''
-								whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + ',%\''
-								whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + '"%\''
-							}
-							whereByData += ')'
-						})
-					} else if (oSchema.type === 'single'){
-						whereByData += 'data like \'%"' + k + '":"' + v + '"%\''
-					} else {
-						whereByData += 'data like \'%"' + k + '":"%' + v + '%"%\''
-					}
-					whereByData += ')'
-				}
-			})
-			w += whereByData
-		}
+        if (getDeepValue(oCriteria, "data")) {
+            let whereByData = ''
+            for (let k in oCriteria.data) {
+                let v = oCriteria.data[k]
+                if (v && oSchemasById[k]) {
+                    let oSchema = oSchemasById[k]
+                    whereByData += ' and ('
+                    if (oSchema.type === 'multiple') {
+                        // 选项ID是否互斥，不存在，例如：v1和v11
+                        let bOpExclusive = true
+                        let strOpVals = ''
+                        for (let op of oSchema.ops) {
+                            strOpVals += ',' + op.v
+                        }
+                        for (let op of oSchema.ops) {
+                            if (-1 !== strOpVals.indexOf(op.v)) {
+                                bOpExclusive = false
+                                break
+                            }
+                        }
+                        // 拼写sql
+                        let v2 = v.split(',')
+                        for (let index in v2) {
+                            let v2v = v2[index]
+                            if (index > 0) {
+                                whereByData += ' and '
+                            }
+                            // 获得和题目匹配的子字符串
+                            let dataBySchema = 'substr(substr(r.data,locate(\'"' + k + '":"\',r.data)),1,locate(\'"\',substr(r.data,locate(\'"' + k + '":"\',r.data)),' + (k.length + 5) + '))'
+                            whereByData += '('
+                            if (bOpExclusive) {
+                                whereByData += dataBySchema + ' like \'%' + v2v + '%\''
+                            } else {
+                                whereByData += dataBySchema + ' like \'%"' + v2v + '"%\''
+                                whereByData += ' or ' + dataBySchema + ' like \'%"' + v2v + ',%\''
+                                whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + ',%\''
+                                whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + '"%\''
+                            }
+                            whereByData += ')'
+                        }
+                    } else if (oSchema.type === 'single'){
+                        whereByData += 'r.data like \'%"' + k + '":"' + v + '"%\''
+                    } else {
+                        whereByData += 'r.data like \'%"' + k + '":"%' + v + '%"%\''
+                    }
+                    whereByData += ')'
+                }
+            }
+            w += whereByData
+        }
 
 		// 指定了按关键字过滤
 		if (oOptions.keyword) {
@@ -264,7 +270,7 @@ class Record extends DbModel {
 		}
 
 		// 查询参数
-		let fields = ''
+		let fields
 		let table = "xxt_enroll_record r"
 		if (oOptions.fields) {
 			fields = oOptions.fields
@@ -275,7 +281,7 @@ class Record extends DbModel {
 		let q2 = {}
 		// 查询结果分页
 		if (oOptions.page && oOptions.size) {
-			q2.r = {'o' : (oOptions.page - 1) * oOptions.size, 'l' : oOptions.size}
+			q2.r = {'o' : (parseInt(oOptions.page) - 1) * parseInt(oOptions.size), 'l' : parseInt(oOptions.size)}
 		}
 
 		// 查询结果排序
@@ -325,7 +331,7 @@ class Record extends DbModel {
 					})
 					return sqls.join(',')
 				}
-				q2.o = await fnOrderBy(oOptions.orderby)
+				q2.o = fnOrderBy(oOptions.orderby)
 			}
 		} else {
 			q2.o = 'r.enroll_at desc'
@@ -375,16 +381,15 @@ class Record extends DbModel {
 			})
 		}
 		// 关联的分组题
-		let modelSchema = new Schema()
-		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema(oApp)
+		let modelSchema = new Schema(oApp)
+		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema()
 		modelSchema.end()
 		let aGroupsById = []; // 缓存分组数据
 		let aRoundsById = []; // 缓存轮次数据
 
-		let fnCheckSchemaVisibility = async (oSchemas, oRecordData) => {
+		let fnCheckSchemaVisibility = (oSchemas, oRecordData) => {
 			oSchemas.forEach( (oSchema) => {
-				for (let i = 0; i < oSchema.visibility.rules.length; i++) {
-					let oRule = oSchema.visibility.rules[i]
+				for (let oRule of oSchema.visibility.rules) {
 					if (oSchema.id.indexOf('member.extattr') === 0) {
 						let memberSchemaId = oSchema.id.replace('member.extattr.', '')
 						if (!oRecordData.member || !oRecordData.member.extattr || !oRecordData.member.extattr[memberSchemaId] || (oRecordData.member.extattr[memberSchemaId] !== oRule.op && !oRecordData.member.extattr[memberSchemaId])) {
@@ -480,7 +485,7 @@ class Record extends DbModel {
 						}
 						/* 根据题目的可见性处理数据 */
 						if (oRec.purpose && oRec.purpose === 'C' && visibilitySchemas.length > 0) {
-							await fnCheckSchemaVisibility(visibilitySchemas, oRec.data)
+							fnCheckSchemaVisibility(visibilitySchemas, oRec.data)
 						}
 					}
 				} else {
