@@ -7,6 +7,11 @@ const authRouter = require('./tms/routers/auth')
 const apiRouter = require('./tms/routers/apis')
 const wxRouter = require('./tms/routers/wx')
 
+// model别名
+global.requireModel = function(name) {
+    return require(`${__dirname}/models/${name}`)
+}
+
 const app = express()
 
 app.use(express.json())

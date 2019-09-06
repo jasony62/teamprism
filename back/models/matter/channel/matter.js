@@ -8,18 +8,18 @@ class Matter extends DbModel {
         super('xxt_channel_matter', { debug })
     }
     async _articleByIds(ids) {
-        let moArticle = require('../article')
+        let moArticle = this.model('matter/article')
         let articles = moArticle.byIds(ids, { fnMapKey: article => `article:${article.id}` })
         return articles
     }
-    async _enrollByIds(ids) {
-        let moEnroll = require('../enroll')
-        let enrolls = moEnroll.byIds(ids, { fnMapKey: article => `article:${article.id}` })
-        return enrolls
-    }
+    // async _enrollByIds(ids) {
+    //     let moEnroll = this.model('matter/enroll')
+    //     let enrolls = moEnroll.byIds(ids, { fnMapKey: article => `enroll:${article.id}` })
+    //     return enrolls
+    // }
     async _linkByIds(ids) {
-        let moLink = require('../link')
-        let links = moLink.byIds(ids, { fnMapKey: article => `article:${article.id}` })
+        let moLink = this.model('matter/link')
+        let links = moLink.byIds(ids, { fnMapKey: article => `link:${article.id}` })
         return links
     }
     /**
@@ -45,13 +45,12 @@ class Matter extends DbModel {
             })
             let matterTypes = Object.keys(chanMattersByType)
             let allTypedMatters = new Map()
-            matterTypes.forEach(mt => {
+            for (let mt of matterTypes) {
                 if (this[`_${mt}ByIds`]) {
-                    let typedMatters = this[`_${mt}ByIds`](chanMattersByType[mt])
+                    let typedMatters = await this[`_${mt}ByIds`](chanMattersByType[mt])
                     allTypedMatters = new Map([...allTypedMatters, ...typedMatters])
                 }
-            })
-
+            }
             chanMatters.forEach(cm => {
                 let typedMatter = allTypedMatters.get(`${cm.matter_type}:${cm.matter_id}`)
                 if (typedMatter)
@@ -63,7 +62,7 @@ class Matter extends DbModel {
     }
 }
 
-function create({ debug = true } = {}) {
+function create({ debug = false } = {}) {
     return new Matter({ debug })
 }
 

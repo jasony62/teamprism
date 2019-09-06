@@ -1,6 +1,5 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const Base = require('../base')
-const { Channel } = require('../../../models/matter/channel')
 
 class Main extends Base {
     constructor(...args) {
@@ -11,7 +10,7 @@ class Main extends Base {
         if (!app)
             return new ResultFault(`参数错误`)
 
-        let dbChannel = new Channel()
+        let dbChannel = this.model('matter/channel')
         const oChannel = await dbChannel.byId(app)
         dbChannel.end()
         if (!oChannel || oChannel.state !== 1)
@@ -28,10 +27,14 @@ class Main extends Base {
         return new ResultData(this.channel)
     }
     /**
-     * 
+     * 频道下的素材 
      */
     async mattersGet() {
+        let dbChanMatter = this.model('matter/channel/matter')
+        let matters = await dbChanMatter.byChannel(this.channel, { page: 1, size: 12 })
+        dbChanMatter.end()
 
+        return new ResultData(matters)
     }
 }
 

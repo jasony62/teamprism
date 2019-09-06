@@ -15,4 +15,13 @@ export default {
             })
         })
     },
+    mattersGet(channelId) {
+        return new Promise((resolve, reject) => {
+            axios.get(`/ue/api/matter/channel/mattersGet?app=${channelId}`).then(rst => {
+                resolve(rst.data.result)
+            }).catch(err => {
+                reject(err)
+            })
+        })
+    },
 }

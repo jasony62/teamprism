@@ -26,7 +26,7 @@
                     <div class="url" v-if="matter.url">
                         <a :href="matter.url" target="_self">阅读原文</a>
                     </div>
-                    <div class="channels" v-if="matter.channels.length">
+                    <div class="channels" v-if="matter.channels&&matter.channels.length">
                         <button
                             class="chanel"
                             v-for="c in matter.channels"

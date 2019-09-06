@@ -1,35 +1,19 @@
 <template>
-    <div id="link">
-        <div class="loading" v-if="loading">
-            <div>Loading...</div>
-        </div>
-        <div v-else>
-            <router-view :matter="matter" :user="user"></router-view>
-        </div>
-    </div>
+    <shell id="link" :site="site" :matter="matter" :user="user"></shell>
 </template>
 <script>
+import mixin from '@/ue/matter/_mixin/main'
 import apis from '@/apis/matter/link'
 
 export default {
-    data() {
-        return { loading: true, matter: { title: 'loading' }, user: {} }
-    },
-    mounted() {
-        this.$eventHub.$on('main-mounted', () => {
-            this.fetchApp()
-        })
-        this.$eventHub.$on('main-failed', () => {
-            this.loading = false
-        })
-    },
+    mixins: [mixin],
     methods: {
         async fetchApp() {
             let params = this.$route.params
             try {
                 if (params.appId) {
-                    let result = await apis.getApp(params.appId)
-                    this.matter = result
+                    let matter = await apis.getApp(params.appId)
+                    this.matter = matter
                 }
             } catch (e) {
                 this.$message({
