@@ -7,7 +7,6 @@ export default {
     data() {
         return {
             loading: true,
-            site: { name: 'sitesite', summary: 'summary summary' },
             matter: { title: 'loading' },
             user: {}
         }

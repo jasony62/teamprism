@@ -6,7 +6,7 @@ export default {
      */
     getSite(id) {
         return new Promise((resolve, reject) => {
-            axios.get(`/ue/api/site?site=${id}`).then(rst => {
+            axios.get(`/ue/api/site/get?site=${id}`).then(rst => {
                 resolve(rst.data.result)
             }).catch(err => {
                 reject(err)
