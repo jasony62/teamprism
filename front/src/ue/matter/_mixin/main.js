@@ -7,8 +7,8 @@ export default {
     data() {
         return {
             loading: true,
-            matter: { title: 'loading' },
-            user: {}
+            site: { name: 'loading' },
+            matter: { title: 'loading' }
         }
     },
     mounted() {

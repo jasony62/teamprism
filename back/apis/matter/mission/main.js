@@ -23,7 +23,16 @@ class Main extends Base {
      * 返回项目用户端视图数据
      */
     async get() {
-        return new ResultData(this.article)
+        let site
+        // 团队信息
+        let moSite = this.model('site')
+        site = await moSite.byId(this.mission.siteid, { fields: moSite.fields_ue })
+        if (false === site)
+            return new ResultObjectNotFound()
+
+        Object.assign(this.mission, { site })
+
+        return new ResultData(this.mission)
     }
 }
 

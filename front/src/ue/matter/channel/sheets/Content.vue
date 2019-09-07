@@ -1,23 +1,7 @@
 <template>
     <div id="content">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3 col-md-push-9 col-xs-12">
-                    <div class="qrcode hidden-xs hidden-sm">
-                        <canvas ref="matterQrcode"></canvas>
-                    </div>
-                </div>
-                <div class="matters col-md-9 col-md-pull-3 col-xs-12">
-                    <div class="media-list">
-                        <matter-item
-                            :matter="m"
-                            v-for="m in matters"
-                            :key="m.id"
-                            :click="gotoMatter(m)"
-                        ></matter-item>
-                    </div>
-                </div>
-            </div>
+        <div class="media-list">
+            <matter-item :matter="m" v-for="m in matters" :key="m.id" :click="gotoMatter(m)"></matter-item>
         </div>
     </div>
 </template>
@@ -48,11 +32,7 @@ export default {
             return this.matter.id
         }
     },
-    mounted() {
-        let QRCode = require('qrcode')
-        let canvas = this.$refs.matterQrcode
-        if (canvas) QRCode.toCanvas(canvas, location.href)
-    },
+    mounted() {},
     methods: {
         gotoMatter(oMatter) {}
     },
@@ -84,3 +64,8 @@ export default {
     }
 }
 </script>
+<style lang="less" scoped>
+.content {
+    background-color: #fff;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-    <skeleton id="channel" :site="site" :matter="matter" :user="user"></skeleton>
+    <skeleton id="channel" :site="site" :matter="matter"></skeleton>
 </template>
 <script>
 import mixin from '@/ue/matter/_mixin/main'
@@ -13,6 +13,7 @@ export default {
             try {
                 if (params.appId) {
                     let matter = await apis.getApp(params.appId)
+                    this.site = matter.site
                     this.matter = matter
                 }
             } catch (e) {
@@ -29,12 +30,3 @@ export default {
     }
 }
 </script>
-<style lang="less" scoped>
-@import '../../../assets/css/bootstrap.css';
-body {
-    height: 100%;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-</style>

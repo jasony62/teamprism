@@ -1,5 +1,5 @@
 <template>
-    <skeleton id="link" :site="site" :matter="matter" :user="user"></skeleton>
+    <skeleton id="link" :site="site" :matter="matter"></skeleton>
 </template>
 <script>
 import mixin from '@/ue/matter/_mixin/main'
@@ -29,11 +29,3 @@ export default {
     }
 }
 </script>
-<style lang="less" scoped>
-body {
-    height: 100%;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-</style>

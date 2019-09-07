@@ -7,12 +7,11 @@ class Main extends Base {
     }
     async tmsBeforeEach() {
         let { app } = this.request.query
-        if (!app)
-            return new ResultFault(`参数错误`)
+        if (!app) return new ResultFault(`参数错误`)
 
-        let dbChannel = this.model('matter/channel')
-        const oChannel = await dbChannel.byId(app)
-        dbChannel.end()
+        let moChannel = this.model('matter/channel')
+        const oChannel = await moChannel.byId(app)
+        moChannel.end()
         if (!oChannel || oChannel.state !== 1)
             return new ResultObjectNotFound()
 
@@ -23,7 +22,24 @@ class Main extends Base {
     /**
      * 
      */
-    get() {
+    async get() {
+        let site, mission
+        // 团队信息
+        let moSite = this.model('site')
+        site = await moSite.byId(this.channel.siteid, { fields: moSite.fields_ue })
+        if (false === site)
+            return new ResultObjectNotFound()
+
+        // 项目信息
+        if (this.channel.mission_id) {
+            let moMission = this.model('matter/mission')
+            mission = await moMission.byId(this.channel.mission_id, { fields: moMission.fields_ue })
+            if (false === mission)
+                return new ResultObjectNotFound()
+        }
+
+        Object.assign(this.channel, { site, mission })
+
         return new ResultData(this.channel)
     }
     /**
