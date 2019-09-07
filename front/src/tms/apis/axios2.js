@@ -4,8 +4,17 @@ class AccessToken {
     constructor(siteId) {
         this.siteId = siteId
     }
+    _store(item) {
+        sessionStorage.setItem('access_token', item)
+    }
+    _fetch() {
+        return sessionStorage.getItem('access_token')
+    }
+    _remove() {
+        sessionStorage.removeItem('access_token')
+    }
     getCached() {
-        let item = sessionStorage.getItem('access_token')
+        let item = this._fetch()
         if (item) {
             let [accessToken, expireAt] = item.split(':')
             if (expireAt * 1000 < new Date) {
@@ -16,6 +25,7 @@ class AccessToken {
         return false
     }
     refresh() {
+        let that = this
         let siteId = this.siteId
         return new Promise((resolve, reject) => {
             axios.get(`/ue/auth/token?site=${siteId}`).then((res) => {
@@ -23,7 +33,7 @@ class AccessToken {
                 // 记录过期时间
                 let expireAt = parseInt(new Date / 1000) + expire_in - 120
                 // 保留获取的数据
-                sessionStorage.setItem('access_token', `${accessToken}:${expireAt}`)
+                that._store(`${accessToken}:${expireAt}`)
                 resolve(accessToken)
             }).catch(err => {
                 reject(`axios2:${err}`)
@@ -51,7 +61,7 @@ function useApiRequestInterceptor() {
                             myAccessToken.refresh().then(accessToken => {
                                 config.params.access_token = accessToken
                                 resolve(config)
-                            }).catch(err => { reject(err) })
+                            }).catch(reject)
                         })
                     }
                 }
@@ -76,14 +86,14 @@ function useResponseInterceptor() {
                 switch (res.data.code) {
                     case 20001:
                         // 清除缓存的token
-                        sessionStorage.removeItem('access_token')
+                        myAccessToken._removeToken()
                         // 如何重发request？
                         return new Promise((resolve, reject) => {
                             myAccessToken.refresh().then(() => {
                                 axios.request(res.config).then(res => {
                                     resolve(res)
-                                }).catch(err => { reject(err) })
-                            }).catch(err => { reject(err) })
+                                }).catch(reject)
+                            }).catch(reject)
                         })
                     default:
                         return Promise.reject(res.data.msg)
