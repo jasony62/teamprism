@@ -1,21 +1,59 @@
 import axios from 'axios'
-/**
- * access_token无效
- */
-class AccessTokenFault {
-    constructor(msg) {
-        this.msg = msg
+
+class AccessToken {
+    constructor(siteId) {
+        this.siteId = siteId
+    }
+    getCached() {
+        let item = sessionStorage.getItem('access_token')
+        if (item) {
+            let [accessToken, expireAt] = item.split(':')
+            if (expireAt * 1000 < new Date) {
+                return false
+            }
+            return accessToken
+        }
+        return false
+    }
+    refresh() {
+        let siteId = this.siteId
+        return new Promise((resolve, reject) => {
+            axios.get(`/ue/auth/token?site=${siteId}`).then((res) => {
+                let { access_token: accessToken, expire_in } = res.data.result
+                // 记录过期时间
+                let expireAt = parseInt(new Date / 1000) + expire_in - 120
+                // 保留获取的数据
+                sessionStorage.setItem('access_token', `${accessToken}:${expireAt}`)
+                resolve(accessToken)
+            }).catch(err => {
+                reject(`axios2:${err}`)
+            })
+        })
     }
 }
+/**
+ * 处理所有请求
+ */
 let myApiRequestInterceptor
-// 给所有的请求都加上access_token
-function useApiRequestInterceptor(access_token) {
+
+function useApiRequestInterceptor() {
     if (!myApiRequestInterceptor) {
         myApiRequestInterceptor = axios.interceptors.request.use(config => {
             if (config) {
                 if (config.url.indexOf('/ue/api/') === 0) {
                     if (config.params === undefined) config.params = {}
-                    config.params.access_token = access_token
+                    // 检查token是否已经过期，如果过期，重新获取token
+                    let accessToken = myAccessToken.getCached()
+                    if (accessToken) {
+                        config.params.access_token = accessToken
+                    } else {
+                        return new Promise((resolve, reject) => {
+                            myAccessToken.refresh().then(accessToken => {
+                                config.params.access_token = accessToken
+                                resolve(config)
+                            }).catch(err => { reject(err) })
+                        })
+                    }
                 }
             }
             return config
@@ -26,7 +64,9 @@ function useApiRequestInterceptor(access_token) {
     }
 }
 
-// 处理所有的响应
+/**
+ * 处理所有的响应
+ */
 let myResponseInterceptor
 
 function useResponseInterceptor() {
@@ -35,8 +75,16 @@ function useResponseInterceptor() {
             if (res.data.code !== 0) {
                 switch (res.data.code) {
                     case 20001:
-                        // 如何进行重发？
-                        return Promise.reject(new AccessTokenFault(res.data.msg))
+                        // 清除缓存的token
+                        sessionStorage.removeItem('access_token')
+                        // 如何重发request？
+                        return new Promise((resolve, reject) => {
+                            myAccessToken.refresh().then(() => {
+                                axios.request(res.config).then(res => {
+                                    resolve(res)
+                                }).catch(err => { reject(err) })
+                            }).catch(err => { reject(err) })
+                        })
                     default:
                         return Promise.reject(res.data.msg)
                 }
@@ -49,55 +97,31 @@ function useResponseInterceptor() {
 }
 
 // 统一处理所有的响应
-if (!myResponseInterceptor)
-    useResponseInterceptor()
+if (!myResponseInterceptor) useResponseInterceptor()
 
 // 最后一次设置access_token时的siteId
-let lastSiteId
+let myAccessToken
 /**
  * 给请求自动添加access_token参数
  * 
  * @param {String} siteid 
  */
 function setupAccessToken(siteid) {
-    if (!siteid)
-        return Promise.reject('axios2:参数错误')
+    if (!siteid) return Promise.reject('axios2:参数错误')
 
-    lastSiteId = siteid
+    myAccessToken = new AccessToken(siteid)
 
     return new Promise((resolve, reject) => {
-        let cached = sessionStorage.getItem('access_token')
-        if (cached) {
-            let [access_token, expireAt] = cached.split(':')
-            let now = parseInt(new Date / 1000)
-            // 没有关闭页面，刷新或者重新进入页面
-            if (access_token && expireAt > now) {
-                if (myApiRequestInterceptor)
-                    axios.interceptors.resquest.eject(myApiRequestInterceptor)
-                useApiRequestInterceptor(access_token)
-
-                resolve(axios)
-                return
-            }
-        }
-
-        axios.get(`/ue/auth/token?site=${siteid}`).then((res) => {
-            let { access_token, expire_in } = res.data.result
-
-            // 记录过期时间
-            let expireAt = parseInt(new Date / 1000) + expire_in - 120
-            // 保留获取的数据
-            sessionStorage.setItem('access_token', `${access_token}:${expireAt}`)
-
-            // 统一处理所有请求
-            if (myApiRequestInterceptor)
-                axios.interceptors.request.eject(myApiRequestInterceptor)
-            useApiRequestInterceptor(access_token)
-
+        let accessToken = myAccessToken.getCached()
+        if (accessToken) {
+            if (!myApiRequestInterceptor) useApiRequestInterceptor()
             resolve(axios)
-        }).catch(err => {
-            reject(`axios2:${err}`)
-        })
+        } else {
+            myAccessToken.refresh().then(() => {
+                if (!myApiRequestInterceptor) useApiRequestInterceptor()
+                resolve(axios)
+            }).catch(err => { reject(`axios2:${err}`) })
+        }
     })
 }
 
