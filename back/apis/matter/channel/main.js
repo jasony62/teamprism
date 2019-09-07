@@ -23,7 +23,7 @@ class Main extends Base {
     /**
      * 
      */
-    app() {
+    get() {
         return new ResultData(this.channel)
     }
     /**

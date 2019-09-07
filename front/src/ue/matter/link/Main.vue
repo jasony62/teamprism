@@ -1,5 +1,5 @@
 <template>
-    <shell id="link" :site="site" :matter="matter" :user="user"></shell>
+    <skeleton id="link" :site="site" :matter="matter" :user="user"></skeleton>
 </template>
 <script>
 import mixin from '@/ue/matter/_mixin/main'

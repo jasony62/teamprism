@@ -11,7 +11,7 @@ describe("#apis", () => {
                     ctrl.model = jest.fn().mockReturnValue({ byChannel: mockByChannel, end: mockEnd })
                     return ctrl.mattersGet().then(rst => {
                         expect(ctrl.model.mock.calls).toHaveLength(1)
-                        expect(ctrl.model.mock.calls[0][0]).toEqual('matter/channel')
+                        expect(ctrl.model.mock.calls[0][0]).toEqual('matter/channel/matter')
                         expect(mockByChannel.mock.calls).toHaveLength(1)
                         expect(mockByChannel.mock.calls[0][0]).toEqual(ctrl.channel)
                         expect(mockEnd.mock.calls).toHaveLength(1)

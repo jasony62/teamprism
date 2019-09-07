@@ -4,6 +4,12 @@ class Site extends DbModel {
     constructor({ debug = false } = {}) {
         super('xxt_site', { debug, autoIncId: false })
     }
+    /**
+     * 用户端可见字段
+     */
+    get fields_ue() {
+        return ['id', 'name', 'summary', 'heading_pic']
+    }
 
     async byId(id, { fields = '*' } = {}) {
         let sqlWhere = [

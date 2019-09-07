@@ -1,8 +1,8 @@
-import Shell from '@/ue/matter/_components/Shell.vue'
+import Skeleton from '@/ue/matter/_components/Skeleton.vue'
 
 export default {
     components: {
-        Shell
+        Skeleton
     },
     data() {
         return {

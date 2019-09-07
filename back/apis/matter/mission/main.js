@@ -7,24 +7,23 @@ class Main extends Base {
     }
     async tmsBeforeEach() {
         let { app } = this.request.query
-        if (!app)
-            return new ResultFault(`参数错误`)
+        if (!app) return new ResultFault(`参数错误`)
 
-        let dbLink = this.model('matter/link')
-        const oLink = await dbLink.byId(app)
-        dbLink.end()
-        if (!oLink || oLink.state !== 1)
+        let dbMission = this.model('matter/mission')
+        const oMission = await dbMission.byId(app)
+        dbMission.end()
+        if (!oMission || oMission.state !== 1)
             return new ResultObjectNotFound()
 
-        this.channel = oLink
+        this.mission = oMission
 
         return true
     }
     /**
-     * 
+     * 返回项目用户端视图数据
      */
     async get() {
-        return new ResultData(this.channel)
+        return new ResultData(this.article)
     }
 }
 

@@ -8,7 +8,7 @@ export default {
      */
     getApp(appId) {
         return new Promise((resolve, reject) => {
-            axios.get(`/ue/api/matter/channel/app?app=${appId}`).then(rst => {
+            axios.get(`/ue/api/matter/channel/get?app=${appId}`).then(rst => {
                 resolve(rst.data.result)
             }).catch(err => {
                 reject(err)
