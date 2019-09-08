@@ -11,7 +11,6 @@ class Main extends Base {
 
         let moChannel = this.model('matter/channel')
         const oChannel = await moChannel.byId(app)
-        moChannel.end()
         if (!oChannel || oChannel.state !== 1)
             return new ResultObjectNotFound()
 
@@ -48,7 +47,6 @@ class Main extends Base {
     async mattersGet() {
         let dbChanMatter = this.model('matter/channel/matter')
         let matters = await dbChanMatter.byChannel(this.channel, { page: 1, size: 12 })
-        dbChanMatter.end()
 
         return new ResultData(matters)
     }

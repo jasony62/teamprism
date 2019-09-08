@@ -223,7 +223,7 @@ class DbModel extends Model {
         if (this[DB_INSTANCE]) {
             db = this[DB_INSTANCE]
         } else {
-            db = await require('./db')({ debug: this.debug })
+            db = await require('./db').create({ debug: this.debug })
             this[DB_INSTANCE] = db
         }
 

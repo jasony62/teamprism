@@ -11,7 +11,6 @@ class Main extends Base {
 
         let dbLink = this.model('matter/link')
         const oLink = await dbLink.byId(app)
-        dbLink.end()
         if (!oLink || oLink.state !== 1)
             return new ResultObjectNotFound()
 

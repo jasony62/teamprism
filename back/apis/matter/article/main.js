@@ -11,7 +11,6 @@ class Main extends Base {
 
         let moArticle = this.model('matter/article')
         const oArticle = await moArticle.byId(app)
-        moArticle.end()
         if (!oArticle || oArticle.state !== 1)
             return new ResultObjectNotFound()
 

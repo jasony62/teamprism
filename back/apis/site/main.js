@@ -11,7 +11,6 @@ class Main extends Api {
         let { site } = this.request.query
         let moSite = this.model('site')
         let oSite = await moSite.byId(site)
-        moSite.end()
 
         if (false === oSite)
             return new ResultObjectNotFound()

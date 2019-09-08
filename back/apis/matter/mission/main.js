@@ -11,7 +11,6 @@ class Main extends Base {
 
         let dbMission = this.model('matter/mission')
         const oMission = await dbMission.byId(app)
-        dbMission.end()
         if (!oMission || oMission.state !== 1)
             return new ResultObjectNotFound()
 
