@@ -48,9 +48,10 @@ const API_FIELD_REQUEST = Symbol('request')
 const API_FIELD_CLIENT = Symbol('client')
 
 class Api {
-    constructor(request, client) {
+    constructor(request, client, db) {
         this[API_FIELD_REQUEST] = request
         this[API_FIELD_CLIENT] = client
+        this.dbConn = db
     }
 
     get request() {
@@ -68,6 +69,7 @@ class Api {
     model(name) {
         let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
         let model = fnCreate()
+        model.db(this.dbConn)
         return model
     }
 }

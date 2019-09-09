@@ -262,8 +262,40 @@ const MYSQL_CONN = Symbol('mysql_conn')
 const EXEC_SQL_STACK = Symbol('exec_sql_stack')
 
 // 已经建立的数据库连接
-let cachedDbConn, cachedReadonlyDbConn
+let cachedDbPool, cachedReadonlyDbPool
+let dbConnCount = 0
+/**
+ * 获取或创建数据库连接池
+ */
+function getPool(path, readonly = false) {
+    // 只创建1次连接池
+    if (readonly) {
+        if (cachedReadonlyDbPool)
+            return cachedReadonlyDbPool
+    } else if (cachedDbPool) {
+        return cachedDbPool
+    }
 
+    if (!fs.existsSync(path)) return Promise.reject('指定的配置文件不存在')
+
+    const fileConfig = fs.readFileSync(path)
+    const oCusConfig = JSON.parse(fileConfig)
+    let oPoolConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
+
+    if (oPoolConfig.supportBigNumbers === undefined)
+        oPoolConfig.supportBigNumbers = true
+    if (oPoolConfig.bigNumberStrings === undefined)
+        oPoolConfig.bigNumberStrings = true
+
+    console.log(`新建据库连接池`)
+    let dbPool = mysql.createPool(oPoolConfig)
+    if (readonly)
+        cachedReadonlyDbPool = dbPool
+    else
+        cachedDbPool = dbPool
+
+    return dbPool
+}
 /**
  * 连接数据库
  * 
@@ -271,37 +303,18 @@ let cachedDbConn, cachedReadonlyDbConn
  * @param {String} path 
  */
 function connect(readonly, path) {
-    // 只创建1次连接
-    if (readonly)
-        if (cachedReadonlyDbConn)
-            return Promise.resolve(cachedReadonlyDbConn)
-    else if (cachedDbConn)
-        return Promise.resolve(cachedDbConn)
-
-    if (!fs.existsSync(path)) return Promise.reject('指定的配置文件不存在')
-
-    const fileConfig = fs.readFileSync(path)
-    const oCusConfig = JSON.parse(fileConfig)
-    let oConnConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
-
-    if (oConnConfig.supportBigNumbers === undefined)
-        oConnConfig.supportBigNumbers = true
-    if (oConnConfig.bigNumberStrings === undefined)
-        oConnConfig.bigNumberStrings = true
-
-    let conn = mysql.createConnection(oConnConfig)
-
-    if (readonly)
-        cachedReadonlyDbConn = conn
-    else
-        cachedDbConn = conn
-
+    dbConnCount++
     return new Promise((resolve, reject) => {
-        conn.connect(err => {
-            if (err)
+        let beginAt = Date.now()
+        getPool(path, readonly).getConnection((err, conn) => {
+            if (err) {
+                console.log(`连接数据库失败：`, err)
                 reject(err)
-            else
+            } else {
+                let duration = Date.now() - beginAt
+                console.log(`获得数据库连接(${dbConnCount})(${duration}ms)(${conn.threadId})`)
                 resolve(conn)
+            }
         })
     })
 }
@@ -325,19 +338,20 @@ class Db {
         return this[EXEC_SQL_STACK]
     }
 
-    static async build(readonly, path, debug) {
-        let conn
-        if (debug)
-            conn = null
-        else
-            conn = await connect(readonly, path)
-
-        return new Db(conn, debug)
+    static getPool(path = process.cwd() + "/cus/db.json") {
+        return getPool(path)
     }
 
-    static destroy() {
-        if (cachedDbConn) cachedDbConn.destroy()
-        if (cachedReadonlyDbConn) cachedReadonlyDbConn.destroy()
+    static async getConnection() {
+        return await connect()
+    }
+
+    static release(dbConn) {
+        if (dbConn) {
+            console.log(`销毁数据库连接(${dbConn.threadId})`)
+            dbConn.release()
+            dbConn = null
+        }
     }
     /**
      * 通常只有单元测试时才需要使用该方法，应该用destroy关闭所有连接
@@ -377,17 +391,9 @@ class Db {
     }
 }
 
-async function create({
-    readonly = false,
-    path = process.cwd() + "/cus/db.json",
-    debug = false
-} = {}) {
-    try {
-        let db = await Db.build(readonly, path, debug)
-        return db
-    } catch (err) {
-        return false
-    }
+function create({ conn = null, debug = false } = {}) {
+    let db = new Db(conn, debug)
+    return db
 }
 
 module.exports = { Db, create }
