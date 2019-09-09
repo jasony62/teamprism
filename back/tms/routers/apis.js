@@ -89,6 +89,10 @@ router.all('*', async (req, res) => {
     } catch (err) {
         res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))
         console.log(err)
+    } finally {
+        // 关闭数据库连接
+        let { Db } = require('../db')
+        Db.destroy()
     }
 })
 

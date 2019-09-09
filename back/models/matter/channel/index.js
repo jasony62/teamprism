@@ -5,6 +5,12 @@ class Channel extends MatterBase {
         super('xxt_channel', { debug })
     }
     /**
+     * 用户端可见字段
+     */
+    get fields_ue() {
+        return ['id', 'title']
+    }
+    /**
      * 获得素材的所有频道
      */
     async byMatter(id, type, { public_visible = null } = {}) {

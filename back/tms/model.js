@@ -78,7 +78,6 @@ function encrypt(str, operation, key) {
     return result
 }
 
-
 class Model {
 
     static encryptEnc(str, key) {
@@ -87,7 +86,16 @@ class Model {
     static encryptDec(str, key) {
         return encrypt(str, Encrypt_Decode, key)
     }
-
+    /**
+     * 加载指定的model包
+     * 
+     * @param {*} name 
+     */
+    model(name) {
+        let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
+        let model = fnCreate()
+        return model
+    }
 }
 /**
  * 数据库表
@@ -215,7 +223,7 @@ class DbModel extends Model {
         if (this[DB_INSTANCE]) {
             db = this[DB_INSTANCE]
         } else {
-            db = await require('./db')({ debug: this.debug })
+            db = await require('./db').create({ debug: this.debug })
             this[DB_INSTANCE] = db
         }
 

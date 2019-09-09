@@ -60,6 +60,16 @@ class Api {
     get client() {
         return this[API_FIELD_CLIENT]
     }
+    /**
+     * 加载指定的model包
+     * 
+     * @param {*} name 
+     */
+    model(name) {
+        let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
+        let model = fnCreate()
+        return model
+    }
 }
 
 module.exports = { Api, ResultData, ResultFault, ResultObjectNotFound, AccessTokenFault, Client }

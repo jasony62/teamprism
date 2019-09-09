@@ -2,7 +2,7 @@ describe("#tms", function() {
     describe("#db.js", function() {
         let db;
         test("connect", async () => {
-            db = await require("../../tms/db")()
+            db = await require("../../tms/db").create()
             expect(db.conn).not.toBe(false)
         })
         describe("#Where", function() {
