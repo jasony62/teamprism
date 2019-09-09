@@ -78,6 +78,8 @@ function encrypt(str, operation, key) {
     return result
 }
 
+const MODEL_CONTEXT = Symbol('model_context')
+
 class Model {
 
     static encryptEnc(str, key) {
@@ -86,7 +88,12 @@ class Model {
     static encryptDec(str, key) {
         return encrypt(str, Encrypt_Decode, key)
     }
-
+    get context() {
+        return this[MODEL_CONTEXT]
+    }
+    set context(ctx) {
+        this[MODEL_CONTEXT] = ctx
+    }
 }
 /**
  * 数据库表
@@ -216,18 +223,23 @@ class DbModel extends Model {
     model(name) {
         let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
         let model = fnCreate()
+        model.context = this.context
         // 使用同一个数据库连接
         model.db(this[DB_INSTANCE].conn)
 
         return model
     }
-
-    db(dbConn = null) {
+    /**
+     * 设置数据库操作对象
+     * 
+     * @param {*} param0 
+     */
+    db({ conn = null } = {}) {
         let db
         if (this[DB_INSTANCE]) {
             db = this[DB_INSTANCE]
         } else {
-            db = require('./db').create({ conn: dbConn, debug: this.debug })
+            db = require('./db').create({ conn, debug: this.debug, context: this.context })
             this[DB_INSTANCE] = db
         }
 
@@ -235,9 +247,9 @@ class DbModel extends Model {
     }
 
     end(done) {
-        if (this[DB_INSTANCE] && this[DB_INSTANCE].conn)
-            this[DB_INSTANCE].conn.end(done)
-        else if (done)
+        if (this[DB_INSTANCE])
+            this[DB_INSTANCE].end(done)
+        else if (done && typeof done === 'function')
             done()
     }
 }

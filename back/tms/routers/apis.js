@@ -55,17 +55,17 @@ router.all('*', async (req, res) => {
     }
     let client = aResult[1]
 
-    let { Db } = require('../db')
-    let dbConn
+    let oCtrl, method
     try {
         /**
          * 获取数据库连接
          */
-        dbConn = await Db.getConnection()
+        let { Db } = require('../db')
+        let dbConn = await Db.getConnection();
         /**
          * 创建控制器
          */
-        const [oCtrl, method] = findCtrlAndMethod(req, client, dbConn)
+        [oCtrl, method] = findCtrlAndMethod(req, client, dbConn)
         /**
          * 是否需要事物？
          */
@@ -100,7 +100,7 @@ router.all('*', async (req, res) => {
         console.log(err)
     } finally {
         // 关闭数据库连接
-        Db.release(dbConn)
+        oCtrl.release()
     }
 })
 
