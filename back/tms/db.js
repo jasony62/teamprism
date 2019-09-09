@@ -1,35 +1,5 @@
 const mysql = require("mysql")
 const fs = require("fs")
-/**
- * 连接数据库
- * 
- * @param {Boolean} readonly 
- * @param {String} path 
- */
-function connect(readonly, path) {
-    if (!fs.existsSync(path)) {
-        return false
-    }
-    const fileConfig = fs.readFileSync(path)
-    const oCusConfig = JSON.parse(fileConfig)
-    let oConnConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
-
-    if (oConnConfig.supportBigNumbers === undefined)
-        oConnConfig.supportBigNumbers = true
-    if (oConnConfig.bigNumberStrings === undefined)
-        oConnConfig.bigNumberStrings = true
-
-    let conn = mysql.createConnection(oConnConfig)
-
-    return new Promise((resolve, reject) => {
-        conn.connect(err => {
-            if (err)
-                reject(err)
-            else
-                resolve(conn)
-        })
-    })
-}
 
 /**
  * where条件
@@ -291,6 +261,51 @@ const MYSQL_CONN = Symbol('mysql_conn')
 // 记录执行的SQL
 const EXEC_SQL_STACK = Symbol('exec_sql_stack')
 
+// 已经建立的数据库连接
+let cachedDbConn, cachedReadonlyDbConn
+
+/**
+ * 连接数据库
+ * 
+ * @param {Boolean} readonly 
+ * @param {String} path 
+ */
+function connect(readonly, path) {
+    // 只创建1次连接
+    if (readonly)
+        if (cachedReadonlyDbConn)
+            return Promise.resolve(cachedReadonlyDbConn)
+    else if (cachedDbConn)
+        return Promise.resolve(cachedDbConn)
+
+    if (!fs.existsSync(path)) return Promise.reject('指定的配置文件不存在')
+
+    const fileConfig = fs.readFileSync(path)
+    const oCusConfig = JSON.parse(fileConfig)
+    let oConnConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
+
+    if (oConnConfig.supportBigNumbers === undefined)
+        oConnConfig.supportBigNumbers = true
+    if (oConnConfig.bigNumberStrings === undefined)
+        oConnConfig.bigNumberStrings = true
+
+    let conn = mysql.createConnection(oConnConfig)
+
+    if (readonly)
+        cachedReadonlyDbConn = conn
+    else
+        cachedDbConn = conn
+
+    return new Promise((resolve, reject) => {
+        conn.connect(err => {
+            if (err)
+                reject(err)
+            else
+                resolve(conn)
+        })
+    })
+}
+
 class Db {
     constructor(conn, debug = false) {
         this[MYSQL_CONN] = conn
@@ -315,15 +330,24 @@ class Db {
         if (debug)
             conn = null
         else
-            conn = await connect(readonly, path);
+            conn = await connect(readonly, path)
 
         return new Db(conn, debug)
     }
 
+    static destroy() {
+        if (cachedDbConn) cachedDbConn.destroy()
+        if (cachedReadonlyDbConn) cachedReadonlyDbConn.destroy()
+    }
+    /**
+     * 通常只有单元测试时才需要使用该方法，应该用destroy关闭所有连接
+     * 
+     * @param {Function} done 
+     */
     end(done) {
         if (this.conn)
             this.conn.end(done)
-        else if (done)
+        else if (done && typeof done === 'function')
             done()
         delete this[EXEC_SQL_STACK]
     }
@@ -353,15 +377,17 @@ class Db {
     }
 }
 
-module.exports = async function({
+async function create({
     readonly = false,
     path = process.cwd() + "/cus/db.json",
     debug = false
 } = {}) {
     try {
-        let db = Db.build(readonly, path, debug)
+        let db = await Db.build(readonly, path, debug)
         return db
     } catch (err) {
         return false
     }
 }
+
+module.exports = { Db, create }

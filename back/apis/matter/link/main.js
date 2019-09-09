@@ -1,6 +1,5 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const Base = require('../base')
-const { Link } = require('../../../models/matter/link')
 
 class Main extends Base {
     constructor(...args) {
@@ -8,24 +7,39 @@ class Main extends Base {
     }
     async tmsBeforeEach() {
         let { app } = this.request.query
-        if (!app)
-            return new ResultFault(`参数错误`)
+        if (!app) return new ResultFault(`参数错误`)
 
-        let dbLink = new Link()
+        let dbLink = this.model('matter/link')
         const oLink = await dbLink.byId(app)
-        dbLink.end()
         if (!oLink || oLink.state !== 1)
             return new ResultObjectNotFound()
 
-        this.channel = oLink
+        this.link = oLink
 
         return true
     }
     /**
      * 
      */
-    async app() {
-        return new ResultData(this.channel)
+    async get() {
+        let site, mission
+        // 团队信息
+        let moSite = this.model('site')
+        site = await moSite.byId(this.link.siteid, { fields: moSite.fields_ue })
+        if (false === site)
+            return new ResultObjectNotFound()
+
+        // 项目信息
+        if (this.link.mission_id) {
+            let moMission = this.model('matter/mission')
+            mission = await moMission.byId(this.link.mission_id, { fields: moMission.fields_ue })
+            if (false === mission)
+                return new ResultObjectNotFound()
+        }
+
+        Object.assign(this.link, { site, mission })
+
+        return new ResultData(this.link)
     }
 }
 

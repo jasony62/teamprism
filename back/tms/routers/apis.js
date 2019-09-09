@@ -99,6 +99,10 @@ router.all('*', async (req, res) => {
         modelLog.end()
 
         res.json(new ResultFault(errMesg))
+    } finally {
+        // 关闭数据库连接
+        let { Db } = require('../db')
+        Db.destroy()
     }
 })
 
