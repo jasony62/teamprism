@@ -1,8 +1,9 @@
-const { Api, ResultData, ResultObjectNotFound } = require('../../../tms/api')
+const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
+const matterBase = require('../base')
 const User = require('../../../models/matter/enroll/user')
 const Enroll = require('../../../models/matter/enroll')
 
-class Base extends Api {
+class Base extends matterBase {
     constructor(...args) {
         super(...args)
 	}

@@ -10,7 +10,8 @@ describe("#apis", () => {
                         testdata = require('../../../../cus/test.data')
                         mockReq = {
                             query: {
-                                app: testdata.apis.ue.matter.enroll.main.appId
+                                app: testdata.apis.ue.matter.enroll.main.appId,
+                                ek: testdata.apis.ue.matter.enroll.record.ek
                             }
                         }
 
@@ -33,6 +34,11 @@ describe("#apis", () => {
                     test("coworkDataList()", () => {
                         return ctrl.coworkDataList().then(rst => {
                             expect(rst).toMatchObject({ code: 0, result: expect.anything() })
+                        })
+                    })
+                    test("recordGet()", () => {
+                        return ctrl.recordGet().then(rst => {
+                            expect(rst.result.enroll_key).toBe(mockReq.query.ek)
                         })
                     })
                 })

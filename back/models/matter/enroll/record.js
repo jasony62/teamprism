@@ -7,8 +7,6 @@ const Schema = require('../../../models/matter/enroll/schema')
 // const GroupRecord = require('../../../models/matter/group/record')()
 // const Groupteam = require('../../../models/matter/group/team')
 
-const REPOS_FIELDS = 'id,enroll_key,aid,rid,purpose,userid,nickname,group_id,first_enroll_at,enroll_at,enroll_key,data,agreed,agreed_log,dislike_data_num,dislike_log,dislike_num,favor_num,like_data_num,like_log,like_num,rec_remark_num,remark_num,score,supplement,tags,vote_cowork_num,vote_schema_num'
-
 class Record extends DbModel {
     async byId(ek, aOptions = {}) {
 		let fields = "fields" in aOptions ? aOptions.fields : '*';
@@ -24,10 +22,10 @@ class Record extends DbModel {
 		let oRecord = await dbSelect.exec()
 
 		if (oRecord) {
-			oRecord = await this._processRecord(oRecord, fields, verbose);
+			oRecord = await this._processRecord(oRecord, fields, verbose)
 		}
 
-		return oRecord;
+		return oRecord
 	}
 	/**
 	 * 处理从数据库中取出的数据

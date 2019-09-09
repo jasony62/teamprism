@@ -62,14 +62,6 @@ class Api {
     get client() {
         return this[API_FIELD_CLIENT]
     }
-    // 如果不copy 会重复更改，如果执行多次就会加很多的杠，并且会格式化原始数据，如果copy 如果存在转移失败的情况怎么办，是否需要原始数据
-    getQuery(escape = true) {
-        let querys = JSON.parse(JSON.stringify(this[API_FIELD_REQUEST]['query']))
-        if (escape)
-            querys = Model.escape(querys)
-
-        return querys
-    }
     /**
      * 防sql注入
      */

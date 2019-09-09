@@ -1,7 +1,6 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const { getDeepValue, replaceHTMLTags } = require('../../../tms/utilities')
 const Base = require('./base')
-const Enroll = require('../../../models/matter/enroll')
 const Record = require('../../../models/matter/enroll/record')
 const Data = require('../../../models/matter/enroll/data')
 const Task = require('../../../models/matter/enroll/task')
@@ -293,7 +292,7 @@ class Repos extends Base {
         return new ResultData(oResult)
     }
     /**
-     * 
+     * 解析数据
      */
     async _processDatas(oApp, oUser, rawDatas, processType = 'recordList', voteRules = null) {
         if (oApp.voteConfig) {
@@ -516,6 +515,27 @@ class Repos extends Base {
             modelTask.end()
         }
         return rawDatas
+    }
+    /**
+     * 获得一条记录可共享的内容
+     */
+    async recordGet() {
+        let { ek } = this.request.query
+        let oApp = this.app
+
+        let modelRec = new Record()
+        let fields = 'id,state,aid,rid,enroll_key,userid,group_id,nickname,verified,enroll_at,first_enroll_at,supplement,score,like_num,like_log,remark_num,rec_remark_num,favor_num,agreed,data,dislike_num,dislike_log'
+        let oRecord = await modelRec.byId(ek, {'fields' : fields})
+        if (false === oRecord || oRecord.state != 1) {
+            return new ResultObjectNotFound()
+        }
+        let oUser = await this.getUser(oApp)
+
+        let oRecords = [oRecord]
+        this._processDatas(oApp, oUser, oRecords, 'recordList')
+
+        modelRec.end()
+        return new ResultData(oRecord)
     }
 }
 
