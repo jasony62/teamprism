@@ -1,16 +1,16 @@
-const { DbModel } = require('../../tms/model')
-const Schema = require("./enroll/schema")
-const Round = require('./enroll/round')
-const Config = require('../../config')
+const { Base: MatterBase } = require('../base')
+const { create : Schema } = require("./schema")
+const { create : Round } = require('./round')
+const Config = require('../../../config')
 
 /**
  * 记录日志时需要的列
  */
 const LOG_FIELDS = 'siteid,id,title,summary,pic,mission_id'
 
-class Enroll extends DbModel {
-    constructor() {
-        super('xxt_enroll')
+class Enroll extends MatterBase {
+    constructor({ debug = false } = {}) {
+        super('xxt_enroll', { debug })
     }
     /**
      * 活动进入链接
@@ -51,10 +51,7 @@ class Enroll extends DbModel {
         let cascaded = (options.cascaded) ? options.cascaded : 'Y';
         let appRid = (options.appRid) ? options.appRid : '';
 
-        let db = await this.db()
-        let dbSelect = db.newSelectOne('xxt_enroll', fields)
-        dbSelect.where.fieldMatch('id', '=', appId);
-        let oApp = await dbSelect.exec()
+        let oApp = await super.byId(appId)
         if (!oApp)
             throw new Error('记录活动不存在')
 
@@ -108,12 +105,11 @@ class Enroll extends DbModel {
                 } else {
                     /* 应用的动态题目 */
                     let oApp2 =  {'id' : oApp.id, 'appRound' : oApp.appRound, 'dataSchemas' : oApp.dataSchemas, 'mission_id' : oApp.mission_id}
-                    let modelSch =new Schema(oApp2)
+                    let modelSch = Schema(oApp2)
                     // oApp2 = await modelSch.setDynaSchemas(aOptions.task ? aOptions.task : null);
                     oApp.dynaDataSchemas = oApp2.dataSchemas;
                     /* 设置活动的动态选项 */
                     // oApp = await modelSch.setDynaOptions(oApp, oAppRnd);
-                    modelSch.end()
                 }
             } else {
                 oApp.dataSchemas = oApp.dynaDataSchemas = [];
@@ -161,6 +157,9 @@ class Enroll extends DbModel {
         return oApp;
     }
 }
-module.exports = function() {
-    return new Enroll()
+
+function create({ debug = false } = {}) {
+    return new Enroll({ debug })
 }
+
+module.exports = { Enroll, create }

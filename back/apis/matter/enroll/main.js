@@ -1,8 +1,7 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const Base = require('./base')
-const Enroll = require('../../../models/matter/enroll')
-const Record = require('../../../models/matter/enroll/record')
-const Task = require('../../../models/matter/enroll/task')
+const { create : Record } = require('../../../models/matter/enroll/record')
+const { create : Task } = require('../../../models/matter/enroll/task')
 
 class Main extends Base {
     constructor(...args) {
@@ -23,7 +22,7 @@ class Main extends Base {
 
         let params = {}; // 返回的结果
         /* 要打开的记录 */
-        let modelRec = new Record();
+        let modelRec = Record();
 
         let oOpenedRecord
         if (ek) {
@@ -33,7 +32,7 @@ class Main extends Base {
         /* 要打开的应用 */
         //let aOptions = { 'cascaded': query.cascaded, 'fields': '*', 'appRid': (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid };
         // if (query.task) {
-        //     let modelTask = new Task();
+        //     let modelTask = Task();
         //     let oTask = await modelTask.byId(query.task);
         //     if (oTask) {
         //         aOptions.task = oTask;

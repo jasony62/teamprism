@@ -1,7 +1,7 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const matterBase = require('../base')
-const User = require('../../../models/matter/enroll/user')
-const Enroll = require('../../../models/matter/enroll')
+const { create : User } = require('../../../models/matter/enroll/user')
+const { create : Enroll } = require('../../../models/matter/enroll')
 
 class Base extends matterBase {
     constructor(...args) {
@@ -15,9 +15,8 @@ class Base extends matterBase {
         if (!app)
             return new ResultFault(`参数错误`)
 
-        let modelApp = new Enroll()
-        const oApp = await modelApp.byId(app)
-        modelApp.end()
+        let modelApp = Enroll()
+        let oApp = await modelApp.byId(app)
         if (!oApp || oApp.state !== 1)
             return new ResultFault(`数据错误`)
 
@@ -32,10 +31,9 @@ class Base extends matterBase {
 	 */
     async getUser(oEnrolledData = null) {
         let who = await this.client.data
-		let modelUsr = new User()
+		let modelUsr = User()
 		let oUser = await modelUsr.detail(this.app, who, oEnrolledData)
 
-        modelUsr.end()
 		return oUser
     }
     /**

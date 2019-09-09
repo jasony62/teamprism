@@ -112,9 +112,9 @@ class Model {
      * 
      * @param {*} name 
      */
-    model(name) {
+    model(name, app = null) {
         let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
-        let model = fnCreate()
+        let model = fnCreate(app)
         return model
     }
 }

@@ -73,9 +73,9 @@ class Api {
      * 
      * @param {*} name 
      */
-    model(name) {
+    model(name, ...args) {
         let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
-        let model = fnCreate()
+        let model = fnCreate(args)
         return model
     }
 }

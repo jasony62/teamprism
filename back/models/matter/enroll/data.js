@@ -1,11 +1,11 @@
-const { DbModel } = require('../../../tms/model')
-const Schema = require('./schema')
+const { Base: MatterBase } = require('../base')
+const { create : Schema } = require('./schema')
 const { getDeepValue, replaceHTMLTags, setDeepValue } = require('../../../tms/utilities')
 const DEFAULT_FIELDS = 'id,state,value,tag,supplement,rid,enroll_key,schema_id,userid,group_id,nickname,submit_at,score,remark_num,last_remark_at,like_num,like_log,modify_log,agreed,agreed_log,multitext_seq,vote_num'
 
-class Data extends DbModel {
-    constructor(oApp) {
-        super()
+class Data extends MatterBase {
+    constructor(oApp = null, { debug = false } = {}) {
+        super('xxt_enroll_record_data', { debug })
         this._oApp = oApp
     }
 	/**
@@ -343,7 +343,7 @@ class Data extends DbModel {
         // 设置了可见性规则的题目
         let visibilitySchemas = oApp.dynaDataSchemas.filter(function (oSchema) {return getDeepValue(oSchema, 'visibility.rules')})
         // 关联的分组题
-        let modelSchema = new Schema(oApp)
+        let modelSchema = Schema(oApp)
         let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema()
         let aGroupsById = [] // 缓存分组数据
         let aRoundsById = [] // 缓存轮次数据
@@ -459,7 +459,6 @@ class Data extends DbModel {
             })
         }
 
-        modelSchema.end()
         return aRecDatas
     }
     /**
@@ -471,6 +470,8 @@ class Data extends DbModel {
     }
 }
 
-module.exports = function (oApp = null) {
-    return new Data(oApp)
+function create(oApp = null, { debug = false } = {}) {
+    return new Data(oApp, { debug })
 }
+
+module.exports = { Data, create }

@@ -1,9 +1,13 @@
-const { DbModel } = require('../../../tms/model')
-const Enroll = require('../enroll')
-// const Mission = require('../mission')
+const { Base: MatterBase } = require('../base')
+const { create : Enroll } = require('../enroll')
+const { create : Mission } = require('../mission')
 // const MissionRound = require('../mission/round')
 
-class Round extends DbModel {
+class Round extends MatterBase {
+    constructor({ debug = false } = {}) {
+        super('xxt_enroll_round', { debug })
+    }
+    
     /**
      * 
      * @param {*} rid 
@@ -33,7 +37,7 @@ class Round extends DbModel {
             aRequireAppFields.push('mission_id');
         }
         if (aRequireAppFields.length > 0) {
-            let modelEnl = new Enroll();
+            let modelEnl = Enroll();
             let oApp2 = await modelEnl.byId(oApp.id, {'fields' : aRequireAppFields.join(','), 'notDecode' : true});
             Object.keys(oApp2).forEach((k) => {
                 oApp[k] = oApp2[k];
@@ -121,6 +125,8 @@ class Round extends DbModel {
     }
 }
 
-module.exports = function () {
-    return new Round()
+function create({ debug = false } = {}) {
+    return new Round({ debug })
 }
+
+module.exports = { Round, create }

@@ -91,7 +91,7 @@ router.all('*', async (req, res) => {
         res.json(result)
     } catch (err) {
         let errMesg = typeof err === 'string' ? err : err.toString()
-        let modelLog = new Log()
+        let modelLog = Log()
         let errStack =  Api.escape(err.stack ? err.stack : errMesg)
         let referer =  Api.escape(req.url)
 

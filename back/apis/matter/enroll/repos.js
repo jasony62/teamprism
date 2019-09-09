@@ -1,9 +1,9 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const { getDeepValue, replaceHTMLTags } = require('../../../tms/utilities')
 const Base = require('./base')
-const Record = require('../../../models/matter/enroll/record')
-const Data = require('../../../models/matter/enroll/data')
-const Task = require('../../../models/matter/enroll/task')
+const { create : Record } = require('../../../models/matter/enroll/record')
+const { create : Data } = require('../../../models/matter/enroll/data')
+const { create : Task } = require('../../../models/matter/enroll/task')
 // const Tag2 = require('../../../models/matter/enroll/tag2')
 // const Assoc = require('../../../models/matter/enroll/assoc')
 
@@ -18,9 +18,7 @@ class Repos extends Base {
         let oApp = this.app
         let dirSchemas = [] // 作为分类的题目
         let oSchemasById = {}
-        let dataSchemasKeys = Object.keys(oApp.dataSchemas)
-        for (let dsi = 0; dsi < dataSchemasKeys.length; dsi++ ) {
-            let key = dataSchemasKeys[dsi]
+        for (let key in oApp.dataSchemas) {
             let oSchema = oApp.dataSchemas[key]
             if (oSchema.asdir && oSchema.asdir === 'Y') {
                 oSchemasById[oSchema.id] = oSchema
@@ -28,21 +26,18 @@ class Repos extends Base {
                 case 'single':
                     if (!oSchema.optGroups) {
                         /* 根分类 */
-                        for (let i = 0; i < oSchema.ops.length; i++) {
-                            let oOp = oSchema.ops[i]
+                        oSchema.ops.forEach( (oOp) => {
                             let oRootDir = {}
                             oRootDir.schema_id = oSchema.id;
                             oRootDir.schema_type = 'single';
                             oRootDir.op = oOp;
                             dirSchemas.push(oRootDir)
-                        }
+                        })
                     } else {
-                        for (let i = 0; i < oSchema.optGroups.length; i++) {
-                            let oOptGroup = oSchema.optGroups[i]
+                        for (let oOptGroup of oSchema.optGroups) {
                             if (oOptGroup.assocOp && oOptGroup.assocOp.v && oSchemasById[oOptGroup.assocOp.schemaId]) {
                                 let oParentSchema = oSchemasById[oOptGroup.assocOp.schemaId]
-                                for (let i2 = 0; i2 < oParentSchema.ops.length; i2++) {
-                                    let oAssocOp = oParentSchema.ops[i2]
+                                for (let oAssocOp of oParentSchema.ops) {
                                     if (oAssocOp.v === oOptGroup.assocOp.v) {
                                         if (!oAssocOp.childrenDir) {
                                             oAssocOp.childrenDir = []
@@ -59,7 +54,7 @@ class Repos extends Base {
                     }
                     break
                 case 'shorttext':
-                    let modelData = new Data()
+                    let modelData = Data()
                     if (!oSchema.historyAssoc) {
                         let oOptions = {}
                         oOptions.rid = !oApp.appRound ? '' : oApp.appRound.rid
@@ -74,8 +69,7 @@ class Repos extends Base {
                             dirSchemas.push(oRootDir)
                         })
                     } else {
-                        for (let i = 0; i < dirSchemas.length; i++) {
-                            let oParentDirSchema = dirSchemas[i]
+                        for (let oParentDirSchema of dirSchemas) {
                             if (oSchema.historyAssoc.includes(oParentDirSchema.schema_id)) {
                                 let aChildrenDir = []
                                 let oOptions = {}
@@ -109,7 +103,7 @@ class Repos extends Base {
         let { page, size} = this.request.query
         if (!page || !size) {
             page = 1
-            size = 30
+            size = 12
         }
         
         let oApp = this.app
@@ -151,7 +145,7 @@ class Repos extends Base {
         }
 
         // 查询结果
-        let modelRec = new Record()
+        let modelRec = Record()
         let oCriteria = {}
         oCriteria.record = {}
         oCriteria.record.rid = oPosted.rid ? oPosted.rid : 'all'
@@ -203,7 +197,6 @@ class Repos extends Base {
         //     modelEvent.searchRecord(oApp, rest['search'], oUser)
         // }
 
-        modelRec.end()
         return new ResultData(oResult)
     }
     /**
@@ -211,11 +204,11 @@ class Repos extends Base {
      * 答案视图
      */
     async coworkDataList() {
-        let { page, size} = this.request.query
         let oApp = this.app
+        let { page, size} = this.request.query
         if (!page || !size) {
             page = 1
-            size = 30
+            size = 12
         }
         
         let coworkSchemaIds = [];
@@ -275,7 +268,7 @@ class Repos extends Base {
             oCriteria.recordData.agreed = oPosted.agreed
 
         // 查询结果
-        let modelRecDat = new Data(oApp)
+        let modelRecDat = Data(oApp)
         let oResult = await modelRecDat.coworkDataByApp(oOptions, oCriteria, oUser)
         // 处理数据
         if (oResult.recordDatas)
@@ -288,7 +281,6 @@ class Repos extends Base {
         //     this.model('matter\enroll\event').searchRecord(oApp, rest['search'], oUser);
         // }
 
-        modelRecDat.end()
         return new ResultData(oResult)
     }
     /**
@@ -296,12 +288,12 @@ class Repos extends Base {
      */
     async _processDatas(oApp, oUser, rawDatas, processType = 'recordList', voteRules = null) {
         if (oApp.voteConfig) {
-            var modelTask = new Task(oApp)
+            var modelTask = Task(oApp)
         }
         /* 是否设置了编辑组 */
         let oEditorGrp = await this.getEditorGroup(oApp)
         
-        let modelData = new Data()
+        let modelData = Data()
         // let modelTag = new Tag2()
         // let modelAss = new Assoc()
         for (let rawData of rawDatas) {
@@ -508,13 +500,69 @@ class Repos extends Base {
             }
         }
 
-        modelData.end()
-        // modelTag.end()
-        // modelAss.end()
-        if (oApp.voteConfig) {
-            modelTask.end()
-        }
         return rawDatas
+    }
+    /**
+     * 返回指定活动的填写记录的共享内容
+     */
+    async recordByTopic() {
+        let oApp = this.app
+        let { topic, page, size} = this.request.query
+        if (!page || !size) {
+            page = 1
+            size = 12
+        }
+
+        let oUser = await this.getUser()
+
+        // 填写记录过滤条件
+        let oOptions = { page : page, size : size }
+
+        // 查询结果
+        let modelRec = this.model('matter/enroll/record')
+        let modelTop = this.model('matter/enroll/topic', oApp)
+        let oTopic = modelTop.byId(topic)
+
+        let oResult = modelTop.records(oTopic, {'fields' : modelRec.REPOS_FIELDS})
+        // if (!empty($oResult->records)) {
+        //     /* 获取记录的投票信息 */
+        //     if (!empty($oApp->voteConfig)) {
+        //         $aVoteRules = $this->model('matter\enroll\task', $oApp)->getVoteRule($oUser);
+        //     } else {
+        //         $aVoteRules = null;
+        //     }
+        //     // 处理数据
+        //     $this->_processDatas($oApp, $oUser, $oResult->records, 'recordByTopic', $aVoteRules);
+        //     /**
+        //      * 根据任务进行排序
+        //      * 1、投票任务结束后，根据投票数排序
+        //      * 2、投票进行中，指定了排序规则，按规则排序
+        //      */
+        //     if (!empty($oTopic->task_id) && !empty($oResult->records)) {
+        //         $oTask = $this->model('matter\enroll\task', $oApp)->byId($oTopic->task_id);
+        //         if ($oTask) {
+        //             if ($oTask->config_type === 'vote') {
+        //                 if ($oTask->state === 'AE') {
+        //                     if (!empty($oTask->schemas)) {
+        //                         $p = 'voteResult.' . $oTask->schemas[0] . '.vote_num';
+        //                         usort($oResult->records, function ($a, $b) use ($p) {
+        //                             $anum = $this->getDeepValue($a, $p, 0);
+        //                             $bnum = $this->getDeepValue($b, $p, 0);
+        //                             return $bnum - $anum;
+        //                         });
+        //                     }
+        //                 }
+        //             }
+        //             if (in_array($oTask->config_type, ['vote', 'answer'])) {
+        //                 if ($this->getDeepValue($oTask, 'source.orderby') === 'random') {
+        //                     shuffle($oResult->records);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        return new ResultData(oResult)
     }
     /**
      * 获得一条记录可共享的内容
@@ -523,7 +571,7 @@ class Repos extends Base {
         let { ek } = this.request.query
         let oApp = this.app
 
-        let modelRec = new Record()
+        let modelRec = Record()
         let fields = 'id,state,aid,rid,enroll_key,userid,group_id,nickname,verified,enroll_at,first_enroll_at,supplement,score,like_num,like_log,remark_num,rec_remark_num,favor_num,agreed,data,dislike_num,dislike_log'
         let oRecord = await modelRec.byId(ek, {'fields' : fields})
         if (false === oRecord || oRecord.state != 1) {
@@ -534,7 +582,6 @@ class Repos extends Base {
         let oRecords = [oRecord]
         this._processDatas(oApp, oUser, oRecords, 'recordList')
 
-        modelRec.end()
         return new ResultData(oRecord)
     }
 }

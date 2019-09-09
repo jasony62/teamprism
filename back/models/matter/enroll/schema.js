@@ -1,11 +1,11 @@
-const { DbModel } = require('../../../tms/model')
+const { Base: MatterBase } = require('../base')
 const { getDeepValue } = require('../../../tms/utilities')
-const Round = require('./round')
+const { create : Round } = require('./round')
 // const Enroll = require('../enroll')
 
-class Schema extends DbModel {
-    constructor(oApp) {
-        super()
+class Schema extends MatterBase {
+    constructor(oApp, { debug = false } = {}) {
+        super('', { debug })
         this._oApp = oApp
     }
     /**
@@ -22,7 +22,6 @@ class Schema extends DbModel {
         // if (!oApp.appRound) {
         //     let modelRnd = new Round()
         //     oAppRound = modelRnd.getActive(oApp, {'fields' : 'id,rid,title,start_at,end_at,mission_rid'})
-        //     modelRnd.end()
         // } else {
         //     oAppRound = oApp.appRound
         // }
@@ -81,6 +80,8 @@ class Schema extends DbModel {
     }
 }
 
-module.exports = function (oApp = null) {
-    return new Schema(oApp)
+function create(oApp = null, { debug = false } = {}) {
+    return new Schema(oApp, { debug })
 }
+
+module.exports = { Schema, create }

@@ -39,6 +39,11 @@ describe("#apis", () => {
                         expect(rst.result.enroll_key).toBe(mockReq.query.ek)
                     })
                 })
+                afterAll(() => {
+                    // 关闭数据库连接
+                    let { Db } = require('../../../../tms/db')
+                    Db.destroy()
+                })
             })
         })
     })

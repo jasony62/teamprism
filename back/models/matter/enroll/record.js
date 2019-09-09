@@ -1,13 +1,20 @@
-const { DbModel } = require('../../../tms/model')
+const { Base: MatterBase } = require('../base')
 const { getDeepValue } = require('../../../tms/utilities')
-const Enroll = require('../../../models/matter/enroll')
-const Data = require('../../../models/matter/enroll/data')
-const Round = require('../../../models/matter/enroll/round')
-const Schema = require('../../../models/matter/enroll/schema')
+const { create : Enroll } = require('../../../models/matter/enroll')
+const { create : Data } = require('../../../models/matter/enroll/data')
+const { create : Round } = require('../../../models/matter/enroll/round')
+const { create : Schema } = require('../../../models/matter/enroll/schema')
 // const GroupRecord = require('../../../models/matter/group/record')()
 // const Groupteam = require('../../../models/matter/group/team')
 
-class Record extends DbModel {
+class Record extends MatterBase {
+
+	constructor({ debug = false } = {}) {
+		super('xxt_enroll_record', { debug })
+		
+		this.REPOS_FIELDS = 'id,enroll_key,aid,rid,purpose,userid,nickname,group_id,first_enroll_at,enroll_at,enroll_key,data,agreed,agreed_log,dislike_data_num,dislike_log,dislike_num,favor_num,like_data_num,like_log,like_num,rec_remark_num,remark_num,score,supplement,tags,vote_cowork_num,vote_schema_num'
+	}
+	
     async byId(ek, aOptions = {}) {
 		let fields = "fields" in aOptions ? aOptions.fields : '*';
 		let verbose = "verbose" in aOptions ? aOptions.verbose : 'N';
@@ -50,14 +57,12 @@ class Record extends DbModel {
 			oRecord.dislike_log = oRecord.dislike_log ? {} : JSON.parse(oRecord.dislike_log);
 		}
 		if (verbose === 'Y' && "enroll_key" in oRecord) {
-			let modelData = new Data()
+			let modelData = Data()
 			oRecord.verbose = await modelData.byRecord(oRecord.enroll_key)
-			modelData.end()
 		}
 		if (oRecord.rid) {
-			let modelRound = new Round()
+			let modelRound = Round()
 			let oRound = await modelRound.byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'})
-			modelRound.end()
 			if (oRound) {
 				oRecord.round = oRound;
 			} else {
@@ -88,17 +93,15 @@ class Record extends DbModel {
 		if (!oOptions) oOptions = {}
 		if (!oCriteria) oCriteria = {}
 		if (typeof oApp === "string") {
-			let modelEnroll = new Enroll()
+			let modelEnroll = Enroll()
 			oApp = await modelEnroll.byId(oApp, {'cascaded' : 'N'})
-			modelEnroll.end()
 		}
 		if (false === oApp && !oApp.dynaDataSchemas) {
 			return false
 		}
 
-		let modelSchema = new Schema()
+		let modelSchema = Schema()
 		let aSchemasById = await modelSchema.asAssoc(oApp.dynaDataSchemas)
-		modelSchema.end()
 
 		// 指定记录活动下的记录记录
 		let w = "r.state=1 and r.aid='" + oApp.id + "'"
@@ -379,9 +382,8 @@ class Record extends DbModel {
 			})
 		}
 		// 关联的分组题
-		let modelSchema = new Schema(oApp)
+		let modelSchema = Schema(oApp)
 		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema()
-		modelSchema.end()
 		let aGroupsById = []; // 缓存分组数据
 		let aRoundsById = []; // 缓存轮次数据
 
@@ -442,7 +444,7 @@ class Record extends DbModel {
 		// 	}
 		// }
 		// aFnHandlers.push(userGroupFuc)
-		let modelRound = new Round()
+		let modelRound = Round()
 		for (let ri = 0; ri < records.length; ri++) {
 			let oRec = records[ri]
 			if (oRec.like_log) {
@@ -495,7 +497,6 @@ class Record extends DbModel {
 			// 	if (!aGroupsById[oRec.group_id]) {
 					// let modelGroupteam = new Groupteam()
 			// 		let oGroup = modelGroupteam.byId(oRec.group_id, {'fields' : 'title')
-					// modelGroupteam.end()
 			// 		delete oGroup.type
 			// 		aGroupsById[oRec.group_id] = oGroup
 			// 	} else {
@@ -524,13 +525,12 @@ class Record extends DbModel {
 			}
 		}
 
-		modelRound.end()
-		// GroupRecord.end()
-
 		return records
 	}
 }
 
-module.exports = function () {
-    return new Record()
+function create({ debug = false } = {}) {
+    return new Record({ debug })
 }
+
+module.exports = { Record, create }
