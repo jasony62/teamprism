@@ -95,6 +95,10 @@ class SqlAction {
         return Promise.resolve(this.conn)
             .then(conn => isWritableConn ? this.writableConn() : conn)
             .then(conn => {
+                if (!conn) {
+                    console.log('数据库连接不可用', this.sql)
+                    return Promise.reject('数据库连接不可用')
+                }
                 return new Promise((resolve, reject) => {
                     conn.query(this.sql, (error, result) => {
                         if (error) {

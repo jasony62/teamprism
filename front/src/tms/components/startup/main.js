@@ -13,7 +13,7 @@ const oDefaultOptions = {
             onFailure.call(this)
         } else {
             setupAccessToken(siteId).then(() => {
-                this.$eventHub.$emit('main-mounted')
+                this.$eventHub.$emit('main-loaded')
             }).catch(e => {
                 this.$message({
                     message: e.message,

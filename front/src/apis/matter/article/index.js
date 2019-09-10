@@ -6,13 +6,9 @@ export default {
      * 
      * @param {String} appId 
      */
-    getApp(appId) {
-        return new Promise((resolve, reject) => {
-            axios.get(`/ue/api/matter/article/get?app=${appId}`).then(rst => {
-                resolve(rst.data.result)
-            }).catch(err => {
-                reject(err)
-            })
-        })
-    },
+    skeleton(appId) {
+        return axios.get(`/ue/api/matter/article/get?app=${appId}`)
+            .then(rst => rst.data.result)
+            .catch(err => Promise.reject(err))
+    }
 }
