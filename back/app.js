@@ -7,6 +7,15 @@ const authRouter = require('./tms/routers/auth')
 const apiRouter = require('./tms/routers/apis')
 const wxRouter = require('./tms/routers/wx')
 
+/**
+ * 启动数据库连接池
+ */
+const { Db } = require('./tms/db')
+Db.getPool()
+
+/**
+ * 启动web服务
+ */
 const app = express()
 
 app.use(express.json())

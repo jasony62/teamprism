@@ -87,7 +87,6 @@ async function createProxy(siteid) {
     const model = new Config()
     try {
         let wxConfig = await model.bySite(siteid, { fields: 'id,appid,appsecret' })
-        model.end()
         let proxy = new WxProxy(wxConfig)
         return proxy
     } catch (e) {

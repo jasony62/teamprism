@@ -14,7 +14,7 @@ const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
  * @param {Request} req 
  * @param {Who} client
  */
-function findCtrlAndMethod(req, client) {
+function findCtrlAndMethod(req, client, dbConn) {
     let { path } = req
     let pieces = path.split('/')
     if (pieces.length < 2)
@@ -29,7 +29,7 @@ function findCtrlAndMethod(req, client) {
     }
 
     const CtrlClass = require(ctrlPath)
-    const oCtrl = new CtrlClass(req, client)
+    const oCtrl = new CtrlClass(req, client, dbConn)
     if (oCtrl[method] === undefined && typeof oCtrl[method] !== 'function')
         throw new Error('参数错误，请求的对象不存在(3)')
 
@@ -55,8 +55,17 @@ router.all('*', async (req, res) => {
     }
     let client = aResult[1]
 
+    let oCtrl, method
     try {
-        const [oCtrl, method] = findCtrlAndMethod(req, client)
+        /**
+         * 获取数据库连接
+         */
+        let { Db } = require('../db')
+        let dbConn = await Db.getConnection();
+        /**
+         * 创建控制器
+         */
+        [oCtrl, method] = findCtrlAndMethod(req, client, dbConn)
         /**
          * 是否需要事物？
          */
@@ -89,6 +98,9 @@ router.all('*', async (req, res) => {
     } catch (err) {
         res.json(new ResultFault(typeof err === 'string' ? err : err.toString()))
         console.log(err)
+    } finally {
+        // 关闭数据库连接
+        oCtrl.release()
     }
 })
 
