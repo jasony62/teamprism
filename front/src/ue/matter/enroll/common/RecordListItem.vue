@@ -1,12 +1,12 @@
 <template>
-    <div class="record" @click="remarkRecord(record)">
+    <div class="record" @click="remarkRecord(record, $event)">
         <van-cell-group class="record-cell-group">
             <van-cell icon="user-o" :title="record.nickname || '隐藏'" class="record-header">
                 <van-button type="info" size="mini" v-if="record.favored" @click="favorRecord(record)">已收藏</van-button>
                 <van-button type="danger" size="mini" v-if="record.agreed==='Y'">推荐</van-button>
             </van-cell>
             <van-cell class="record-content">
-                <record-data :rec="record" :schemas="schemas"></record-data>
+                <ui-schemas class="repos-record" :rec="record" :subjects="schemas"></ui-schemas>
             </van-cell>
             <van-cell :title="record.enroll_at*1000 | formatDate" class="record-footer">                  
                 <span class="record-indicator" v-if="record.like_num!='0'" :class="{'like': record.like_log[user.uid]}">
@@ -35,7 +35,8 @@
 
 <script>
 import { Col, Icon, Button, Cell, CellGroup} from "vant"
-import RecordData from "./RecordData"
+import UiSchemas from "@/ue/matter/enroll/assert/UiSchemas"
+
 export default {
     props: ['record', 'user', 'schemas'],
     components: {
@@ -44,7 +45,7 @@ export default {
         [Button.name]: Button,
         [Cell.name]: Cell,
         [CellGroup.name]: CellGroup,
-        RecordData
+        UiSchemas
     },
     filters: {
         formatDate: function(value) {
@@ -64,18 +65,21 @@ export default {
         }
     },
     methods: {
-        remarkRecord() {
-            
-        },
-        favorRecord() {
-            
-        },
-        shiftTag() {
-            
+        remarkRecord(record, event) {
+            if(event) event.preventDefault()
+            let params, target
+            params = this.$route.params
+            target = event.target;
+            if (target.getAttribute('ng-click') || target.parentNode.getAttribute('ng-click')) return;
+            if (/button/i.test(target.tagName) || /button/i.test(target.parentNode.tagName)) return;
+
+            //addToCache();
+            this.$router.push({name: 'record-cowork', path: `/ue/matter/enroll/${params.siteId}/${params.appId}/record/${record.enroll_key}/cowork`})
         }
     }
 };
 </script>
+
 <style lang="scss">
 .record {
     &-indicator{

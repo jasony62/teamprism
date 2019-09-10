@@ -1,6 +1,5 @@
 <template>
     <div id="repos-record">
-        <div>Repos Record</div>
         <tms-list :items="records">
             <template v-slot:item="{ item }">
                 <record-list-item :record="item" :schemas="schemas" :user="user"></record-list-item>
@@ -8,6 +7,7 @@
         </tms-list>
     </div>
 </template>
+
 <script>
 import {Repos as RepApis} from "@/apis/matter/enroll"
 import TmsList from "@/tms/components/List.vue"

@@ -14,6 +14,7 @@
         </div>
     </div>
 </template>
+
 <script>
 import PrimaryNav from '../common/PrimaryNav'
 import {  Tab, Tabs } from 'vant'
