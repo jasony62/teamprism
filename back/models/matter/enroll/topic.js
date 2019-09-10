@@ -3,7 +3,13 @@ const { Base: MatterBase } = require('../base')
 class Topic extends MatterBase {
     constructor({ debug = false } = {}) {
         super('xxt_enroll_topic', { debug })
-    } 
+    }
+    /**
+     * 
+     */
+    set setApp(oApp) {
+        this._oApp = oApp
+    }
 	/**
 	 * 返回专题下的记录
 	 *

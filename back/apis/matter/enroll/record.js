@@ -1,6 +1,5 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const Base = require('./base')
-const { create : ModelRecord } = require('../../../models/matter/enroll/record')
 
 class Record extends Base {
     constructor(...args) {
@@ -16,7 +15,7 @@ class Record extends Base {
      */
     async get() {
         let { ek } = this.request.query
-        let modelRec = ModelRecord()
+        let modelRec = this.model('matter/enroll/record')
         const oRecord = await modelRec.byId(ek)
 
         if (!oRecord) {

@@ -4,8 +4,13 @@ const { getDeepValue, replaceHTMLTags, setDeepValue } = require('../../../tms/ut
 const DEFAULT_FIELDS = 'id,state,value,tag,supplement,rid,enroll_key,schema_id,userid,group_id,nickname,submit_at,score,remark_num,last_remark_at,like_num,like_log,modify_log,agreed,agreed_log,multitext_seq,vote_num'
 
 class Data extends MatterBase {
-    constructor(oApp = null, { debug = false } = {}) {
+    constructor({ debug = false } = {}) {
         super('xxt_enroll_record_data', { debug })
+    }
+    /**
+     * 
+     */
+    set setApp(oApp) {
         this._oApp = oApp
     }
 	/**
@@ -470,8 +475,8 @@ class Data extends MatterBase {
     }
 }
 
-function create(oApp = null, { debug = false } = {}) {
-    return new Data(oApp, { debug })
+function create({ debug = false } = {}) {
+    return new Data({ debug })
 }
 
 module.exports = { Data, create }

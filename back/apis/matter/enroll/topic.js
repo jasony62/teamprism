@@ -1,7 +1,6 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const { getDeepValue, replaceHTMLTags } = require('../../../tms/utilities')
 const Base = require('./base')
-const { create : ModelRecord } = require('../../../models/matter/enroll/record')
 
 class Topic extends Base {
     constructor(...args) {

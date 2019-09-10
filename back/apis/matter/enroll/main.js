@@ -1,7 +1,5 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const Base = require('./base')
-const { create : Record } = require('../../../models/matter/enroll/record')
-const { create : Task } = require('../../../models/matter/enroll/task')
 
 class Main extends Base {
     constructor(...args) {
@@ -11,7 +9,7 @@ class Main extends Base {
      * 获得指定记录活动的进入规则以及当前用户的匹配情况
      */
     async entryRule() {
-        return Promise.resolve(this.app.entryRule)
+        return new ResultData(this.app.entryRule)
     }
     /**
      * 返回记录活动定义
@@ -22,7 +20,7 @@ class Main extends Base {
 
         let params = {}; // 返回的结果
         /* 要打开的记录 */
-        let modelRec = Record();
+        let modelRec = this.model('matter/enroll/record')
 
         let oOpenedRecord
         if (ek) {
@@ -32,7 +30,7 @@ class Main extends Base {
         /* 要打开的应用 */
         //let aOptions = { 'cascaded': query.cascaded, 'fields': '*', 'appRid': (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid };
         // if (query.task) {
-        //     let modelTask = Task();
+        //     let modelTask = this.model('matter/enroll/task)
         //     let oTask = await modelTask.byId(query.task);
         //     if (oTask) {
         //         aOptions.task = oTask;

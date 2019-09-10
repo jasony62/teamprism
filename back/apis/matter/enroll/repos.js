@@ -1,9 +1,6 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const { getDeepValue, replaceHTMLTags } = require('../../../tms/utilities')
 const Base = require('./base')
-const { create : Record } = require('../../../models/matter/enroll/record')
-const { create : Data } = require('../../../models/matter/enroll/data')
-const { create : Task } = require('../../../models/matter/enroll/task')
 // const Tag2 = require('../../../models/matter/enroll/tag2')
 // const Assoc = require('../../../models/matter/enroll/assoc')
 
@@ -54,7 +51,8 @@ class Repos extends Base {
                     }
                     break
                 case 'shorttext':
-                    let modelData = Data()
+                    let modelData = this.model('matter/enroll/data')
+                    modelData.setApp = oApp
                     if (!oSchema.historyAssoc) {
                         let oOptions = {}
                         oOptions.rid = !oApp.appRound ? '' : oApp.appRound.rid
@@ -145,7 +143,7 @@ class Repos extends Base {
         }
 
         // 查询结果
-        let modelRec = Record()
+        let modelRec = this.model('matter/enroll/record')
         let oCriteria = {}
         oCriteria.record = {}
         oCriteria.record.rid = oPosted.rid ? oPosted.rid : 'all'
@@ -268,7 +266,8 @@ class Repos extends Base {
             oCriteria.recordData.agreed = oPosted.agreed
 
         // 查询结果
-        let modelRecDat = Data(oApp)
+        let modelRecDat = this.model('matter/enroll/data')
+        modelRecDat.setApp = oApp
         let oResult = await modelRecDat.coworkDataByApp(oOptions, oCriteria, oUser)
         // 处理数据
         if (oResult.recordDatas)
@@ -287,13 +286,16 @@ class Repos extends Base {
      * 解析数据
      */
     async _processDatas(oApp, oUser, rawDatas, processType = 'recordList', voteRules = null) {
+        let modelTask
         if (oApp.voteConfig) {
-            var modelTask = Task(oApp)
+            modelTask = this.model('matter/enroll/task')
+            modelTask.setApp = oApp
         }
         /* 是否设置了编辑组 */
-        let oEditorGrp = await this.getEditorGroup(oApp)
+        let oEditorGrp = await this.getEditorGroup()
         
-        let modelData = Data()
+        let modelData = this.model('matter/enroll/data')
+        modelData.setApp = oApp
         // let modelTag = new Tag2()
         // let modelAss = new Assoc()
         for (let rawData of rawDatas) {
@@ -520,7 +522,8 @@ class Repos extends Base {
 
         // 查询结果
         let modelRec = this.model('matter/enroll/record')
-        let modelTop = this.model('matter/enroll/topic', oApp)
+        let modelTop = this.model('matter/enroll/topic')
+        modelTop.setApp = oApp
         let oTopic = modelTop.byId(topic)
 
         let oResult = modelTop.records(oTopic, {'fields' : modelRec.REPOS_FIELDS})
@@ -571,7 +574,7 @@ class Repos extends Base {
         let { ek } = this.request.query
         let oApp = this.app
 
-        let modelRec = Record()
+        let modelRec = this.model('matter/enroll/record')
         let fields = 'id,state,aid,rid,enroll_key,userid,group_id,nickname,verified,enroll_at,first_enroll_at,supplement,score,like_num,like_log,remark_num,rec_remark_num,favor_num,agreed,data,dislike_num,dislike_log'
         let oRecord = await modelRec.byId(ek, {'fields' : fields})
         if (false === oRecord || oRecord.state != 1) {
