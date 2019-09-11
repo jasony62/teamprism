@@ -100,6 +100,7 @@ class SqlAction {
                     return Promise.reject('数据库连接不可用')
                 }
                 return new Promise((resolve, reject) => {
+                    console.log(this.sql)
                     conn.query(this.sql, (error, result) => {
                         if (error) {
                             reject(error)

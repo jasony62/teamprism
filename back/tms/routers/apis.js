@@ -99,6 +99,7 @@ router.all('*', async (req, res) => {
 
         res.json(result)
     } catch (err) {
+        console.log(err)
         let errMesg = typeof err === 'string' ? err : err.toString()
         let modelLog = Log()
         let errStack =  Api.escape(err.stack ? err.stack : errMesg)

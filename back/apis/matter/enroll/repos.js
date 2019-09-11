@@ -512,9 +512,9 @@ class Repos extends Base {
         let modelRec = this.model('matter/enroll/record')
         let modelTop = this.model('matter/enroll/topic')
         modelTop.setApp = oApp
-        let oTopic = modelTop.byId(topic)
+        let oTopic = await modelTop.byId(topic)
 
-        let oResult = modelTop.records(oTopic, {'fields' : modelRec.REPOS_FIELDS})
+        let oResult = await modelTop.records(oTopic, {'fields' : modelRec.REPOS_FIELDS})
         // if (!empty($oResult->records)) {
         //     /* 获取记录的投票信息 */
         //     if (!empty($oApp->voteConfig)) {

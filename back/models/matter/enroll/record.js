@@ -1,9 +1,5 @@
 const { Base: MatterBase } = require('../base')
 const { getDeepValue } = require('../../../tms/utilities')
-const { create : Enroll } = require('../../../models/matter/enroll')
-const { create : Data } = require('../../../models/matter/enroll/data')
-const { create : Round } = require('../../../models/matter/enroll/round')
-const { create : Schema } = require('../../../models/matter/enroll/schema')
 // const GroupRecord = require('../../../models/matter/group/record')()
 // const Groupteam = require('../../../models/matter/group/team')
 
@@ -57,11 +53,11 @@ class Record extends MatterBase {
 			oRecord.dislike_log = oRecord.dislike_log ? {} : JSON.parse(oRecord.dislike_log);
 		}
 		if (verbose === 'Y' && "enroll_key" in oRecord) {
-			let modelData = Data()
+			let modelData = this.model('matter/enroll/data')
 			oRecord.verbose = await modelData.byRecord(oRecord.enroll_key)
 		}
 		if (oRecord.rid) {
-			let modelRound = Round()
+			let modelRound = this.model('matter/enroll/round')
 			let oRound = await modelRound.byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'})
 			if (oRound) {
 				oRecord.round = oRound;
@@ -93,14 +89,14 @@ class Record extends MatterBase {
 		if (!oOptions) oOptions = {}
 		if (!oCriteria) oCriteria = {}
 		if (typeof oApp === "string") {
-			let modelEnroll = Enroll()
+			let modelEnroll = this.model('matter/enroll')
 			oApp = await modelEnroll.byId(oApp, {'cascaded' : 'N'})
 		}
 		if (false === oApp && !oApp.dynaDataSchemas) {
 			return false
 		}
 
-		let modelSchema = Schema()
+		let modelSchema = this.model('matter/enroll/schema')
 		let aSchemasById = await modelSchema.asAssoc(oApp.dynaDataSchemas)
 
 		// 指定记录活动下的记录记录
@@ -382,7 +378,8 @@ class Record extends MatterBase {
 			})
 		}
 		// 关联的分组题
-		let modelSchema = Schema(oApp)
+		let modelSchema = this.model('matter/enroll/schema')
+		modelSchema.setApp = oApp
 		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema()
 		let aGroupsById = []; // 缓存分组数据
 		let aRoundsById = []; // 缓存轮次数据
@@ -444,7 +441,7 @@ class Record extends MatterBase {
 		// 	}
 		// }
 		// aFnHandlers.push(userGroupFuc)
-		let modelRound = Round()
+		let modelRound = this.model('matter/enroll/round')
 		for (let ri = 0; ri < records.length; ri++) {
 			let oRec = records[ri]
 			if (oRec.like_log) {

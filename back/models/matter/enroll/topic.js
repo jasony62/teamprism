@@ -17,6 +17,7 @@ class Topic extends MatterBase {
 	 */
 	async records(oTopic, aOptions = {}) {
         
+        return this._oApp
 	}
 }
 

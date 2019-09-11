@@ -1,11 +1,16 @@
 const { Base: MatterBase } = require('../base')
 const { getDeepValue } = require('../../../tms/utilities')
-const { create : Round } = require('./round')
+// const { create : Round } = require('./round')
 // const Enroll = require('../enroll')
 
 class Schema extends MatterBase {
-    constructor(oApp, { debug = false } = {}) {
+    constructor({ debug = false } = {}) {
         super('', { debug })
+    }
+    /**
+     * 
+     */
+    set setApp(oApp) {
         this._oApp = oApp
     }
     /**
@@ -80,8 +85,8 @@ class Schema extends MatterBase {
     }
 }
 
-function create(oApp = null, { debug = false } = {}) {
-    return new Schema(oApp, { debug })
+function create({ debug = false } = {}) {
+    return new Schema({ debug })
 }
 
 module.exports = { Schema, create }

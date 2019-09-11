@@ -1,5 +1,4 @@
 const { Base: MatterBase } = require('../base')
-const { create : Schema } = require('./schema')
 const { getDeepValue, replaceHTMLTags, setDeepValue } = require('../../../tms/utilities')
 const DEFAULT_FIELDS = 'id,state,value,tag,supplement,rid,enroll_key,schema_id,userid,group_id,nickname,submit_at,score,remark_num,last_remark_at,like_num,like_log,modify_log,agreed,agreed_log,multitext_seq,vote_num'
 
@@ -348,7 +347,8 @@ class Data extends MatterBase {
         // 设置了可见性规则的题目
         let visibilitySchemas = oApp.dynaDataSchemas.filter(function (oSchema) {return getDeepValue(oSchema, 'visibility.rules')})
         // 关联的分组题
-        let modelSchema = Schema(oApp)
+        let modelSchema = this.model('matter/enroll/schema')
+		modelSchema.setApp = oApp
         let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema()
         let aGroupsById = [] // 缓存分组数据
         let aRoundsById = [] // 缓存轮次数据

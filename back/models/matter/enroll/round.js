@@ -1,6 +1,5 @@
 const { Base: MatterBase } = require('../base')
-const { create : Enroll } = require('../enroll')
-const { create : Mission } = require('../mission')
+// const { create : Mission } = require('../mission')
 // const MissionRound = require('../mission/round')
 
 class Round extends MatterBase {
@@ -37,7 +36,7 @@ class Round extends MatterBase {
             aRequireAppFields.push('mission_id');
         }
         if (aRequireAppFields.length > 0) {
-            let modelEnl = Enroll();
+            let modelEnl = this.model('matter/enroll')
             let oApp2 = await modelEnl.byId(oApp.id, {'fields' : aRequireAppFields.join(','), 'notDecode' : true});
             Object.keys(oApp2).forEach((k) => {
                 oApp[k] = oApp2[k];

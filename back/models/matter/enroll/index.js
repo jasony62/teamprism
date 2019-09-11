@@ -1,6 +1,5 @@
 const { Base: MatterBase } = require('../base')
-const { create : Schema } = require("./schema")
-const { create : Round } = require('./round')
+// const { create : Round } = require('./round')
 const Config = require('../../../config')
 
 /**
@@ -105,7 +104,8 @@ class Enroll extends MatterBase {
                 } else {
                     /* 应用的动态题目 */
                     let oApp2 =  {'id' : oApp.id, 'appRound' : oApp.appRound, 'dataSchemas' : oApp.dataSchemas, 'mission_id' : oApp.mission_id}
-                    let modelSch = Schema(oApp2)
+                    let modelSch = this.model('matter/enroll/schema')
+                    modelSch.setApp = oApp2
                     // oApp2 = await modelSch.setDynaSchemas(aOptions.task ? aOptions.task : null);
                     oApp.dynaDataSchemas = oApp2.dataSchemas;
                     /* 设置活动的动态选项 */
