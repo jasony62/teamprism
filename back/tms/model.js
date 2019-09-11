@@ -225,7 +225,7 @@ class DbModel extends Model {
         let model = fnCreate()
         model.context = this.context
         // 使用同一个数据库连接
-        model.db(this[DB_INSTANCE].conn)
+        model.db({ conn: this[DB_INSTANCE].conn })
 
         return model
     }

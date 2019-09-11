@@ -32,24 +32,10 @@
 <script>
 export default {
     props: {
-        matter: {
-            type: Object,
-            default: () => {
-                return { title: 'wait main loading...' }
-            }
-        }
+        matter: Object
     },
-    computed: {
-        articleId() {
-            return this.matter.id
-        }
-    },
-    mounted() {},
-    watch: {
-        articleId: {
-            async handler(nv) {},
-            immediate: true
-        }
+    mounted() {
+        this.$eventHub.$on('shell-loaded', article => {})
     },
     methods: {
         gotoChannel(channel) {}
