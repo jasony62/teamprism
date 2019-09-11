@@ -98,11 +98,7 @@ class Repos extends Base {
      * 返回指定活动的填写记录的共享内容
      */
     async recordList() {
-        let { page, size} = this.request.query
-        if (!page || !size) {
-            page = 1
-            size = 12
-        }
+        let { page = 1, size = 12} = this.request.query
         
         let oApp = this.app
         let oUser = await this.getUser()
@@ -203,11 +199,7 @@ class Repos extends Base {
      */
     async coworkDataList() {
         let oApp = this.app
-        let { page, size} = this.request.query
-        if (!page || !size) {
-            page = 1
-            size = 12
-        }
+        let { page = 1, size = 12} = this.request.query
         
         let coworkSchemaIds = [];
         for (const k in oApp.dynaDataSchemas) {
@@ -509,11 +501,7 @@ class Repos extends Base {
      */
     async recordByTopic() {
         let oApp = this.app
-        let { topic, page, size} = this.request.query
-        if (!page || !size) {
-            page = 1
-            size = 12
-        }
+        let { topic, page = 1, size = 12} = this.request.query
 
         let oUser = await this.getUser()
 
