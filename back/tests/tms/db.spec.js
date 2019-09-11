@@ -1,9 +1,12 @@
 describe("#tms", function() {
     describe("#db.js", function() {
-        let db;
-        test("connect", async () => {
-            db = await require("../../tms/db").create()
-            expect(db.conn).not.toBe(false)
+        let db
+        test("connect", () => {
+            let { Db, create: fnCreate } = require("../../tms/db")
+            return Db.getConnection().then(conn => {
+                db = fnCreate({ conn })
+                expect(db.conn).not.toBe(false)
+            })
         })
         describe("#Where", function() {
             let select, where
@@ -54,7 +57,7 @@ describe("#tms", function() {
                 select.where.fieldMatch('group_id', '=', 1);
             })
             test("sql", () => {
-                expect(select.sql).toBe(`select group_id,group_name from account_group where group_id='1'`)
+                expect(select.sql).toMatch(/^select group_id,group_name from account_group where group_id='1'$/i)
             })
             test("execute", async () => {
                 return select.exec().then(result => {
@@ -75,8 +78,8 @@ describe("#tms", function() {
             test("sql", () => {
                 expect(insAct.sql).toBe(`insert into xxt_log(siteid,create_at,method,data) values('1','1','insert','测试数据')`)
             })
-            test("execute", async () => {
-                return insAct.exec(true).then(autoIncId => {
+            test("execute", () => {
+                return insAct.exec({ isAutoIncId: true }).then(autoIncId => {
                     expect(autoIncId).toBeGreaterThan(0)
                 })
             })
@@ -90,9 +93,9 @@ describe("#tms", function() {
             test("sql", () => {
                 expect(delAct.sql).toBe(`delete from xxt_log where siteid='1'`)
             })
-            test("execute", async () => {
+            test("execute", () => {
                 return delAct.exec().then(result => {
-                    expect(result.affectedRows).toBeGreaterThanOrEqual(1)
+                    expect(result).toBeGreaterThanOrEqual(1)
                 })
             })
         })
@@ -106,14 +109,16 @@ describe("#tms", function() {
                 updAct.data.data = '更新测试数据'
                 expect(updAct.sql).toBe(`update xxt_log set data='更新测试数据' where siteid='1'`)
             })
-            test("execute", async () => {
+            test("execute", () => {
                 return updAct.exec().then(result => {
                     expect(result).toBe(0)
                 })
             })
         })
         afterAll(done => {
-            db.conn && db.conn.end(done)
+            db.end(() => {
+                require("../../tms/db").Db.closePool(done)
+            })
         })
     })
 })

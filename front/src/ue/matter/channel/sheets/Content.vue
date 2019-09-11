@@ -12,12 +12,7 @@ import apis from '@/apis/matter/channel'
 
 export default {
     props: {
-        matter: {
-            type: Object,
-            default: () => {
-                return { title: 'wait main loading...' }
-            }
-        }
+        matter: Object
     },
     data() {
         return {
@@ -27,40 +22,29 @@ export default {
     components: {
         MatterItem
     },
-    computed: {
-        channelId() {
-            return this.matter.id
-        }
+    mounted() {
+        this.$eventHub.$on('shell-loaded', async channel => {
+            try {
+                let matters = await apis.mattersGet(channel.id)
+                let moment = require('moment')
+                matters.forEach(m => {
+                    m._createAt = moment(m.create_at * 1000).format(
+                        'YYYY-MM-DD'
+                    )
+                })
+                this.matters = matters
+            } catch (e) {
+                this.$message({
+                    message: e,
+                    type: 'error',
+                    duration: 60000,
+                    showClose: true
+                })
+            }
+        })
     },
-    mounted() {},
     methods: {
         gotoMatter(oMatter) {}
-    },
-    watch: {
-        channelId: {
-            async handler(nv) {
-                try {
-                    if (nv) {
-                        let matters = await apis.mattersGet(nv)
-                        let moment = require('moment')
-                        matters.forEach(m => {
-                            m._createAt = moment(m.create_at * 1000).format(
-                                'YYYY-MM-DD'
-                            )
-                        })
-                        this.matters = matters
-                    }
-                } catch (e) {
-                    this.$message({
-                        message: e,
-                        type: 'error',
-                        duration: 60000,
-                        showClose: true
-                    })
-                }
-            },
-            immediate: true
-        }
     }
 }
 </script>

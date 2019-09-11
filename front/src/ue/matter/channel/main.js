@@ -1,9 +1,9 @@
 import TmsVue from "@/tms/components/startup"
 
-import Main from "./Main.vue"
+import Shell from "./Shell.vue"
 import router from "./router.js"
 
 new TmsVue({
     router,
-    render: h => h(Main),
+    render: h => h(Shell),
 }).$mount("#app")

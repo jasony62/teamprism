@@ -82,20 +82,33 @@ class SqlAction {
         this.table = table
     }
 
-    exec() {
-        return new Promise((resolve, reject) => {
-            if (this.db.debug) {
-                this.db.execSqlStack = this.sql
-                resolve([])
-            } else
-                this.conn.query(this.sql, (error, result) => {
-                    if (error) {
-                        reject(error)
-                    } else {
-                        resolve(result)
-                    }
+    async writableConn() {
+        let conn = await this.db.writableConn()
+        return conn
+    }
+
+    exec({ isWritableConn = false } = {}) {
+        if (this.db.debug) {
+            this.db.execSqlStack = this.sql
+            return Promise.resolve([])
+        }
+        return Promise.resolve(this.conn)
+            .then(conn => isWritableConn ? this.writableConn() : conn)
+            .then(conn => {
+                if (!conn) {
+                    console.log('数据库连接不可用', this.sql)
+                    return Promise.reject('数据库连接不可用')
+                }
+                return new Promise((resolve, reject) => {
+                    conn.query(this.sql, (error, result) => {
+                        if (error) {
+                            reject(error)
+                        } else {
+                            resolve(result)
+                        }
+                    })
                 })
-        })
+            })
     }
 }
 
@@ -112,13 +125,14 @@ class Insert extends SqlAction {
 
         return `insert into ${this.table}(${fields.join(',')}) values('${values.join("','")}')`
     }
-    exec(isAutoIncId = false) {
-        return new Promise((resolve, reject) => {
-            if (this.db.debug) {
-                this.db.execSqlStack = this.sql
-                resolve()
-            } else
-                this.conn.query(this.sql, (error, result) => {
+    exec({ isAutoIncId = false } = {}) {
+        if (this.db.debug) {
+            this.db.execSqlStack = this.sql
+            return Promise.resolve()
+        }
+        return this.writableConn().then(conn => {
+            return new Promise((resolve, reject) => {
+                conn.query(this.sql, (error, result) => {
                     if (error) {
                         reject(error)
                     } else {
@@ -128,6 +142,7 @@ class Insert extends SqlAction {
                             resolve(result.affectedRows)
                     }
                 })
+            })
         })
     }
 }
@@ -155,6 +170,23 @@ class Delete extends SqlActionWithWhere {
         return `delete from ${this.table} where ${this.where.sql}`
     }
 
+    exec() {
+        if (this.db.debug) {
+            this.db.execSqlStack = this.sql
+            return Promise.resolve(0)
+        }
+        return this.writableConn().then(conn => {
+            return new Promise((resolve, reject) => {
+                conn.query(this.sql, (error, result) => {
+                    if (error) {
+                        reject(error)
+                    } else {
+                        resolve(result.affectedRows)
+                    }
+                })
+            })
+        })
+    }
 }
 
 class Update extends SqlActionWithWhere {
@@ -171,19 +203,22 @@ class Update extends SqlActionWithWhere {
         return `update ${this.table} set ${pairs.join(",")} where ${this.where.sql}`
     }
     exec() {
-        return new Promise((resolve, reject) => {
-            if (this.db.debug) {
-                this.db.execSqlStack = this.sql
-                resolve(0)
-            } else
-                this.conn.query(this.sql, (error, result) => {
-                    if (error) {
-                        reject(error)
-                    } else {
-                        resolve(result.affectedRows)
-                    }
+        if (this.db.debug) {
+            this.db.execSqlStack = this.sql
+            return Promise.resolve(0)
+        }
+        return this.writableConn()
+            .then(conn => {
+                return new Promise((resolve, reject) => {
+                    conn.query(this.sql, (error, result) => {
+                        if (error) {
+                            reject(error)
+                        } else {
+                            resolve(result.affectedRows)
+                        }
+                    })
                 })
-        })
+            })
     }
 }
 
@@ -227,9 +262,9 @@ class Select extends SqlActionWithWhere {
     }
 }
 class SelectOne extends Select {
-    exec() {
+    exec({ isWritableConn = false } = {}) {
         return new Promise((resolve, reject) => {
-            super.exec().then((rows) => {
+            super.exec({ isWritableConn }).then((rows) => {
                 if (rows.length === 1)
                     resolve(rows[0])
                 else if (rows.length === 0)
@@ -241,9 +276,9 @@ class SelectOne extends Select {
     }
 }
 class SelectOneVal extends Select {
-    exec() {
+    exec({ isWritableConn = false } = {}) {
         return new Promise((resolve, reject) => {
-            super.exec().then((rows) => {
+            super.exec({ isWritableConn }).then((rows) => {
                 if (rows.length === 1)
                     resolve(Object.values(rows[0])[0])
                 else if (rows.length === 0)
@@ -258,61 +293,109 @@ class SelectOneVal extends Select {
 const DEBUG_MODE = Symbol('debug_mode')
 // 数据库连接
 const MYSQL_CONN = Symbol('mysql_conn')
+const MYSQL_CONN_WRITE = Symbol('mysql_conn_write')
 // 记录执行的SQL
 const EXEC_SQL_STACK = Symbol('exec_sql_stack')
+// 用户保存数据的上下文
+const DB_CONTEXT = Symbol('db_context')
 
 // 已经建立的数据库连接
-let cachedDbConn, cachedReadonlyDbConn
-
+let cachedDbPool, cachedWritableDbPool
+let dbConnCount = 0
 /**
- * 连接数据库
- * 
- * @param {Boolean} readonly 
- * @param {String} path 
+ * 获取或创建数据库连接池
  */
-function connect(readonly, path) {
-    // 只创建1次连接
-    if (readonly)
-        if (cachedReadonlyDbConn)
-            return Promise.resolve(cachedReadonlyDbConn)
-    else if (cachedDbConn)
-        return Promise.resolve(cachedDbConn)
+function getPool(path) {
+    // 只创建1次连接池
+    if (cachedDbPool && cachedWritableDbPool)
+        return [cachedDbPool, cachedWritableDbPool]
 
     if (!fs.existsSync(path)) return Promise.reject('指定的配置文件不存在')
 
     const fileConfig = fs.readFileSync(path)
     const oCusConfig = JSON.parse(fileConfig)
-    let oConnConfig = (readonly === true && oCusConfig.read) ? oCusConfig.read : oCusConfig.master
+    let oPoolConfig = oCusConfig.master
+    let oDefaultConfig = {
+        supportBigNumbers: true,
+        bigNumberStrings: true
+    }
+    Object.assign(oPoolConfig, oDefaultConfig)
 
-    if (oConnConfig.supportBigNumbers === undefined)
-        oConnConfig.supportBigNumbers = true
-    if (oConnConfig.bigNumberStrings === undefined)
-        oConnConfig.bigNumberStrings = true
+    console.log(`新建主数据库连接池`)
+    let dbPool = mysql.createPool(oPoolConfig)
+    cachedDbPool = dbPool
+    if (!oCusConfig.write) {
+        cachedWritableDbPool = cachedDbPool
+    } else {
+        let oPoolConfig = oCusConfig.write
+        Object.assign(oPoolConfig, oDefaultConfig)
+        console.log(`新建写数据库连接池`)
+        dbPool = mysql.createPool(oPoolConfig)
+        cachedWritableDbPool = dbPool
+    }
 
-    let conn = mysql.createConnection(oConnConfig)
-
-    if (readonly)
-        cachedReadonlyDbConn = conn
-    else
-        cachedDbConn = conn
-
+    return [cachedDbPool, cachedWritableDbPool]
+}
+/**
+ * 连接数据库
+ * 
+ * @param {String} path 
+ * @param {Boolean} isWritableConn 
+ * @param {Connection} conn
+ */
+function connect({ path, isWritableConn, conn = null }) {
+    dbConnCount++
     return new Promise((resolve, reject) => {
-        conn.connect(err => {
-            if (err)
+        let beginAt = Date.now()
+        let [pool, writablePool] = getPool(path)
+
+        // 如果没有独立的写数据库，且指定了已有连接，就直接返回已有连接
+        if (pool === writablePool && isWritableConn && !conn)
+            return conn
+
+        let connPool = isWritableConn ? writablePool : pool
+        connPool.getConnection((err, conn) => {
+            if (err) {
+                console.log(`连接数据库失败：`, err)
                 reject(err)
-            else
+            } else {
+                let duration = Date.now() - beginAt
+                console.log(`获得数据库连接(${dbConnCount})(${duration}ms)(${conn.threadId})`)
                 resolve(conn)
+            }
         })
     })
 }
-
+/**
+ * 
+ */
 class Db {
-    constructor(conn, debug = false) {
+    constructor(conn = null, debug = false, context = null) {
         this[MYSQL_CONN] = conn
         this[DEBUG_MODE] = debug
+        this[DB_CONTEXT] = context
     }
+    get context() {
+        return this[DB_CONTEXT]
+    }
+    // 默认连接
     get conn() {
         return this[MYSQL_CONN]
+    }
+    // 写数据库连接
+    async writableConn() {
+        let conn
+        if (this[MYSQL_CONN_WRITE])
+            conn = this[MYSQL_CONN_WRITE]
+        else if (this[DB_CONTEXT] && this.context.writableDbConn)
+            conn = this[MYSQL_CONN_WRITE] = this.context.writableDbConn
+        else {
+            conn = this[MYSQL_CONN_WRITE] = await Db.getConnection({ isWritableConn: true, conn: this.conn })
+            if (this.context)
+                this.context.writableDbConn = conn
+        }
+
+        return conn
     }
     get debug() {
         return this[DEBUG_MODE]
@@ -325,19 +408,30 @@ class Db {
         return this[EXEC_SQL_STACK]
     }
 
-    static async build(readonly, path, debug) {
-        let conn
-        if (debug)
-            conn = null
-        else
-            conn = await connect(readonly, path)
-
-        return new Db(conn, debug)
+    static getPool(path = process.cwd() + "/cus/db.json") {
+        return getPool(path)
     }
 
-    static destroy() {
-        if (cachedDbConn) cachedDbConn.destroy()
-        if (cachedReadonlyDbConn) cachedReadonlyDbConn.destroy()
+    static async getConnection({ path = process.cwd() + "/cus/db.json", isWritableConn = false, conn = null } = {}) {
+        return await connect({ path, isWritableConn, conn })
+    }
+
+    static release(dbConn) {
+        if (dbConn) {
+            console.log(`销毁数据库连接(${dbConn.threadId})`)
+            dbConn.release()
+            dbConn = null
+        }
+    }
+
+    static closePool(done) {
+        new Promise(resolve => {
+            cachedWritableDbPool ? cachedWritableDbPool.end(resolve) : resolve(true)
+        }).then(() => {
+            return cachedDbPool ? new Promise(resolve => { cachedDbPool.end(resolve) }) : true
+        }).then(() => {
+            if (done && typeof done === 'function') done()
+        })
     }
     /**
      * 通常只有单元测试时才需要使用该方法，应该用destroy关闭所有连接
@@ -345,10 +439,11 @@ class Db {
      * @param {Function} done 
      */
     end(done) {
-        if (this.conn)
-            this.conn.end(done)
-        else if (done && typeof done === 'function')
-            done()
+        if (!this.context) {
+            if (this[MYSQL_CONN_WRITE]) this[MYSQL_CONN_WRITE].release()
+            if (this.conn) this.conn.release()
+            if (done && typeof done === 'function') done()
+        }
         delete this[EXEC_SQL_STACK]
     }
 
@@ -376,18 +471,15 @@ class Db {
         return new SelectOneVal(this, table, fields)
     }
 }
-
-async function create({
-    readonly = false,
-    path = process.cwd() + "/cus/db.json",
-    debug = false
-} = {}) {
-    try {
-        let db = await Db.build(readonly, path, debug)
-        return db
-    } catch (err) {
-        return false
-    }
+/**
+ * 
+ * @param {*} conn 
+ * @param {*} debug 
+ * @param {*} context
+ */
+function create({ conn = null, debug = false, context = null } = {}) {
+    let db = new Db(conn, debug, context)
+    return db
 }
 
 module.exports = { Db, create }

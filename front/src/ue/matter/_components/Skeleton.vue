@@ -15,7 +15,7 @@
                             </div>
                         </div>
                         <div class="col-md-9 col-md-pull-3 col-xs-12">
-                            <router-view :matter="matter" :user="user"></router-view>
+                            <router-view :matter="matter"></router-view>
                         </div>
                     </div>
                 </div>
@@ -27,15 +27,12 @@
 import NavbarTop from '@/ue/matter/_components/NavbarTop.vue'
 import SiteCard from '@/ue/matter/_components/SiteCard.vue'
 
-import apis from '@/apis/site'
-
 export default {
-    props: ['site', 'matter', 'user'],
+    props: ['site', 'matter'],
     components: {
         NavbarTop,
         SiteCard
     },
-    mounted() {},
     watch: {
         matter: {
             async handler(nv) {

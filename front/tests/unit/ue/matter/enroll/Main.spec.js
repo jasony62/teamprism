@@ -1,7 +1,7 @@
 import { shallowMount, config } from "@vue/test-utils"
 import MainVue from "@/ue/matter/enroll/Main.vue"
 import Vue from "vue"
-
+Vue.prototype.$eventHub = Vue.prototype.$eventHub || new Vue()
 
 describe("ue", () => {
     describe("matter", () => {
