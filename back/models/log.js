@@ -3,8 +3,8 @@ const { DbModel } = require('../tms/model')
  * 日志
  */
 class Log extends DbModel {
-    constructor() {
-        super('xxt_log')
+    constructor({ debug = false } = {}) {
+        super('xxt_log', { debug })
     }
     /**
      * 
@@ -24,6 +24,8 @@ class Log extends DbModel {
     }
 }
 
-module.exports = function () {
-    return new Log()
+function create({ debug = false } = {}) {
+    return new Log({ debug })
 }
+
+module.exports = { Log, create }

@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const Token = require('../token')
-const { ResultFault, AccessTokenFault, Api } = require('../api')
+const { ResultFault, AccessTokenFault } = require('../api')
 const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
-const Log = require('../../models/log')
 const { tms_get_server } = require('../../tms/utilities')
 
 /**
@@ -100,12 +99,11 @@ router.all('*', async (req, res) => {
         res.json(result)
     } catch (err) {
         let errMesg = typeof err === 'string' ? err : err.toString()
-        let modelLog = Log()
-        let errStack =  Api.escape(err.stack ? err.stack : errMesg)
-        let referer =  Api.escape(req.url)
+        let modelLog = oCtrl.model('log')
+        let errStack =  oCtrl.escape(err.stack ? err.stack : errMesg)
+        let referer =  oCtrl.escape(req.url)
 
-        modelLog.log('error', req.path, errStack, tms_get_server(req, 'user-agent'), referer)
-        modelLog.end()
+        modelLog.log('error', 'ue' + req.path, errStack, tms_get_server(req, 'user-agent'), referer)
 
         res.json(new ResultFault(errMesg))
     } finally {

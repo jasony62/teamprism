@@ -78,7 +78,7 @@ class Api {
     /**
      * 防sql注入
      */
-    static escape(data) {
+    escape(data) {
         return Model.escape(data)
     }
     /**
