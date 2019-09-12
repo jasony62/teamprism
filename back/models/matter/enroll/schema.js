@@ -1,7 +1,5 @@
 const { Base: MatterBase } = require('../base')
 const { getDeepValue } = require('../../../tms/utilities')
-// const { create : Round } = require('./round')
-// const Enroll = require('../enroll')
 
 class Schema extends MatterBase {
     constructor({ debug = false } = {}) {

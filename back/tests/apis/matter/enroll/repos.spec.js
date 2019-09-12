@@ -29,8 +29,8 @@ describe("#apis", () => {
                         expect(rst).toMatchObject({ code: 0, result: expect.anything() })
                     })
                 })
-                test("coworkDataList()", () => {
-                    return ctrl.coworkDataList().then(rst => {
+                test("coworkList()", () => {
+                    return ctrl.coworkList().then(rst => {
                         expect(rst).toMatchObject({ code: 0, result: expect.anything() })
                     })
                 })
