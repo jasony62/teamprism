@@ -189,6 +189,8 @@ class Repos extends Base {
         //     modelEvent.searchRecord(oApp, rest['search'], oUser)
         // }
 
+        oResult.datas = oResult.records
+        delete oResult.records
         return new ResultData(oResult)
     }
     /**
@@ -269,7 +271,9 @@ class Repos extends Base {
         //     // 记录日志
         //     this.model('matter\enroll\event').searchRecord(oApp, rest['search'], oUser);
         // }
-
+        
+        oResult.datas = oResult.recordDatas
+        delete oResult.recordDatas
         return new ResultData(oResult)
     }
     /**
@@ -342,6 +346,8 @@ class Repos extends Base {
         //     this.model('matter\enroll\event').searchRecord(oApp, rest['search'], oUser)
         // }
 
+        oResult.datas = oResult.topics
+        delete oResult.topics
         return new ResultData(oResult)
     }
     /**
