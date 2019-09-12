@@ -33,6 +33,7 @@ describe("#tms", function() {
             })
             test("通过access_token获得用户信息", (done) => {
                 const agent = request.agent(app)
+                console.log('at', access_token)
                 agent.get(`/ue/auth/client?access_token=${access_token}`)
                     .then((res) => {
                         expect(res.body).toMatchObject(expect.objectContaining({

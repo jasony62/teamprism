@@ -109,16 +109,6 @@ class Model {
             return data
         }
     }
-    /**
-     * 加载指定的model包
-     * 
-     * @param {*} name 
-     */
-    model(name, app = null) {
-        let { create: fnCreate } = require(`${process.cwd()}/models/${name}`)
-        let model = fnCreate(app)
-        return model
-    }
     get context() {
         return this[MODEL_CONTEXT]
     }
