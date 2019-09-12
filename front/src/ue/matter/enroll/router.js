@@ -49,7 +49,7 @@ const routes = [
     },
     { path: '/ue/matter/enroll/:siteId/:appId/event', name: 'event', component: Event },
     {
-        path: '/analyze',
+        path: '/ue/matter/enroll/:siteId/:appId/analyze',
         name: 'analyze',
         component: Analyze,
         children: [

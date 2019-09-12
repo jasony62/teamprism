@@ -15,7 +15,10 @@ import RecordListItem from "../../common/RecordListItem"
 import { Notify } from 'vant'
 
 export default {
-    props: ['app', 'user'],
+    props: {
+        app: Object,
+        user: Object
+    },
     data: function() {
         return {
             records: []
@@ -26,7 +29,7 @@ export default {
         appid() {
             return this.app.id
         },
-        schemas: function() {
+        schemas() {
             var _aShareableSchemas = [];
             this.app.dynaDataSchemas.forEach((oSchema) => {
                 if (oSchema.shareable === 'Y') {
@@ -48,6 +51,8 @@ export default {
         async fetchList(appid) {
             try {
                 let result = await RepApis.getList('recordList', appid)
+                let moment = require('moment')
+                result.record._createAt = moment(m.create_at * 1000).format('YYYY-MM-DD h:mm:ss')
                 this.records = result.records
             } catch (e) {
                 Notify({

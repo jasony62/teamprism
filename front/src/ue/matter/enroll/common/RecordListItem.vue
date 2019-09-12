@@ -6,9 +6,9 @@
                 <van-button type="danger" size="mini" v-if="record.agreed==='Y'">推荐</van-button>
             </van-cell>
             <van-cell class="record-content">
-                <ui-schemas class="repos-record" :rec="record" :subjects="schemas"></ui-schemas>
+                <ui-schemas class="repos-record" :schema-rec="record" :schema-name="schemas"></ui-schemas>
             </van-cell>
-            <van-cell :title="record.enroll_at*1000 | formatDate" class="record-footer">                  
+            <van-cell :title="record._createAt" class="record-footer">                  
                 <span class="record-indicator" v-if="record.like_num!='0'" :class="{'like': record.like_log[user.uid]}">
                     <van-icon name="thumb-circle-o" tag="span"/>&nbsp;<span v-text="record.like_num"></span>
                 </span>
@@ -38,7 +38,11 @@ import { Col, Icon, Button, Cell, CellGroup} from "vant"
 import UiSchemas from "@/ue/matter/enroll/assert/UiSchemas"
 
 export default {
-    props: ['record', 'user', 'schemas'],
+    props: {
+        record: Object,
+        user: Object,
+        schemas: Array
+    },
     components: {
         [Col.name]: Col,
         [Icon.name]: Icon,
@@ -46,23 +50,6 @@ export default {
         [Cell.name]: Cell,
         [CellGroup.name]: CellGroup,
         UiSchemas
-    },
-    filters: {
-        formatDate: function(value) {
-            let date = new Date(value);
-            let y = date.getFullYear();
-            let MM = date.getMonth() + 1;
-            MM = MM < 10 ? "0" + MM : MM;
-            let d = date.getDate();
-            d = d < 10 ? "0" + d : d;
-            let h = date.getHours();
-            h = h < 10 ? "0" + h : h;
-            let m = date.getMinutes();
-            m = m < 10 ? "0" + m : m;
-            let s = date.getSeconds();
-            s = s < 10 ? "0" + s : s;
-            return y + "-" + MM + "-" + d + " " + h + ":" + m + ":" + s;
-        }
     },
     methods: {
         remarkRecord(record, event) {
@@ -74,7 +61,7 @@ export default {
             if (/button/i.test(target.tagName) || /button/i.test(target.parentNode.tagName)) return;
 
             //addToCache();
-            this.$router.push({name: 'record-cowork', path: `/ue/matter/enroll/${params.siteId}/${params.appId}/record/${record.enroll_key}/cowork`})
+            this.$router.push({name: 'record', path: `/ue/matter/enroll/${params.siteId}/${params.appId}/record/${record.enroll_key}/cowork`})
         }
     }
 };

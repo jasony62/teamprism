@@ -24,7 +24,10 @@ export default {
         [Tabs.name]: Tabs, 
         PrimaryNav 
     },
-    props: ['app', 'user'],
+    props: {
+        app: Object,
+        user: Object
+    },
     data() {
         return {
             tabs: [{
