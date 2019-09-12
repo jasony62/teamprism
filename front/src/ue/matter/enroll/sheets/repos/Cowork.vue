@@ -1,7 +1,6 @@
 <template>
     <div id="repos-cowork">
-        <div>Repos Cowork</div>
-        <tms-list :items="coworks">
+        <tms-list :items="coworks" :pageInfo="page" @loadmore="fetchList(app.id, page.at)">
             <template v-slot:item="{ item }">
                 <cowork-list-item :cowork="item" :schemas="schemas" :user="user"></cowork-list-item>
             </template>
@@ -21,7 +20,12 @@ export default {
     },
     data: function() {
         return {
-            coworks: []
+            coworks: [],
+            page: {
+                at: 1,
+                size: 20,
+                total: 0
+            }
         }
     },
     components: { TmsList, CoworkListItem },
@@ -42,22 +46,28 @@ export default {
     watch: {
         appid: {
             async handler(nv) {
-                if (nv) this.fetchList(nv)
+                if (nv) this.fetchList(nv, 1)
             },
             immediate: true
         }        
     },
     methods: {
-        async fetchList(appid) {
+        async fetchList(appid, pageAt) {
             try {
-                let result = await RepApis.getList('coworkList', appid)
-                this.coworks = result.coworks
+                pageAt ? this.page.at = pageAt : this.page.at
+                let result = await RepApis.getList('coworkList', appid, this.page)
+                let moment = require('moment')
+                result.datas.forEach(cowork => {
+                    cowork._createAt = moment(cowork.enroll_at * 1000).format('YYYY-MM-DD h:mm:ss')
+                    this.coworks.push(cowork)
+                })
+                this.page.total = result.total;
+                this.page.at += 1;
             } catch (e) {
                 Notify({
                     message: e,
                     type: 'danger'
                 });
-                
             } 
         }
     }

@@ -37,11 +37,11 @@ export default {
                 title: '答案',
                 value: 'cowork'
             },{
-                title: '评论',
-                value: 'remark'
-            },{
                 title: '专题',
                 value: 'topic'
+            },{
+                title: '评论',
+                value: 'remark'
             }],
             activeName: "record"
         }

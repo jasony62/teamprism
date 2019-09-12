@@ -58,7 +58,7 @@ const routes = [
         ],
         props: true
     },
-    { path: '/ue/matter/enroll/:siteId/:appId/topic', name: 'topic', component: Topic, props: true },
+    { path: '/ue/matter/enroll/:siteId/:appId/topic/:topicId', name: 'topic', component: Topic, props: true },
     { path: '/ue/matter/enroll/:siteId/:appId/share', name: 'share', component: Share, props: true },
     { path: '/ue/matter/enroll/*', name: 'failure', component: Failure, props: true }
 ]

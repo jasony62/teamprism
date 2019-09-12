@@ -4,19 +4,28 @@
             <li v-for="item in items" :key="item.id">
                 <slot name="item" :item="item"></slot>
             </li>
+            <li v-if="pageInfo.total > items.length">
+                <button @click="onload()">加载更多</button>
+            </li>
         </ul> 
     </div>
 </template>
 <script>
 export default {
     props: {
-        items: Array
+        items: Array,
+        pageInfo:Object
     },
     data() {
         return {
             loading: false,
             finished: false
-        };
+        }
+    },
+    methods: {
+        onload() {
+            this.$emit("loadmore")
+        }
     }
 };
 </script>

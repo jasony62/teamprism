@@ -8,7 +8,7 @@
         <div v-for="schema in schemas" :key="schema.id" class='rec-data-schema'>
             <div class="rec-data-title text-muted" v-bind:class="[schemasLen > 1 ? 'more' : 'one']"><span v-text="schema.title"></span></div>
             <div v-if="schema.type==='file'">
-                <div v-for="file in record.data[schema.id]" :key="file.index">
+                <div v-for="(file, key) in record.data[schema.id]" :key="key">
                     <video v-if="file.type==='video'" controls="controls" preload="none">
                         <source :src="file.url" :type="file.type" />
                     </video>
@@ -26,7 +26,7 @@
                 </div>
             </div>
             <div v-else-if="schema.type==='voice'">
-                <div v-for="voice in record.data[schema.id]" :key="voice.index">
+                <div v-for="(voice, key) in record.data[schema.id]" :key="key">
                     <audio controls="controls" preload="none">
                         <source :src="voice.url" :type="voice.type" />
                     </audio>
@@ -34,27 +34,27 @@
             </div>
             <div v-else-if="schema.type==='image'">
                 <ul class='list-unstyled'>
-                    <li v-for="img in record.data[schema.id].split(',')" :key="img.index"><img :src="img" /></li>
+                    <li v-for="(img, key) in record.data[schema.id].split(',')" :key="key"><img :src="img" /></li>
                 </ul>
             </div>
             <div v-else-if="schema.type==='score'">
-                <div v-for="item in record.data[schema.id]" :key="item.index">
+                <div v-for="(item, key) in record.data[schema.id]" :key="key">
                     <span v-text="item.title"></span>:<span v-text="item.score"></span>;
                 </div>
             </div>
             <div v-else-if="schema.type==='multitext' && (!schema.cowork||schema.cowork!=='Y')">
-                <span v-for="item in record.data[schema.id]" :key="item.index">
+                <span v-for="(item, key) in record.data[schema.id]" :key="key">
                     <span v-text="item.value"></span><span v-hide="item.index==record.data[schema.id].length-1">;</span>
                 </span>
             </div>
             <div v-else-if="schema.type==='multitext' && schema.cowork==='Y'" class="cowork">
-                <p v-for="item in record.data[schema.id]" :key="item.index">
-                    <span dynamic-html="item.value"></span>
+                <p v-for="(item, key) in record.data[schema.id]" :key="key">
+                    <span v-text="item.value"></span>
                 </p>
             </div>
             <div v-else-if="schema.type==='single'"><span v-text="record.data[schema.id]"></span></div>
             <div v-else-if="schema.type==='multiple'">
-                <span v-for="item in record.data[schema.id]" :key="item.index">
+                <span v-for="(item, key) in record.data[schema.id]" :key="key">
                     <span v-text="item"></span><span v-hide="item.index==record.data[schema.id].length-1">,</span>
                 </span>
             </div>

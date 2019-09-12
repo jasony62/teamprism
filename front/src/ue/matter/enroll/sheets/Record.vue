@@ -18,9 +18,14 @@ import { Record as RecApis } from '@/apis/matter/enroll'
 
 export default {
     props: {
-        ek: "",
+        ek: String,
         app: Object,
         user: Object
+    },
+    data() {
+        return {
+            record: ""
+        }
     },
     mounted() {},
     computed: {

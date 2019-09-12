@@ -60,8 +60,7 @@ export default {
             if (target.getAttribute('ng-click') || target.parentNode.getAttribute('ng-click')) return;
             if (/button/i.test(target.tagName) || /button/i.test(target.parentNode.tagName)) return;
 
-            //addToCache();
-            this.$router.push({name: 'record', path: `/ue/matter/enroll/${params.siteId}/${params.appId}/record/${record.enroll_key}/cowork`})
+            this.$router.push(`/ue/matter/enroll/${params.siteId}/${params.appId}/record/${record.enroll_key}/cowork`)
         }
     }
 };

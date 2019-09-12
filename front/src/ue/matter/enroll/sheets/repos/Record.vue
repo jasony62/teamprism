@@ -1,6 +1,6 @@
 <template>
     <div id="repos-record">
-        <tms-list :items="records">
+        <tms-list :items="records" :pageInfo="page" @loadmore="fetchList(app.id, page.at)">
             <template v-slot:item="{ item }">
                 <record-list-item :record="item" :schemas="schemas" :user="user"></record-list-item>
             </template>
@@ -21,7 +21,12 @@ export default {
     },
     data: function() {
         return {
-            records: []
+            records: [],
+            page: {
+                at: 1,
+                size: 20,
+                total: 0
+            }
         }
     },
     components: { TmsList, RecordListItem },
@@ -42,24 +47,28 @@ export default {
     watch: {
         appid: {
             async handler(nv) {
-                if (nv) this.fetchList(nv)
+                if (nv) this.fetchList(nv, 1)
             },
             immediate: true
         }
     },
     methods: {
-        async fetchList(appid) {
+        async fetchList(appid, pageAt) {
             try {
-                let result = await RepApis.getList('recordList', appid)
+                pageAt ? this.page.at = pageAt : this.page.at
+                let result = await RepApis.getList('recordList', appid, this.page)
                 let moment = require('moment')
-                result.record._createAt = moment(m.create_at * 1000).format('YYYY-MM-DD h:mm:ss')
-                this.records = result.records
+                result.datas.forEach(record => {
+                    record._createAt = moment(record.enroll_at * 1000).format('YYYY-MM-DD h:mm:ss')
+                    this.records.push(record)
+                })
+                this.page.total = result.total;
+                this.page.at += 1;
             } catch (e) {
                 Notify({
                     message: e,
                     type: 'danger'
                 });
-                
             } 
         }
     }

@@ -1,13 +1,12 @@
 <template>
     <div id="record-cowork">
-        <div>Record Cowork</div>
         <van-cell-group class="record-cell-group">
             <van-cell icon="user-o" :title="record.nickname || '隐藏'" class="record-header">
                 <van-button type="info" size="mini" v-if="record.favored" @click="favorRecord(record)">已收藏</van-button>
                 <van-button type="danger" size="mini" v-if="record.agreed==='Y'">推荐</van-button>
             </van-cell>
             <van-cell class="record-content">
-                <ui-schemas class="repos-record" :schema-rec="record" :schema-name="schemas"></ui-schemas>
+                <ui-schemas :schema-rec="record" :schema-name="schemas"></ui-schemas>
             </van-cell>
             <van-cell :title="record.enroll_at*1000 | formatDate" class="record-footer">                  
                 <span class="record-indicator" v-if="record.like_num!='0'" :class="{'like': record.like_log[user.uid]}">

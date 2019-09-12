@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { Col, Icon, Button, Cell, CellGroup} from "vant"
+import { Icon, Button, Cell, CellGroup} from "vant"
 import UiSchemas from "@/ue/matter/enroll/assert/UiSchemas"
 
 export default {
@@ -36,7 +36,6 @@ export default {
         schemas: Array
     },
     components: {
-        [Col.name]: Col,
         [Icon.name]: Icon,
         [Button.name]: Button,
         [Cell.name]: Cell,
@@ -52,8 +51,7 @@ export default {
             if (target.getAttribute('ng-click') || target.parentNode.getAttribute('ng-click')) return;
             if (/button/i.test(target.tagName) || /button/i.test(target.parentNode.tagName)) return;
 
-            //addToCache();
-            this.$router.push({name: 'record-cowork', path: `/ue/matter/enroll/${params.siteId}/${params.appId}/record/${cowork.enroll_key}/cowork`})
+            this.$router.push(`/ue/matter/enroll/${params.siteId}/${params.appId}/record/${cowork.enroll_key}/cowork`)
         }
     }
 }
