@@ -13,7 +13,7 @@ class Topic extends Base {
         let oApp = this.app
 
         let oPosted = this.request.body ? this.request.body : {}
-        let oUser = await this.getUser(oApp)
+        let oUser = await this.getUser()
 
         let w = `state=1 and aid='${oApp.id}'`
         if (oPosted.keyword) {

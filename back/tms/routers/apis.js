@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const Token = require('../token')
-const { ResultFault, AccessTokenFault } = require('../api')
+const { ResultFault, AccessTokenFault, Api } = require('../api')
 const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
 const { tms_get_server } = require('../../tms/utilities')
 
@@ -57,13 +57,13 @@ router.all('*', async (req, res) => {
     }
     let client = aResult[1]
 
-    let oCtrl, method
+    let oCtrl, method, dbConn
     try {
         /**
          * 获取数据库连接
          */
         let { Db } = require('../db')
-        let dbConn = await Db.getConnection();
+        dbConn = await Db.getConnection();
         /**
          * 创建控制器
          */
@@ -98,13 +98,17 @@ router.all('*', async (req, res) => {
 
         res.json(result)
     } catch (err) {
+        if (!oCtrl) {
+            oCtrl = new Api(req, client, dbConn)
+        }
+
         let errMesg = typeof err === 'string' ? err : err.toString()
         let modelLog = oCtrl.model('log')
         let errStack =  oCtrl.escape(err.stack ? err.stack : errMesg)
         let referer =  oCtrl.escape(req.url)
-
-        modelLog.log('error', 'ue' + req.path, errStack, tms_get_server(req, 'user-agent'), referer)
-
+        
+        await modelLog.log('error', 'ue' + req.path, errStack, tms_get_server(req, 'user-agent'), referer)
+        
         res.json(new ResultFault(errMesg))
     } finally {
         // 关闭数据库连接

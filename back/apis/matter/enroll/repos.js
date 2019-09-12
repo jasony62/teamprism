@@ -1,8 +1,6 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const { getDeepValue, replaceHTMLTags } = require('../../../tms/utilities')
 const Base = require('./base')
-// const Tag2 = require('../../../models/matter/enroll/tag2')
-// const Assoc = require('../../../models/matter/enroll/assoc')
 
 class Repos extends Base {
     constructor(...args) {
@@ -426,24 +424,24 @@ class Repos extends Base {
                     //     if (processType === 'coworkDataList') {
                     //         continue;
                     //     } else if (processType === 'recordByTopic') {
-                    //         if (this.getDeepValue(oVoteRule->schema, 'cowork') === 'Y') {continue;}
-                    //         oRecData = modelData->byRecord(rawData->enroll_key, ['schema' => schemaId, 'fields' => 'id,vote_num']);
+                    //         if (this.getDeepValue(oVoteRule.schema, 'cowork') === 'Y') {continue;}
+                    //         oRecData = modelData.byRecord(rawData.enroll_key, ['schema' => schemaId, 'fields' => 'id,vote_num']);
                     //         if (oRecData) {
-                    //             vote_at = (int) modelData->query_val_ss(['vote_at', 'xxt_enroll_vote', ['rid' => oApp->appRound->rid, 'data_id' => oRecData->id, 'state' => 1, 'userid' => oUser->uid]]);
-                    //             oRecData->vote_at = vote_at;
-                    //             oRecData->state = oVoteRule->state;
-                    //             oVoteResult->{schemaId} = oRecData;
+                    //             vote_at = (int) modelData.query_val_ss(['vote_at', 'xxt_enroll_vote', ['rid' => oApp.appRound.rid, 'data_id' => oRecData.id, 'state' => 1, 'userid' => oUser.uid]]);
+                    //             oRecData.vote_at = vote_at;
+                    //             oRecData.state = oVoteRule.state;
+                    //             oVoteResult.{schemaId} = oRecData;
                     //         }
                     //     } else {
                     //         oVoteResult = new \stdClass;
-                    //         if (this->getDeepValue(oVoteRule->schema, 'cowork') === 'Y') {continue;}
-                    //         oRecData = modelData->byRecord(rawData->enroll_key, ['schema' => schemaId, 'fields' => 'id,vote_num']);
+                    //         if (this.getDeepValue(oVoteRule.schema, 'cowork') === 'Y') {continue;}
+                    //         oRecData = modelData.byRecord(rawData.enroll_key, ['schema' => schemaId, 'fields' => 'id,vote_num']);
                     //         if (oRecData) {
-                    //             oVoteResult->{schemaId} = oRecData;
+                    //             oVoteResult.{schemaId} = oRecData;
                     //         }
                     //     }
                     // }
-                    // rawData->voteResult = oVoteResult;
+                    // rawData.voteResult = oVoteResult;
                 }
             }
             /* 设置昵称 */
@@ -515,38 +513,38 @@ class Repos extends Base {
         let oTopic = await modelTop.byId(topic)
 
         let oResult = await modelTop.records(oTopic, {'fields' : modelRec.REPOS_FIELDS})
-        // if (!empty($oResult->records)) {
+        // if (!empty(oResult.records)) {
         //     /* 获取记录的投票信息 */
-        //     if (!empty($oApp->voteConfig)) {
-        //         $aVoteRules = $this->model('matter\enroll\task', $oApp)->getVoteRule($oUser);
+        //     if (!empty(oApp.voteConfig)) {
+        //         aVoteRules = this.model('matter\enroll\task', oApp).getVoteRule(oUser);
         //     } else {
-        //         $aVoteRules = null;
+        //         aVoteRules = null;
         //     }
         //     // 处理数据
-        //     $this->_processDatas($oApp, $oUser, $oResult->records, 'recordByTopic', $aVoteRules);
+        //     this._processDatas(oApp, oUser, oResult.records, 'recordByTopic', aVoteRules);
         //     /**
         //      * 根据任务进行排序
         //      * 1、投票任务结束后，根据投票数排序
         //      * 2、投票进行中，指定了排序规则，按规则排序
         //      */
-        //     if (!empty($oTopic->task_id) && !empty($oResult->records)) {
-        //         $oTask = $this->model('matter\enroll\task', $oApp)->byId($oTopic->task_id);
-        //         if ($oTask) {
-        //             if ($oTask->config_type === 'vote') {
-        //                 if ($oTask->state === 'AE') {
-        //                     if (!empty($oTask->schemas)) {
-        //                         $p = 'voteResult.' . $oTask->schemas[0] . '.vote_num';
-        //                         usort($oResult->records, function ($a, $b) use ($p) {
-        //                             $anum = $this->getDeepValue($a, $p, 0);
-        //                             $bnum = $this->getDeepValue($b, $p, 0);
-        //                             return $bnum - $anum;
+        //     if (!empty(oTopic.task_id) && !empty(oResult.records)) {
+        //         oTask = this.model('matter\enroll\task', oApp).byId(oTopic.task_id);
+        //         if (oTask) {
+        //             if (oTask.config_type === 'vote') {
+        //                 if (oTask.state === 'AE') {
+        //                     if (!empty(oTask.schemas)) {
+        //                         p = 'voteResult.' . oTask.schemas[0] . '.vote_num';
+        //                         usort(oResult.records, function (a, b) use (p) {
+        //                             anum = this.getDeepValue(a, p, 0);
+        //                             bnum = this.getDeepValue(b, p, 0);
+        //                             return bnum - anum;
         //                         });
         //                     }
         //                 }
         //             }
-        //             if (in_array($oTask->config_type, ['vote', 'answer'])) {
-        //                 if ($this->getDeepValue($oTask, 'source.orderby') === 'random') {
-        //                     shuffle($oResult->records);
+        //             if (in_array(oTask.config_type, ['vote', 'answer'])) {
+        //                 if (this.getDeepValue(oTask, 'source.orderby') === 'random') {
+        //                     shuffle(oResult.records);
         //                 }
         //             }
         //         }
@@ -568,12 +566,233 @@ class Repos extends Base {
         if (false === oRecord || oRecord.state != 1) {
             return new ResultObjectNotFound()
         }
-        let oUser = await this.getUser(oApp)
+        let oUser = await this.getUser()
 
         let oRecords = [oRecord]
         this._processDatas(oApp, oUser, oRecords, 'recordList')
 
         return new ResultData(oRecord)
+    }
+    /**
+     * 获取活动共享页筛选条件
+     */
+    async criteriaGet() {
+        let { viewType = 'record' } = this.request.query
+
+        let oUser = await this.getUser()
+
+        let oCriterias = this._originCriteriaGet()
+        let result = await this._packCriteria(oUser, oCriterias, viewType)
+        if (result[0] === false) {
+            return new ResultFault(result[1])
+        }
+
+        let criterias = result[1]
+        return new ResultData(criterias)
+    }
+    /**
+     * 按当前用户角色过滤筛选条件
+     */
+    async _packCriteria(oUser, criterias, viewType = 'record') {
+        let oApp = this.app
+        if (!Array.isArray(criterias)) {
+            return [false, '参数格式错误！']
+        }
+
+        for (let key in criterias) {
+            let oCriteria = criterias[key]
+            // 默认排序
+            if (oCriteria.type === 'orderby') {
+                if (viewType === 'topic') {
+                    oCriteria.menus = []
+                    oCriteria.menus.push({'id' : 'lastest', 'title' : '最近创建'})
+                    oCriteria.menus.push({'id' : 'earliest', 'title' : '最早创建'})
+                    oCriteria.default = oCriteria.menus[0]
+                } else {
+                    if (getDeepValue(oApp, "reposConfig.defaultOrder")) {
+                        for (let i in oCriteria.menus) {
+                            let v = oCriteria.menus[i]
+                            if (v.id === oApp.reposConfig.defaultOrder) {
+                                oCriteria.default = oCriteria.menus[i]
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            //获取轮次
+            if (oCriteria.type === 'rid') {
+                if (viewType === 'topic') {
+                    criterias.splice(key, 1)
+                } else {
+                    let modelRun = this.model('matter/enroll/round')
+                    let options = {'fields' : 'rid,title', 'state' : ['1', '2']}
+                    let result = await modelRun.byApp(oApp, options)
+                    if (result.rounds.length == 1) {
+                        criterias.splice(key, 1)
+                    } else {
+                        result.rounds.forEach( (round) => {
+                            if (round.rid === result.active.rid) {
+                                oCriteria.menus.push({'id' : round.rid, 'title' : '(当前填写轮次) ' . round.title})
+                            } else {
+                                oCriteria.menus.push({'id' : round.rid, 'title' : round.title})
+                            }
+                        })
+                    }
+                }
+            }
+            // 如果有答案的题型才显示筛选答案的按钮
+            if (oCriteria.type === 'coworkAgreed') {
+                let coworkState = false
+                if (viewType === 'record') {
+                    for (let oSchema of oApp.dynaDataSchemas) {
+                        if (getDeepValue(oSchema, "cowork") === 'Y') {
+                            coworkState = true
+                            break
+                        }
+                    }
+                }
+                if (!coworkState) {
+                    criterias.splice(key, 1)
+                }
+            }
+            // 获取分组
+            if (oCriteria.type === 'userGroup') {
+                if (viewType === 'topic') {
+                    criterias.splice(key, 1)
+                } else if (getDeepValue(oApp, "entryRule.group.id", null) !== null) {
+                    criterias.splice(key, 1)
+                } else {
+                    // let assocGroupAppId = oApp.entryRule.group.id
+                    // let modelGrpTeam = this.model('matter/group/team')
+                    // let groups = modelGrpTeam.byApp(assocGroupAppId, {'fields' : "team_id,title"})
+                    // if (!groups) {
+                    //     criterias.splice(key, 1)
+                    // } else {
+                    //     groups.forEach((group) => {
+                    //         oCriteria.menus.push({'id' : group.team_id, 'title' : group.title})
+                    //     })
+                    // }
+                    criterias.splice(key, 1)
+                }
+            }
+            /*
+             *表态 当用户为编辑或者超级管理员或者有组时才会出现“接受”，“关闭” ，“讨论”，“未表态” ，否则只有推荐和不限两种
+             */
+            if (oCriteria.type === 'agreed') {
+                if (viewType === 'topic') {
+                    criterias.splice(key, 1)
+                } else if (oUser.group_id || getDeepValue(oUser.is_leader) === 'S' || getDeepValue(oUser.is_editor) === 'Y') {
+                    oCriteria.menus.push({'id' : 'A', 'title' : '接受'})
+                    oCriteria.menus.push({'id' : 'D', 'title' : '讨论'})
+                    oCriteria.menus.push({'id' : 'N', 'title' : '关闭'})
+                }
+            }
+            // 只有登录用户才会显示我的记录和我的收藏
+            if (oCriteria.type === 'mine') {
+                if (!oUser.unionid) {
+                    criterias.splice(key, 1)
+                } else if (viewType === 'record') {
+                    oCriteria.menus.push({'id' : 'creator', 'title' : '我的记录'})
+                    oCriteria.menus.push({'id' : 'favored', 'title' : '我的收藏'})
+                } else if (viewType === 'coworkData') {
+                    oCriteria.menus.push({'id' : 'creator', 'title' : '我的回答'})
+                } else if (viewType === 'topic') {
+                    oCriteria.menus.push({'id' : 'creator', 'title' : '我的专题'})
+                    oCriteria.menus.push({'id' : 'public', 'title' : '公共专题'})
+                } else {
+                    criterias.splice(key, 1)
+                }
+            }
+            // 搜索历史
+            if (oCriteria.type === 'keyword') {
+                // let search = this.model('matter/enroll/search').listUserSearch(oApp, oUser)
+                // let userSearchs = search.userSearch
+                // userSearchs.forEach ( (userSearch) => {
+                //     oCriteria.menus.push({'id' : userSearch.keyword, 'title' : userSearch.keyword})
+                // })
+                oCriteria.menus.push({'id' : 'test', 'title' : 'test'})
+            }
+        }
+
+        return [true, criterias]
+    }
+    /**
+     * 获得所有条件
+     */
+    _originCriteriaGet() {
+        let criterias = []
+        // 排序
+        let orderby = {}
+        orderby.type = 'orderby'
+        orderby.title = '排序'
+        orderby.menus = [
+            {'id' : 'lastest', 'title' : '最近提交'},
+            {'id' : 'earliest', 'title' : '最早提交'},
+            {'id' : 'mostliked', 'title' : '最多赞同'},
+            {'id' : 'mostvoted', 'title' : '最多投票'},
+        ]
+        orderby.default = orderby.menus[0]
+        criterias.push(orderby)
+        // 搜索历史
+        let keyword = {}
+        keyword.type = 'keyword'
+        keyword.title = '历史'
+        keyword.menus = [
+            {'id' : null, 'title' : '不限'}
+        ]
+        keyword.default = keyword.menus[0]
+        criterias.push(keyword)
+        // 协作
+        let coworkAgreed = {}
+        coworkAgreed.type = 'coworkAgreed'
+        coworkAgreed.title = '协作'
+        coworkAgreed.menus = [
+            {'id' : null, 'title' : '所有问题'},
+            {'id' : 'answer', 'title' : '已回答'},
+            {'id' : 'unanswer', 'title' : '等待回答'},
+        ]
+        coworkAgreed.default = coworkAgreed.menus[0]
+        criterias.push(coworkAgreed)
+        // 轮次
+        let round = {}
+        round.type = 'rid'
+        round.title = '轮次'
+        round.menus = [
+            {'id' : null, 'title' : '不限'}
+        ]
+        round.default = round.menus[0]
+        criterias.push(round)
+        // 分组
+        let group = {}
+        group.type = 'userGroup'
+        group.title = '分组'
+        group.menus = [
+            {'id' : null, 'title' : '不限'},
+        ]
+        group.default = group.menus[0]
+        criterias.push(group)
+        // 表态
+        let agreed = {}
+        agreed.type = 'agreed'
+        agreed.title = '表态'
+        agreed.menus = [
+            {'id' : null, 'title' : '不限'},
+            {'id' : 'Y', 'title' : '推荐'},
+        ]
+        agreed.default = agreed.menus[0]
+        criterias.push(agreed)
+        // 我的
+        let mine = {}
+        mine.type = 'mine'
+        mine.title = '我的'
+        mine.menus = [
+            {'id' : null, 'title' : '不限'},
+        ]
+        mine.default = mine.menus[0]
+        criterias.push(mine)
+
+        return criterias
     }
 }
 

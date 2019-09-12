@@ -45,7 +45,7 @@ class Main extends Base {
         params.app = oApp;
 
         /* 当前访问用户的基本信息 */
-        let oUser = await this.getUser(oApp)
+        let oUser = await this.getUser()
         params.user = oUser;
 
         /* 进入规则 */
