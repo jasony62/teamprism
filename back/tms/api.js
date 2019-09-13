@@ -1,6 +1,3 @@
-class Client {
-
-}
 /**
  * API返回结果
  */
@@ -37,6 +34,21 @@ class ResultObjectNotFound extends ResultFault {
 class AccessTokenFault extends ResultBase {
     constructor(msg = '', code = 20001, result = null) {
         super(result, msg, code)
+    }
+}
+/**
+ * 业务逻辑错误
+ * 前2位编码从30开始
+ */
+class EntryRuleNotPassed extends ResultFault {
+    constructor(result, msg = '不满足进入规则') {
+        if (result && result instanceof Map) {
+            let o = {}
+            result.forEach((v, k) => { o[k] = v })
+            result = o
+        }
+
+        super(msg, 30001, result)
     }
 }
 /**
@@ -95,4 +107,4 @@ class Api {
     }
 }
 
-module.exports = { Api, ResultData, ResultFault, ResultObjectNotFound, AccessTokenFault, Client }
+module.exports = { Api, ResultData, ResultFault, ResultObjectNotFound, AccessTokenFault, EntryRuleNotPassed }

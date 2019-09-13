@@ -1,11 +1,11 @@
-const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
+const { ResultData, ResultFault, ResultObjectNotFound, EntryRuleNotPassed } = require('../../../tms/api')
 const Base = require('../base')
 
 class Main extends Base {
     constructor(...args) {
         super(...args)
     }
-    async tmsBeforeEach() {
+    async tmsBeforeEach(method) {
         let { app } = this.request.query
         if (!app) return new ResultFault(`参数错误`)
 
@@ -13,6 +13,21 @@ class Main extends Base {
         const oArticle = await moArticle.byId(app)
         if (!oArticle || oArticle.state !== 1)
             return new ResultObjectNotFound()
+
+        // 检查进入规则
+        if (!['guide'].includes(method)) {
+            if (typeof oArticle.entryRule === 'object') {
+                let userid = this.client.id
+                let rule = this.model('matter/entry_rule')
+                rule.rule = oArticle.entryRule
+                let result = await rule.check(userid)
+                if (result.size) {
+                    let o = {}
+                    result.forEach((k, v) => { o[k] = v })
+                    return new EntryRuleNotPassed(o)
+                }
+            }
+        }
 
         this.article = oArticle
 
@@ -51,6 +66,12 @@ class Main extends Base {
 
         Object.assign(this.article, { site, mission, channels })
 
+        return new ResultData(this.article)
+    }
+    /**
+     * 不检查进入规则，返回活动的信息
+     */
+    async guide() {
         return new ResultData(this.article)
     }
 }

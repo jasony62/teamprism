@@ -23,12 +23,18 @@ export default {
                         this.$eventHub.$emit('shell-loaded', matter)
                     }
                 } catch (e) {
-                    this.$message({
-                        message: e,
-                        type: 'error',
-                        duration: 60000,
-                        showClose: true
-                    })
+                    // 不满足进入规则
+                    if (e.code && e.code === 30001) {
+                        if (this.$router.currentRoute.name !== 'guide')
+                            this.$router.push({ name: 'guide' })
+                    } else {
+                        this.$message({
+                            message: e,
+                            type: 'error',
+                            duration: 60000,
+                            showClose: true
+                        })
+                    }
                     this.$eventHub.$emit('shell-failed')
                 } finally {
                     this.loading = false

@@ -12,7 +12,7 @@ const { RequestTransaction: ReqTrans } = require('../../models/tms/transaction')
  * 如果文件不存在，倒数第2段作为目录名，查找main.js文件
  * 
  * @param {Request} req 
- * @param {Who} client
+ * @param {TmsClient} client
  */
 function findCtrlAndMethod(req, client, dbConn) {
     let { path } = req
@@ -20,7 +20,7 @@ function findCtrlAndMethod(req, client, dbConn) {
     if (pieces.length < 2)
         throw new Error('参数错误，请求的对象不存在(1)')
 
-    let method = pieces.splice(-1, 1)
+    let method = pieces.splice(-1, 1)[0]
     let ctrlPath = process.cwd() + '/apis/' + pieces.join('/') + '.js'
     if (!fs.existsSync(ctrlPath)) {
         ctrlPath = process.cwd() + '/apis/' + pieces.join('/') + '/main.js'

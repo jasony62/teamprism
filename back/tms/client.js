@@ -85,5 +85,14 @@ function createTmsClient(req) {
 
     return tmsClient
 }
+/**
+ * 从数据对象创建
+ * 
+ * @param {*} oPlainData 
+ */
+function createByData(oPlainData) {
+    let { id, siteid, data } = oPlainData
+    return new TmsClient(siteid, id, data)
+}
 
-module.exports = { create: createTmsClient, CookieClient, TmsClient }
+module.exports = { create: createTmsClient, CookieClient, TmsClient, createByData }

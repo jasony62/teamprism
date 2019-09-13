@@ -128,6 +128,7 @@ class Token {
      * 获取token对应的数据
      * 
      * @param {*} token 
+     * 
      */
     static async fetch(token) {
         let tokenRedis = await TokenInRedis.create()
@@ -136,7 +137,8 @@ class Token {
 
         try {
             let oResult = await tokenRedis.get(token)
-            return [true, oResult.data]
+            let oTmsClient = require('./client').createByData(oResult.data)
+            return [true, oTmsClient]
         } catch (e) {
             return [false, e]
         } finally {

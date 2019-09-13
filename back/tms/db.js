@@ -233,13 +233,13 @@ class Select extends SqlActionWithWhere {
     }
 
     group(group = null) {
-        if (group && typeof group === 'string') {
+        if (typeof group === 'string') {
             this.groupBy = ` GROUP BY ` + group
         }
     }
 
     order(order = null) {
-        if (order && typeof order === 'string') {
+        if (typeof order === 'string') {
             this.orderBy = ` ORDER BY ` + order
         }
     }

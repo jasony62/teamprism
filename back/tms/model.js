@@ -112,7 +112,7 @@ const TABLE_AUTO_INC_ID = Symbol('table_auto_inc_id')
 /**
  * 添加where条件
  * @param {*} dbSqlAction 
- * @param {*} whereParts 
+ * @param {Array} whereParts 
  */
 function _makeWhere(dbSqlAction, whereParts) {
     if (whereParts && Array.isArray(whereParts)) {
@@ -157,26 +157,39 @@ class DbModel extends Model {
     /**
      * 返回符合条件的记录 
      * 
-     * @param {Function} fnMapKey 若指定，返回结果为map，key由该方法生成
+     * @param {string} fields
+     * @param {Array<Array>} wheres
+     * @param {object} sqlOptions
+     * @param {Array} sqlOptions.limit offset,length
+     * @param {string} sqlOptions.orderby 
+     * @param {string} sqlOptions.groupby 
+     * @param {object} rowOptions 结果处理函数
+     * @param {function} rowOptions.fnForEach 处理获得结果的每1行 
+     * @param {function} rowOptions.fnMapKey 若指定，返回结果为map，key由该方法生成
+     * 
+     * @return {Array} rows
      */
-    async select(fields, wheres, { limit = null, orderby = null, groupby = null, fnMapKey = false } = {}) {
+    async select(fields, wheres, { limit = null, orderby = null, groupby = null } = {}, { fnForEach = false, fnMapKey = false } = {}) {
         let db = await this.db()
         let dbSelect = db.newSelect(this.table, fields)
 
-        if (limit && Array.isArray(limit) && limit.length === 2)
+        if (Array.isArray(limit) && limit.length === 2)
             dbSelect.limit(...limit)
 
-        if (orderby)
+        if (typeof orderby === 'string')
             dbSelect.order(orderby)
 
-        if (groupby)
+        if (typeof groupby === 'string')
             dbSelect.group(groupby)
 
         _makeWhere(dbSelect, wheres)
 
         let rows = await dbSelect.exec()
         if (rows && rows.length) {
-            if (fnMapKey && typeof fnMapKey === 'function') {
+            if (typeof fnForEach === 'function')
+                rows.forEach(r => fnForEach(r))
+
+            if (typeof fnMapKey === 'function') {
                 let map = new Map()
                 rows.forEach(r => {
                     map.set(fnMapKey(r), r)
