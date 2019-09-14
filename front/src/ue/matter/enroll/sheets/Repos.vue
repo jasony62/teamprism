@@ -2,32 +2,61 @@
     <div id="repos">
         <div>{{app.title}}</div>
         <div>Repos</div>
-        <div>
-            <router-link :to="{name:'repos-record'}">Go to Record</router-link>
-        </div>
-        <div>
-            <router-link :to="{name:'repos-cowork'}">Go to Cowork</router-link>
-        </div>
-        <div>
-            <router-link :to="{name:'repos-remark'}">Go to Remark</router-link>
-        </div>
-        <div>
-            <router-link :to="{name:'repos-topic'}">Go to Topic</router-link>
-        </div>
+        <van-tabs v-model="activeName" swipeable @change="changeRouter(activeName)">
+            <van-tab v-for="tab in tabs" :key="tab" :title="tab.title" :name="tab.value">
+                <router-view :app="app" :user="user"></router-view>
+            </van-tab>
+        </van-tabs>
         <hr />
-        <div>
-            <router-view :app="app" :user="user"></router-view>
-        </div>
         <div>
             <hr />
             <primary-nav />
         </div>
     </div>
 </template>
+
 <script>
 import PrimaryNav from '../common/PrimaryNav'
+import {  Tab, Tabs } from 'vant'
 export default {
-    components: { PrimaryNav },
-    props: ['app', 'user']
+    components: { 
+        [Tab.name]: Tab, 
+        [Tabs.name]: Tabs, 
+        PrimaryNav 
+    },
+    props: {
+        app: Object,
+        user: Object
+    },
+    data() {
+        return {
+            tabs: [{
+                title: '问题',
+                value: 'record'
+            },{
+                title: '答案',
+                value: 'cowork'
+            },{
+                title: '专题',
+                value: 'topic'
+            },{
+                title: '评论',
+                value: 'remark'
+            }],
+            activeName: "record"
+        }
+    },
+    mounted(){
+        this.$router.push(this.activeName)
+    },
+    methods: {
+        changeRouter: function(name) {
+            this.$router.push(name);
+        }
+    }
 }
 </script>
+
+<style >
+
+</style>

@@ -9,7 +9,7 @@
             <router-link :to="{name:'record-input'}">Go to Input</router-link>
         </div>
         <div>
-            <router-view :app="app" :record="record"></router-view>
+            <router-view :app="app" :record="record" :user="user"></router-view>
         </div>
     </div>
 </template>
@@ -17,7 +17,16 @@
 import { Record as RecApis } from '@/apis/matter/enroll'
 
 export default {
-    props: ['ek', 'app'],
+    props: {
+        ek: String,
+        app: Object,
+        user: Object
+    },
+    data() {
+        return {
+            record: ""
+        }
+    },
     mounted() {},
     computed: {
         appid() {
@@ -35,7 +44,7 @@ export default {
     methods: {
         async fetchRecord(appid) {
             try {
-                let record = await RecApis.getRecord(appid, this.ek)
+                let record = await RecApis.getRecord(appid, this.$route.params.ek)
                 this.record = record
             } catch (e) {
                 this.$message({

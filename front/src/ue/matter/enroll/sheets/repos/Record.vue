@@ -1,23 +1,32 @@
 <template>
     <div id="repos-record">
-        <div>Repos Record</div>
-        <tms-list :items="records">
+        <tms-list :items="records" :pageInfo="page" @loadmore="fetchList(app.id, page.at)">
             <template v-slot:item="{ item }">
                 <record-list-item :record="item" :schemas="schemas" :user="user"></record-list-item>
             </template>
         </tms-list>
     </div>
 </template>
+
 <script>
 import {Repos as RepApis} from "@/apis/matter/enroll"
 import TmsList from "@/tms/components/List.vue"
 import RecordListItem from "../../common/RecordListItem"
+import { Notify } from 'vant'
 
 export default {
-    props: ['app', 'user'],
+    props: {
+        app: Object,
+        user: Object
+    },
     data: function() {
         return {
-            records: []
+            records: [],
+            page: {
+                at: 1,
+                size: 20,
+                total: 0
+            }
         }
     },
     components: { TmsList, RecordListItem },
@@ -25,7 +34,7 @@ export default {
         appid() {
             return this.app.id
         },
-        schemas: function() {
+        schemas() {
             var _aShareableSchemas = [];
             this.app.dynaDataSchemas.forEach((oSchema) => {
                 if (oSchema.shareable === 'Y') {
@@ -38,23 +47,28 @@ export default {
     watch: {
         appid: {
             async handler(nv) {
-                if (nv) this.fetchList(nv)
+                if (nv) this.fetchList(nv, 1)
             },
             immediate: true
         }
     },
     methods: {
-        async fetchList(appid) {
+        async fetchList(appid, pageAt) {
             try {
-                let result = await RepApis.getList('recordList', appid)
-                this.records = result.records
-            } catch (e) {
-                this.$message({
-                    message: e,
-                    type: 'error',
-                    duration: 60000,
-                    showClose: true
+                pageAt ? this.page.at = pageAt : this.page.at
+                let result = await RepApis.getList('recordList', appid, this.page)
+                let moment = require('moment')
+                result.datas.forEach(record => {
+                    record._createAt = moment(record.enroll_at * 1000).format('YYYY-MM-DD h:mm:ss')
+                    this.records.push(record)
                 })
+                this.page.total = result.total;
+                this.page.at += 1;
+            } catch (e) {
+                Notify({
+                    message: e,
+                    type: 'danger'
+                });
             } 
         }
     }
