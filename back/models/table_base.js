@@ -1,4 +1,4 @@
-const { DbModel } = require('../tms/model')
+const { DbModel } = require('tms-koa')
 
 class Base extends DbModel {
     constructor(table, ...args) {
@@ -15,7 +15,7 @@ class Base extends DbModel {
             ['fieldMatch', this.id, '=', id]
         ]
         let obj = await this.selectOne(fields, wheres)
-        if (this.handleDbRaw && typeof this.handleDbRaw === 'function')
+        if (obj && this.handleDbRaw && typeof this.handleDbRaw === 'function')
             this.handleDbRaw(obj)
 
         return obj

@@ -15,9 +15,11 @@ class Article extends MatterBase {
      * @param {object} raw
      */
     handleDbRaw(raw) {
-        if (Reflect.has(raw, 'entry_rule') && typeof raw.entry_rule === 'string') {
-            raw.entryRule = raw.entry_rule ? JSON.parse(raw.entry_rule) : {}
-            delete raw.entry_rule
+        if (raw && typeof raw === 'object') {
+            if (Reflect.has(raw, 'entry_rule') && typeof raw.entry_rule === 'string') {
+                raw.entryRule = raw.entry_rule ? JSON.parse(raw.entry_rule) : {}
+                delete raw.entry_rule
+            }
         }
 
         return raw

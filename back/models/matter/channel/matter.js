@@ -1,4 +1,4 @@
-const { DbModel } = require('../../../tms/model')
+const { DbModel } = require('tms-koa')
 
 class Matter extends DbModel {
     /**
