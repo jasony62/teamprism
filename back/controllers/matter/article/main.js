@@ -23,7 +23,7 @@ class Main extends Base {
                 let result = await rule.check(userid)
                 if (result.size) {
                     let o = {}
-                    result.forEach((k, v) => { o[k] = v })
+                    result.forEach((v, k) => { o[k] = v })
                     return new EntryRuleNotPassed(o)
                 }
             }
