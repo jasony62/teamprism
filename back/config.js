@@ -1,15 +1,13 @@
-var fs = require('fs')
+let fs = require('fs')
 
-var ctrlPath = process.cwd() + "/cus/config.js"
+let ctrlPath = process.cwd() + "/cus/config.js"
+let configCus = {}
 if (fs.existsSync(ctrlPath)) {
-    var configCus = require('./cus/config')
-} else {
-    var configCus = {}
+    configCus = require('./cus/config')
 }
 
-var config = {}
+let config = {}
 config.APP_PROTOCOL = (configCus.APP_PROTOCOL) ? configCus.APP_PROTOCOL : 'http://'
-// config.APP_HTTP_HOST = (configCus.APP_HTTP_HOST) ? configCus.APP_HTTP_HOST + '/ue' : this.request.headers.host + '/ue'
-config.APP_HTTP_HOST = (configCus.APP_HTTP_HOST) ? configCus.APP_HTTP_HOST : "localhost/ue"
+config.APP_HTTP_HOST = (configCus.APP_HTTP_HOST) ? configCus.APP_HTTP_HOST : 'localhost/ue'
 
 module.exports = config

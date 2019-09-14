@@ -1,36 +1,15 @@
 const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
 const Base = require('./base')
-const Enroll = require('../../../models/matter/enroll')
-const Record = require('../../../models/matter/enroll/record')
-const Task = require('../../../models/matter/enroll/task')
 
 class Main extends Base {
     constructor(...args) {
         super(...args)
     }
     /**
-     * 在调用方法前被执行的公共方法
-     */
-    async tmsBeforeEach() {
-        let { app } = this.request.query
-        if (!app)
-            return new ResultFault(`参数错误`)
-
-        let modelApp = new Enroll()
-        const oApp = await modelApp.byId(app)
-        modelApp.end()
-        if (!oApp || oApp.state !== 1)
-            return new ResultFault(`数据错误`)
-
-        this.app = oApp
-
-        return true
-    }
-    /**
      * 获得指定记录活动的进入规则以及当前用户的匹配情况
      */
     async entryRule() {
-        return Promise.resolve(this.app.entryRule)
+        return new ResultData(this.app.entryRule)
     }
     /**
      * 返回记录活动定义
@@ -41,7 +20,7 @@ class Main extends Base {
 
         let params = {}; // 返回的结果
         /* 要打开的记录 */
-        let modelRec = new Record();
+        let modelRec = this.model('matter/enroll/record')
 
         let oOpenedRecord
         if (ek) {
@@ -51,7 +30,7 @@ class Main extends Base {
         /* 要打开的应用 */
         //let aOptions = { 'cascaded': query.cascaded, 'fields': '*', 'appRid': (oOpenedRecord && oOpenedRecord.rid) ? oOpenedRecord.rid : rid };
         // if (query.task) {
-        //     let modelTask = new Task();
+        //     let modelTask = this.model('matter/enroll/task)
         //     let oTask = await modelTask.byId(query.task);
         //     if (oTask) {
         //         aOptions.task = oTask;
@@ -66,7 +45,7 @@ class Main extends Base {
         params.app = oApp;
 
         /* 当前访问用户的基本信息 */
-        let oUser = await this.getUser(oApp)
+        let oUser = await this.getUser()
         params.user = oUser;
 
         /* 进入规则 */

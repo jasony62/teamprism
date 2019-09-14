@@ -1,3 +1,4 @@
+const { Model } = require("./model")
 /**
  * API返回结果
  */
@@ -84,6 +85,12 @@ class Api {
     }
     get writableDbConn() {
         return this[API_FIELD_WRITABLE_DBCONN]
+    }
+    /**
+     * 防sql注入
+     */
+    escape(data) {
+        return Model.escape(data)
     }
     /**
      * 加载指定的model包

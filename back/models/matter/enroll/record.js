@@ -1,14 +1,16 @@
-const { DbModel } = require('../../../tms/model')
-const Enroll = require('../../../models/matter/enroll')
-const Data = require('../../../models/matter/enroll/data')
-const Round = require('../../../models/matter/enroll/round')
-const Schema = require('../../../models/matter/enroll/schema')
+const { Base: MatterBase } = require('../base')
+const { getDeepValue } = require('../../../tms/utilities')
 // const GroupRecord = require('../../../models/matter/group/record')()
 // const Groupteam = require('../../../models/matter/group/team')
 
-const REPOS_FIELDS = 'id,enroll_key,aid,rid,purpose,userid,nickname,group_id,first_enroll_at,enroll_at,enroll_key,data,agreed,agreed_log,dislike_data_num,dislike_log,dislike_num,favor_num,like_data_num,like_log,like_num,rec_remark_num,remark_num,score,supplement,tags,vote_cowork_num,vote_schema_num'
+class Record extends MatterBase {
 
-class Record extends DbModel {
+	constructor({ debug = false } = {}) {
+		super('xxt_enroll_record', { debug })
+		
+		this.REPOS_FIELDS = 'id,enroll_key,aid,rid,purpose,userid,nickname,group_id,first_enroll_at,enroll_at,enroll_key,data,agreed,agreed_log,dislike_data_num,dislike_log,dislike_num,favor_num,like_data_num,like_log,like_num,rec_remark_num,remark_num,score,supplement,tags,vote_cowork_num,vote_schema_num'
+	}
+	
     async byId(ek, aOptions = {}) {
 		let fields = "fields" in aOptions ? aOptions.fields : '*';
 		let verbose = "verbose" in aOptions ? aOptions.verbose : 'N';
@@ -23,10 +25,10 @@ class Record extends DbModel {
 		let oRecord = await dbSelect.exec()
 
 		if (oRecord) {
-			oRecord = await this._processRecord(oRecord, fields, verbose);
+			oRecord = await this._processRecord(oRecord, fields, verbose)
 		}
 
-		return oRecord;
+		return oRecord
 	}
 	/**
 	 * 处理从数据库中取出的数据
@@ -51,14 +53,12 @@ class Record extends DbModel {
 			oRecord.dislike_log = oRecord.dislike_log ? {} : JSON.parse(oRecord.dislike_log);
 		}
 		if (verbose === 'Y' && "enroll_key" in oRecord) {
-			let modelData = new Data()
+			let modelData = this.model('matter/enroll/data')
 			oRecord.verbose = await modelData.byRecord(oRecord.enroll_key)
-			modelData.end()
 		}
 		if (oRecord.rid) {
-			let modelRound = new Round()
+			let modelRound = this.model('matter/enroll/round')
 			let oRound = await modelRound.byId(oRecord.rid, {'fields' : 'id,rid,title,state,start_at,end_at,purpose'})
-			modelRound.end()
 			if (oRound) {
 				oRecord.round = oRound;
 			} else {
@@ -85,18 +85,19 @@ class Record extends DbModel {
 	 * records 数据列表
 	 * total 数据总条数
 	 */
-	async byApp(oApp, oOptions = {}, oCriteria = {}, oUser = null) {
+	async byApp(oApp, oOptions = null, oCriteria = null, oUser = null) {
+		if (!oOptions) oOptions = {}
+		if (!oCriteria) oCriteria = {}
 		if (typeof oApp === "string") {
-			let modelEnroll = new Enroll()
+			let modelEnroll = this.model('matter/enroll')
 			oApp = await modelEnroll.byId(oApp, {'cascaded' : 'N'})
-			modelEnroll.end()
 		}
 		if (false === oApp && !oApp.dynaDataSchemas) {
 			return false
 		}
-		let modelSchema = new Schema()
+
+		let modelSchema = this.model('matter/enroll/schema')
 		let aSchemasById = await modelSchema.asAssoc(oApp.dynaDataSchemas)
-		modelSchema.end()
 
 		// 指定记录活动下的记录记录
 		let w = "r.state=1 and r.aid='" + oApp.id + "'"
@@ -108,12 +109,12 @@ class Record extends DbModel {
 				w += " and (r.rid='" + rid + "')"
 			}
 		} else if (oCriteria.record && oCriteria.record.rid) {
-			if (oCriteria.record.rid === 'string') {
+			if (typeof oCriteria.record.rid === 'string') {
 				if (oCriteria.record.rid.toLowerCase() !== 'all') {
 					let rid = oCriteria.record.rid
 					w += " and (r.rid='" + rid + "')"
 				}
-			} else if (Object.prototype.toString.call(oCriteria.record.rid) === '[object Array]') {
+			} else if (Array.isArray(oCriteria.record.rid)) {
 				let rids = oCriteria.record.rid
 				w += " and r.rid in('" + rids.join("','") + "')"
 			}
@@ -138,7 +139,7 @@ class Record extends DbModel {
 			}
 			// 指定了记录标签
 			if (oCriteria.record.tags) {
-				if (Object.prototype.toString.call(oCriteria.record.tags) === '[object Array]') {
+				if (Array.isArray(oCriteria.record.tags)) {
 					oCriteria.record.tags.forEach((tagId) => {
 						w += " and exists(select 1 from xxt_enroll_tag_target tt where tt.target_id=r.id and tt.target_type=1 and tt.tag_id=" + tagId + ")"
 					})
@@ -159,7 +160,7 @@ class Record extends DbModel {
 		// 讨论状态的记录仅提交人，同组用户或超级用户可见
 		if (oUser) {
 			// 当前用户收藏的
-			if (oUser.unionid && oCriteria.record && oCriteria.record.favored) {
+			if (oUser.unionid && getDeepValue(oCriteria, "record.favored")) {
 				w += " and exists(select 1 from xxt_enroll_record_favor f where r.id=f.record_id and f.favor_unionid='" + oUser.unionid + "' and f.state=1)"
 			}
 			// 当前用户角色
@@ -184,54 +185,56 @@ class Record extends DbModel {
 		}
 
 		// 指定了记录数据过滤条件
-		if (oCriteria.data) {
-			let whereByData = ''
-			Object.keys(oCriteria.data).forEach( (k) => {
-				let v = oCriteria.data[k]
-				if (v && aSchemasById[k]) {
-					let oSchema = aSchemasById[k]
-					whereByData += ' and (';
-					if (oSchema.type === 'multiple') {
-						// 选项ID是否互斥，不存在，例如：v1和v11
-						let bOpExclusive = true
-						let strOpVals = ''
-						oSchema.ops.forEach ((op) => {
-							strOpVals += ',' + op.v
-						})
-						oSchema.ops.forEach ((op) => {
-							if (strOpVals.indexOf(op.v) !== -1) {
-								bOpExclusive = false
-							}
-						})
-						// 拼写sql
-						let v2 = v.split(',')
-						v2.forEach ((v2v, index) => {
-							if (index > 0) {
-								whereByData += ' and '
-							}
-							// 获得和题目匹配的子字符串
-							let dataBySchema = 'substr(substr(data,locate(\'"' + k + '":"\',data)),1,locate(\'"\',substr(data,locate(\'"' + k + '":"\',data)),' + (k.length + 5) + '))'
-							whereByData += '('
-							if (bOpExclusive) {
-								whereByData += dataBySchema + ' like \'%' + v2v + '%\''
-							} else {
-								whereByData += dataBySchema + ' like \'%"' + v2v + '"%\''
-								whereByData += ' or ' + dataBySchema + ' like \'%"' + v2v + ',%\''
-								whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + ',%\''
-								whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + '"%\''
-							}
-							whereByData += ')'
-						})
-					} else if (oSchema.type === 'single'){
-						whereByData += 'data like \'%"' + k + '":"' + v + '"%\''
-					} else {
-						whereByData += 'data like \'%"' + k + '":"%' + v + '%"%\''
-					}
-					whereByData += ')'
-				}
-			})
-			w += whereByData
-		}
+        if (getDeepValue(oCriteria, "data")) {
+            let whereByData = ''
+            for (let k in oCriteria.data) {
+                let v = oCriteria.data[k]
+                if (v && oSchemasById[k]) {
+                    let oSchema = oSchemasById[k]
+                    whereByData += ' and ('
+                    if (oSchema.type === 'multiple') {
+                        // 选项ID是否互斥，不存在，例如：v1和v11
+                        let bOpExclusive = true
+                        let strOpVals = ''
+                        for (let op of oSchema.ops) {
+                            strOpVals += ',' + op.v
+                        }
+                        for (let op of oSchema.ops) {
+                            if (-1 !== strOpVals.indexOf(op.v)) {
+                                bOpExclusive = false
+                                break
+                            }
+                        }
+                        // 拼写sql
+                        let v2 = v.split(',')
+                        for (let index in v2) {
+                            let v2v = v2[index]
+                            if (index > 0) {
+                                whereByData += ' and '
+                            }
+                            // 获得和题目匹配的子字符串
+                            let dataBySchema = 'substr(substr(r.data,locate(\'"' + k + '":"\',r.data)),1,locate(\'"\',substr(r.data,locate(\'"' + k + '":"\',r.data)),' + (k.length + 5) + '))'
+                            whereByData += '('
+                            if (bOpExclusive) {
+                                whereByData += dataBySchema + ' like \'%' + v2v + '%\''
+                            } else {
+                                whereByData += dataBySchema + ' like \'%"' + v2v + '"%\''
+                                whereByData += ' or ' + dataBySchema + ' like \'%"' + v2v + ',%\''
+                                whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + ',%\''
+                                whereByData += ' or ' + dataBySchema + ' like \'%,' + v2v + '"%\''
+                            }
+                            whereByData += ')'
+                        }
+                    } else if (oSchema.type === 'single'){
+                        whereByData += 'r.data like \'%"' + k + '":"' + v + '"%\''
+                    } else {
+                        whereByData += 'r.data like \'%"' + k + '":"%' + v + '%"%\''
+                    }
+                    whereByData += ')'
+                }
+            }
+            w += whereByData
+        }
 
 		// 指定了按关键字过滤
 		if (oOptions.keyword) {
@@ -264,7 +267,7 @@ class Record extends DbModel {
 		}
 
 		// 查询参数
-		let fields = ''
+		let fields
 		let table = "xxt_enroll_record r"
 		if (oOptions.fields) {
 			fields = oOptions.fields
@@ -275,7 +278,7 @@ class Record extends DbModel {
 		let q2 = {}
 		// 查询结果分页
 		if (oOptions.page && oOptions.size) {
-			q2.r = {'o' : (oOptions.page - 1) * oOptions.size, 'l' : oOptions.size}
+			q2.r = {'o' : (parseInt(oOptions.page) - 1) * parseInt(oOptions.size), 'l' : parseInt(oOptions.size)}
 		}
 
 		// 查询结果排序
@@ -325,7 +328,7 @@ class Record extends DbModel {
 					})
 					return sqls.join(',')
 				}
-				q2.o = await fnOrderBy(oOptions.orderby)
+				q2.o = fnOrderBy(oOptions.orderby)
 			}
 		} else {
 			q2.o = 'r.enroll_at desc'
@@ -375,16 +378,15 @@ class Record extends DbModel {
 			})
 		}
 		// 关联的分组题
-		let modelSchema = new Schema()
-		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema(oApp)
-		modelSchema.end()
+		let modelSchema = this.model('matter/enroll/schema')
+		modelSchema.setApp = oApp
+		let oAssocGrpTeamSchema = await modelSchema.getAssocGroupTeamSchema()
 		let aGroupsById = []; // 缓存分组数据
 		let aRoundsById = []; // 缓存轮次数据
 
-		let fnCheckSchemaVisibility = async (oSchemas, oRecordData) => {
+		let fnCheckSchemaVisibility = (oSchemas, oRecordData) => {
 			oSchemas.forEach( (oSchema) => {
-				for (let i = 0; i < oSchema.visibility.rules.length; i++) {
-					let oRule = oSchema.visibility.rules[i]
+				for (let oRule of oSchema.visibility.rules) {
 					if (oSchema.id.indexOf('member.extattr') === 0) {
 						let memberSchemaId = oSchema.id.replace('member.extattr.', '')
 						if (!oRecordData.member || !oRecordData.member.extattr || !oRecordData.member.extattr[memberSchemaId] || (oRecordData.member.extattr[memberSchemaId] !== oRule.op && !oRecordData.member.extattr[memberSchemaId])) {
@@ -439,7 +441,7 @@ class Record extends DbModel {
 		// 	}
 		// }
 		// aFnHandlers.push(userGroupFuc)
-		let modelRound = new Round()
+		let modelRound = this.model('matter/enroll/round')
 		for (let ri = 0; ri < records.length; ri++) {
 			let oRec = records[ri]
 			if (oRec.like_log) {
@@ -480,7 +482,7 @@ class Record extends DbModel {
 						}
 						/* 根据题目的可见性处理数据 */
 						if (oRec.purpose && oRec.purpose === 'C' && visibilitySchemas.length > 0) {
-							await fnCheckSchemaVisibility(visibilitySchemas, oRec.data)
+							fnCheckSchemaVisibility(visibilitySchemas, oRec.data)
 						}
 					}
 				} else {
@@ -492,7 +494,6 @@ class Record extends DbModel {
 			// 	if (!aGroupsById[oRec.group_id]) {
 					// let modelGroupteam = new Groupteam()
 			// 		let oGroup = modelGroupteam.byId(oRec.group_id, {'fields' : 'title')
-					// modelGroupteam.end()
 			// 		delete oGroup.type
 			// 		aGroupsById[oRec.group_id] = oGroup
 			// 	} else {
@@ -521,13 +522,12 @@ class Record extends DbModel {
 			}
 		}
 
-		modelRound.end()
-		// GroupRecord.end()
-
 		return records
 	}
 }
 
-module.exports = function () {
-    return new Record()
+function create({ debug = false } = {}) {
+    return new Record({ debug })
 }
+
+module.exports = { Record, create }

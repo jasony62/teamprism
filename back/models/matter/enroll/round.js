@@ -1,9 +1,12 @@
-const { DbModel } = require('../../../tms/model')
-const Enroll = require('../enroll')
-// const Mission = require('../mission')
+const { Base: MatterBase } = require('../base')
+// const { create : Mission } = require('../mission')
 // const MissionRound = require('../mission/round')
 
-class Round extends DbModel {
+class Round extends MatterBase {
+    constructor({ debug = false } = {}) {
+        super('xxt_enroll_round', { debug })
+    }
+    
     /**
      * 
      * @param {*} rid 
@@ -20,6 +23,57 @@ class Round extends DbModel {
         return oRound;
     }
     /**
+     * 返回记录活动下的轮次
+     *
+     * @param object $oApp
+     *
+     */
+    async byApp(oApp, aOptions = {}) {
+        if (!oApp.sync_mission_round) {
+            throw new Error('没有提供活动轮次设置的完整信息（1）')
+        }
+
+        let fields = aOptions.fields ? aOptions.fields : '*'
+        let state = aOptions.state ? aOptions.state : false
+        let oPage = aOptions.page ? aOptions.page : {}
+
+        let oResult = {} // 返回的结果
+
+        /* 当前激活轮次 */
+        if (!aOptions.withoutActive || aOptions.withoutActive !== 'Y') {
+            oResult.active = await this.getActive(oApp, {'fields' : fields})
+        }
+
+        /* 活动下已有的所有轮次 */
+        let wheres = [
+            ['fieldMatch', 'aid', '=', oApp.id]
+        ]
+        if (state)
+            wheres.push(['fieldMatch', 'state', '=', state])
+        /* 开始时间 */
+        if (aOptions.start_at)
+            wheres.push(['fieldMatch', 'start_at', '=', aOptions.start_at])
+        /* 开始时间 */
+        if (aOptions.end_at)
+            wheres.push(['fieldMatch', 'end_at', '=', aOptions.end_at])
+        /* 轮次用途 */
+        if (aOptions.purpose)
+            wheres.push(['fieldMatch', 'purpose', '=', aOptions.purpose])
+
+        let sqlParts = {orderby : 'create_at desc'}
+        if (oPage.at && oPage.size) {
+            sqlParts.limit = [(oPage.at - 1) * oPage.size, oPage.size]
+        }
+
+        oResult.rounds = await this.select(fields, wheres, sqlParts)
+        if (oPage.at && oPage.size) {
+            let total = await this.selectOne('count(*) total', wheres)
+            oResult.total = total.total
+        }
+
+        return oResult
+    }
+    /**
      * 
      */
     async getActive(oApp, aOptions = {}) {
@@ -33,7 +87,7 @@ class Round extends DbModel {
             aRequireAppFields.push('mission_id');
         }
         if (aRequireAppFields.length > 0) {
-            let modelEnl = new Enroll();
+            let modelEnl = this.model('matter/enroll')
             let oApp2 = await modelEnl.byId(oApp.id, {'fields' : aRequireAppFields.join(','), 'notDecode' : true});
             Object.keys(oApp2).forEach((k) => {
                 oApp[k] = oApp2[k];
@@ -121,6 +175,8 @@ class Round extends DbModel {
     }
 }
 
-module.exports = function () {
-    return new Round()
+function create({ debug = false } = {}) {
+    return new Round({ debug })
 }
+
+module.exports = { Round, create }

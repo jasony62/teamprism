@@ -12,11 +12,11 @@ describe("#models", () => {
                     let data = await roundModel.byId(rid)
                     expect(data.rid).toBe(rid)
                 })
-                test("getActive()", async () => {
-                    let oApp = testdata.models.ue.matter.enroll
-                    let data = await roundModel.getActive(oApp)
-                    console.log(data)
-                })
+                // test("getActive()", async () => {
+                //     let oApp = testdata.models.ue.matter.enroll
+                //     let data = await roundModel.getActive(oApp)
+                //     console.log(data)
+                // })
                 afterAll(done => {
                     roundModel.end(done)
                 })
