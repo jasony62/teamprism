@@ -4,12 +4,13 @@ describe("#models", () => {
             describe("#schema.js", () => {
                 let schemaModel,testdata
                 beforeAll(() => {
-                    schemaModel = require('../../../../models/matter/enroll/schema')()
+                    schemaModel = require('../../../../models/matter/enroll/schema')
                     testdata = require('../../../../cus/test.data')
                 })
                 test("setDynaSchemas()", async () => {
                     let oApp = testdata.models.ue.matter.enroll
-                    let rst = await schemaModel.setDynaSchemas(oApp)
+                    let modelSchema = new schemaModel(oApp)
+                    let rst = await schemaModel.setDynaSchemas()
                     // console.log(rst)
                     // expect(data.enroll_key).toBe(ek)
                 })

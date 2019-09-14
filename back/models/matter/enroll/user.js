@@ -1,9 +1,10 @@
-const {
-    DbModel
-} = require('../../../tms/model')
-const utilities =  global.utilities
+const { Base: MatterBase } = require('../base')
 
-class User extends DbModel {
+class User extends MatterBase {
+    constructor({ debug = false } = {}) {
+        super('xxt_enroll_user', { debug })
+    }
+
 	async detail(oApp, who, oEnrolledData = null) {
 		let oUser = who;
 
@@ -11,6 +12,8 @@ class User extends DbModel {
     }
 }
 
-module.exports = function () {
-    return new User()
+function create({ debug = false } = {}) {
+    return new User({ debug })
 }
+
+module.exports = { User, create }

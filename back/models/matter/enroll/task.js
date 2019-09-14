@@ -1,13 +1,14 @@
-const { DbModel } = require('../../../tms/model')
-const Enroll = require('../../../models/matter/enroll')
-const Round = require('../../../models/matter/enroll/round')
+const { Base: MatterBase } = require('../base')
 const { tms_object_merge, tms_array_search, getDeepValue } = require('../../../tms/utilities')
 const TYPENAMEZH = {'baseline' : '目标', 'question' : '提问', 'answer' : '回答', 'vote' : '投票', 'score' : '打分'}
 
-class Task extends DbModel {
-	constructor(oApp = null) {
-        super()
-        this._oApp = oApp
+class Task extends MatterBase {
+	constructor({ debug = false } = {}) {
+        super('xxt_enroll_task', { debug })
+    }
+
+    set setApp(oAPP) {
+        this._oApp = oAPP
     }
     /**
      * 
@@ -24,13 +25,13 @@ class Task extends DbModel {
 
         if (oTask && oTask.config_type && oTask.config_id) {
             if (!this._oApp && oTask.aid) {
-                let modelEnl = new Enroll()
+                let modelEnl = this.model('matter/enroll')
                 this._oApp = await modelEnl.byId(oTask.aid, {'fields' : '*'});
             }
             if (this._oApp[oTask.config_type + 'Config']) {
                 let oRuleConfig = await this.configById(oTask.config_type, oTask.config_id);
                 if (oRuleConfig && oRuleConfig.enabled === 'Y') {
-                    let modelRound = new Round()
+                    let modelRound = this.model('matter/enroll/round')
                     let oTaskRound = await modelRound.byId(oTask.rid);
                     if (oTaskRound) {
                         let oRuleState = await this.getRuleStateByRound(oRuleConfig, oTaskRound);
@@ -148,6 +149,8 @@ class Task extends DbModel {
     }
 }
 
-module.exports = function () {
-    return new Task()
+function create({ debug = false } = {}) {
+    return new Task({ debug })
 }
+
+module.exports = { Task, create }
