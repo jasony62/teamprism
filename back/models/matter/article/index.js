@@ -1,8 +1,8 @@
 const { Base: MatterBase } = require('../base')
 
 class Article extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_article', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_article', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -26,8 +26,4 @@ class Article extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Article({ debug })
-}
-
-module.exports = { Article, create }
+module.exports = { Article, create: Article.create.bind(Article) }

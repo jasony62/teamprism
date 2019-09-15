@@ -1,8 +1,8 @@
 const { Base } = require('../table_base')
 
-class Member extends Base {
-    constructor({ debug = false } = {}) {
-        super('xxt_site_member_schema', { debug })
+class Mschema extends Base {
+    constructor({ db, debug = false }) {
+        super('xxt_site_member_schema', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -12,8 +12,4 @@ class Member extends Base {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Member({ debug })
-}
-
-module.exports = { Member, create }
+module.exports = { Mschema, create: Mschema.create.bind(Mschema) }

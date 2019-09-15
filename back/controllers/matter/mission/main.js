@@ -9,8 +9,8 @@ class Main extends Base {
         let { app } = this.request.query
         if (!app) return new ResultFault(`参数错误`)
 
-        let dbMission = this.model('matter/mission')
-        const oMission = await dbMission.byId(app)
+        let dmMission = this.model('matter/mission')
+        const oMission = await dmMission.byId(app)
         if (!oMission || oMission.state !== 1)
             return new ResultObjectNotFound()
 
@@ -24,8 +24,8 @@ class Main extends Base {
     async get() {
         let site
         // 团队信息
-        let moSite = this.model('site')
-        site = await moSite.byId(this.mission.siteid, { fields: moSite.fields_ue })
+        let dmSite = this.model('site')
+        site = await dmSite.byId(this.mission.siteid, { fields: dmSite.fields_ue })
         if (false === site)
             return new ResultObjectNotFound()
 

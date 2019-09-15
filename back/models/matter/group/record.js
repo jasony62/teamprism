@@ -43,7 +43,6 @@ class DbRecordHandler {
         return rec
     }
     async handle(rec) {
-        console.log('xxxxxxx')
         rec = this.data(rec)
         rec = this.role_teams(rec)
         rec = await this.leave(rec)
@@ -51,9 +50,12 @@ class DbRecordHandler {
         return rec
     }
 }
+/**
+ * 
+ */
 class Record extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_group_record', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_group_record', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -100,8 +102,4 @@ class Record extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Record({ debug })
-}
-
-module.exports = { Record, create }
+module.exports = { Record, create: Record.create.bind(Record) }

@@ -1,8 +1,8 @@
 const { DbModel } = require('tms-koa')
 
 class Site extends DbModel {
-    constructor({ debug = false } = {}) {
-        super('xxt_site', { debug, autoIncId: false })
+    constructor({ db, debug = false }) {
+        super('xxt_site', { db, debug, autoIncId: false })
     }
     /**
      * 用户端可见字段
@@ -20,8 +20,4 @@ class Site extends DbModel {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Site({ debug })
-}
-
-module.exports = { Site, create }
+module.exports = { Site, create: Site.create.bind(Site) }

@@ -1,8 +1,8 @@
 const { Base: MatterBase } = require('../base')
 
 class Group extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_group', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_group', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -12,8 +12,4 @@ class Group extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Group({ debug })
-}
-
-module.exports = { Group, create }
+module.exports = { Group, create: Group.create.bind(Group) }

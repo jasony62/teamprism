@@ -1,8 +1,8 @@
 const { Base: MatterBase } = require('../base')
 
 class Mission extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_mission', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_mission', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -12,8 +12,4 @@ class Mission extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Mission({ debug })
-}
-
-module.exports = { Mission, create }
+module.exports = { Mission, create: Mission.create.bind(Mission) }

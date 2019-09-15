@@ -1,8 +1,8 @@
 const { Base: MatterBase } = require('../base')
 
 class Leave extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_group_leave', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_group_leave', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -29,8 +29,4 @@ class Leave extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Leave({ debug })
-}
-
-module.exports = { Leave, create }
+module.exports = { Leave, create: Leave.create.bind(Leave) }

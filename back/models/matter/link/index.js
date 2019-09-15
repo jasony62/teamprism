@@ -1,13 +1,9 @@
 const { Base: MatterBase } = require('../base')
 
 class Link extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_link', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_link', { db, debug })
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Link({ debug })
-}
-
-module.exports = { Link, create }
+module.exports = { Link, create: Link.create.bind(Link) }

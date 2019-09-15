@@ -9,8 +9,8 @@ class Main extends Base {
         let { app } = this.request.query
         if (!app) return new ResultFault(`参数错误`)
 
-        let dbLink = this.model('matter/link')
-        const oLink = await dbLink.byId(app)
+        let dmLink = this.model('matter/link')
+        const oLink = await dmLink.byId(app)
         if (!oLink || oLink.state !== 1)
             return new ResultObjectNotFound()
 
@@ -24,8 +24,8 @@ class Main extends Base {
     async get() {
         let site, mission
         // 团队信息
-        let moSite = this.model('site')
-        site = await moSite.byId(this.link.siteid, { fields: moSite.fields_ue })
+        let dmSite = this.model('site')
+        site = await dmSite.byId(this.link.siteid, { fields: dmSite.fields_ue })
         if (false === site)
             return new ResultObjectNotFound()
 

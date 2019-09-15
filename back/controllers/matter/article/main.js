@@ -9,8 +9,8 @@ class Main extends Base {
         let { app } = this.request.query
         if (!app) return new ResultFault(`参数错误`)
 
-        let moArticle = this.model('matter/article')
-        const oArticle = await moArticle.byId(app)
+        let dmArticle = this.model('matter/article')
+        const oArticle = await dmArticle.byId(app)
         if (!oArticle || oArticle.state !== 1)
             return new ResultObjectNotFound()
 
@@ -39,8 +39,8 @@ class Main extends Base {
     async get() {
         let site, mission, channels
         // 团队信息
-        let moSite = this.model('site')
-        site = await moSite.byId(this.article.siteid, { fields: moSite.fields_ue })
+        let dmSite = this.model('site')
+        site = await dmSite.byId(this.article.siteid, { fields: dmSite.fields_ue })
         if (false === site)
             return new ResultObjectNotFound()
 

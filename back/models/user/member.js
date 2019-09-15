@@ -1,8 +1,8 @@
 const { Base } = require('../table_base')
 
 class Member extends Base {
-    constructor({ debug = false } = {}) {
-        super('xxt_site_member', { debug })
+    constructor({ db, debug = false }) {
+        super('xxt_site_member', { db, debug })
     }
     /**
      * 用户端可见字段
@@ -32,8 +32,4 @@ class Member extends Base {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Member({ debug })
-}
-
-module.exports = { Member, create }
+module.exports = { Member, create: Member.create.bind(Member) }

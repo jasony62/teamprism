@@ -4,8 +4,8 @@ class Matter extends DbModel {
     /**
      *
      */
-    constructor({ debug = true } = {}) {
-        super('xxt_channel_matter', { debug })
+    constructor({ db, debug = true }) {
+        super('xxt_channel_matter', { db, debug })
     }
     async _articleByIds(ids) {
         let moArticle = this.model('matter/article')
@@ -62,8 +62,4 @@ class Matter extends DbModel {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Matter({ debug })
-}
-
-module.exports = { Matter, create }
+module.exports = { Matter, create: Matter.create.bind(Matter) }

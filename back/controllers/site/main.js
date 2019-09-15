@@ -9,8 +9,8 @@ class Main extends TpCtrl {
      */
     async get() {
         let { site } = this.request.query
-        let moSite = this.model('site')
-        let oSite = await moSite.byId(site)
+        let dmSite = this.model('site')
+        let oSite = await dmSite.byId(site)
 
         if (false === oSite)
             return new ResultObjectNotFound()

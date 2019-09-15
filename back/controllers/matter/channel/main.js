@@ -9,8 +9,8 @@ class Main extends Base {
         let { app } = this.request.query
         if (!app) return new ResultFault(`参数错误`)
 
-        let moChannel = this.model('matter/channel')
-        const oChannel = await moChannel.byId(app)
+        let dmChannel = this.model('matter/channel')
+        const oChannel = await dmChannel.byId(app)
         if (!oChannel || oChannel.state !== 1)
             return new ResultObjectNotFound()
 

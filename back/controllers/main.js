@@ -1,6 +1,6 @@
-const { Api, ResultData } = require('../tms/api')
+const { TpCtrl, ResultData } = require('../tms/ctrl')
 
-class Main extends Api {
+class Main extends TpCtrl {
     constructor(...args) {
         super(...args)
     }

@@ -1,8 +1,8 @@
 const { Base: TableBase } = require('../table_base')
 
 class Base extends TableBase {
-    constructor(table, ...args) {
-        super(table, ...args)
+    constructor(table, { db, debug = false }) {
+        super(table, { db, debug })
     }
 }
 

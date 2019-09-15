@@ -1,8 +1,8 @@
 const { DbModel } = require('tms-koa')
 
 class Base extends DbModel {
-    constructor(table, ...args) {
-        super(table, ...args)
+    constructor(table, { db, debug = false }) {
+        super(table, { db, debug })
     }
     /**
      * 
