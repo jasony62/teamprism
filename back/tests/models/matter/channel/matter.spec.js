@@ -5,7 +5,7 @@ describe("#models", () => {
                 test("byChannel()-sql", async () => {
                     let dmChaMat = require('../../../../models/matter/channel/matter').create({ debug: true })
                     await dmChaMat.byChannel({ id: 1 }, {})
-                    expect(dmChaMat.execSqlStack[0]).toMatch(/^select create_at,matter_type,matter_id,seq from xxt_channel_matter where channel_id='1' order by seq,create_at desc limit 0,12$/i)
+                    expect(dmChaMat.execSqlStack[0]).toMatch(/^SELECT create_at,matter_type,matter_id,seq FROm xxt_channel_matter WHERE `channel_id` = 1 order by seq,create_at desc limit 0,12$/i)
                 })
                 test("byChannel()-matters", async () => {
                     let dmChaMat = require('../../../../models/matter/channel/matter').create({ debug: false })
