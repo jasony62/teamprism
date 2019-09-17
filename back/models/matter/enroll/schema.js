@@ -2,8 +2,8 @@ const { Base: MatterBase } = require('../base')
 const { getDeepValue } = require('../../../tms/utilities')
 
 class Schema extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('', { db, debug })
     }
     /**
      * 
@@ -83,8 +83,4 @@ class Schema extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Schema({ debug })
-}
-
-module.exports = { Schema, create }
+module.exports = { Schema, create: Schema.create.bind(Schema) }

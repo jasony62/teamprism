@@ -3,8 +3,8 @@ const { getDeepValue, replaceHTMLTags, setDeepValue } = require('../../../tms/ut
 const DEFAULT_FIELDS = 'id,state,value,tag,supplement,rid,enroll_key,schema_id,userid,group_id,nickname,submit_at,score,remark_num,last_remark_at,like_num,like_log,modify_log,agreed,agreed_log,multitext_seq,vote_num'
 
 class Data extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_enroll_record_data', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('xxt_enroll_record_data', { db, debug })
     }
     /**
      * 
@@ -26,7 +26,7 @@ class Data extends MatterBase {
             fields += ',multitext_seq'
         }
 
-        let db = await this.db()
+        let db = this.db
         let dbSelect = db.newSelect('xxt_enroll_record_data', fields)
         dbSelect.where.fieldMatch('enroll_key', '=', ek)
         dbSelect.where.fieldMatch('state', '=', 1)
@@ -312,7 +312,7 @@ class Data extends MatterBase {
 		 * 处理获得的数据
 		 */
 		let oResult = {} // 返回的结果
-		let db = await this.db()
+		let db = this.db
         let dbSelect = db.newSelect(table, fields)
         let where = [w]
         dbSelect.where.and(where)
@@ -475,8 +475,4 @@ class Data extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Data({ debug })
-}
-
-module.exports = { Data, create }
+module.exports = { Data, create: Data.create.bind(Data) }

@@ -1,8 +1,8 @@
 const { Base: MatterBase } = require('../base')
 
 class Topic extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_enroll_topic', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('xxt_enroll_topic', { db, debug })
     }
     /**
      * 
@@ -21,8 +21,4 @@ class Topic extends MatterBase {
 	}
 }
 
-function create({ debug = false } = {}) {
-    return new Topic({ debug })
-}
-
-module.exports = { Topic, create }
+module.exports = { Topic, create: Topic.create.bind(Topic) }

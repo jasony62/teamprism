@@ -1,8 +1,8 @@
 const { Base: MatterBase } = require('../base')
 
 class User extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_enroll_user', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('xxt_enroll_user', { db, debug })
     }
 
 	async detail(oApp, who, oEnrolledData = null) {
@@ -12,8 +12,4 @@ class User extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new User({ debug })
-}
-
-module.exports = { User, create }
+module.exports = { User, create: User.create.bind(User) }

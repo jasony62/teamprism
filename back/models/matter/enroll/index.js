@@ -8,8 +8,8 @@ const Config = require('../../../config')
 const LOG_FIELDS = 'siteid,id,title,summary,pic,mission_id'
 
 class Enroll extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_enroll', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('xxt_enroll', { db, debug })
     }
     /**
      * 活动进入链接
@@ -158,8 +158,4 @@ class Enroll extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Enroll({ debug })
-}
-
-module.exports = { Enroll, create }
+module.exports = { Enroll, create: Enroll.create.bind(Enroll) }

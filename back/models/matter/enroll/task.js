@@ -3,8 +3,8 @@ const { tms_object_merge, tms_array_search, getDeepValue } = require('../../../t
 const TYPENAMEZH = {'baseline' : '目标', 'question' : '提问', 'answer' : '回答', 'vote' : '投票', 'score' : '打分'}
 
 class Task extends MatterBase {
-	constructor({ debug = false } = {}) {
-        super('xxt_enroll_task', { debug })
+	constructor({ db, debug = false } = {}) {
+        super('xxt_enroll_task', { db, debug })
     }
 
     set setApp(oAPP) {
@@ -18,7 +18,7 @@ class Task extends MatterBase {
 	async byId(id, aOptions = {}) {
 		let fields = aOptions.fields ? aOptions.fields : 'id,aid,rid,start_at,end_at,config_type,config_id';
 
-        let db = await this.db()
+        let db = this.db
         let dbSelect = db.newSelectOne('xxt_enroll_task', fields)
         dbSelect.where.fieldMatch('id', '=', id)
 		let oTask = await dbSelect.exec()
@@ -149,8 +149,4 @@ class Task extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Task({ debug })
-}
-
-module.exports = { Task, create }
+module.exports = { Task, create: Task.create.bind(Task) }
