@@ -11,6 +11,12 @@ class Article extends MatterBase {
         return ['id', 'title', 'pic', 'summary', 'author', 'create_at', 'modify_at', 'url', 'body', 'read_num', 'entryRule']
     }
     /**
+     * 素材封面可见字段
+     */
+    get fields_cover() {
+        return ['id', 'title', 'author', 'create_at', 'summary', 'pic', 'entryRule', 'site']
+    }
+    /**
      * 处理从数据库中获得数据
      * @param {object} raw
      */

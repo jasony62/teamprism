@@ -51,6 +51,7 @@ export default {
 </style>
 <style lang='less' scoped>
 .skeleton {
+    height: 100%;
     background-color: #f5f5f5;
     .qrcode {
         text-align: center;

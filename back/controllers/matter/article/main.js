@@ -1,3 +1,4 @@
+const _ = require('underscore')
 const { ResultData, ResultFault, ResultObjectNotFound, EntryRuleNotPassed } = require('../../../tms/ctrl')
 const Base = require('../base')
 
@@ -5,6 +6,7 @@ class Main extends Base {
     constructor(...args) {
         super(...args)
     }
+
     async tmsBeforeEach(method) {
         let { app } = this.request.query
         if (!app) return new ResultFault(`参数错误`)
@@ -14,17 +16,18 @@ class Main extends Base {
         if (!oArticle || oArticle.state !== 1)
             return new ResultObjectNotFound()
 
-        // 检查进入规则
-        if (!['guide'].includes(method)) {
-            if (typeof oArticle.entryRule === 'object') {
-                let userid = this.client.id
-                let rule = this.model('matter/entry_rule')
-                rule.rule = oArticle.entryRule
-                let result = await rule.check(userid)
-                if (result.size) {
-                    let o = {}
-                    result.forEach((v, k) => { o[k] = v })
-                    return new EntryRuleNotPassed(o)
+        // 检查进入规则，如果要获得封面信息跳过
+        if (typeof oArticle.entryRule === 'object') {
+            let oCheckResult = await this.entryCheck(oArticle.entryRule)
+            if (oCheckResult) {
+                oArticle.entryRule.result = oCheckResult
+                // 团队信息
+                let dmSite = this.model('site')
+                let site = await dmSite.byId(oArticle.siteid, { fields: dmSite.fields_ue })
+                if (site) oArticle.site = site
+                if (!['cover'].includes(method)) {
+                    let cover = _.pick(oArticle, dmArticle.fields_cover)
+                    return new EntryRuleNotPassed(cover)
                 }
             }
         }
@@ -71,10 +74,10 @@ class Main extends Base {
     /**
      * 不检查进入规则，返回活动的基本信息
      */
-    async guide() {
-        let cover = {}
-        let coverFields = ['author']
-        coverFields.forEach
+    async cover() {
+        let dmArticle = this.model('matter/article')
+        let cover = _.pick(this.article, dmArticle.fields_cover)
+
         return new ResultData(cover)
     }
 }

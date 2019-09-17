@@ -11,5 +11,15 @@ export default {
             .then(rst => rst.data.result)
             .catch(err => Promise.reject(err))
 
+    },
+    /**
+     * 获得单图文封面信息
+     * 
+     * @param {String} appId 
+     */
+    cover(appId) {
+        return axios.get(`/ue/api/matter/link/cover?app=${appId}`)
+            .then(rst => rst.data.result)
+            .catch(err => Promise.reject(err))
     }
 }

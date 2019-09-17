@@ -17,7 +17,11 @@ export default {
                 let params = this.$route.params
                 try {
                     if (params.appId) {
-                        matter = await apis.skeleton(params.appId)
+                        if (this.$router.currentRoute.name !== 'cover') {
+                            matter = await apis.skeleton(params.appId)
+                        } else {
+                            matter = await apis.cover(params.appId)
+                        }
                         this.site = matter.site
                         this.matter = matter
                         this.$eventHub.$emit('shell-loaded', matter)
@@ -25,8 +29,15 @@ export default {
                 } catch (e) {
                     // 不满足进入规则
                     if (e.code && e.code === 30001) {
-                        if (this.$router.currentRoute.name !== 'guide')
-                            this.$router.push({ name: 'guide' })
+                        if (e.result) {
+                            matter = e.result
+                            this.site = matter.site
+                            this.matter = matter
+                        }
+                        if (this.$router.currentRoute.name !== 'cover')
+                            this.$router.push({ name: 'cover' })
+
+                        this.$eventHub.$emit('shell-loaded', matter)
                     } else {
                         this.$message({
                             message: e,

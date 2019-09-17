@@ -1,14 +1,14 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
 
-import Guide from './sheets/Guide.vue'
+import Cover from '../_components/Cover.vue'
 import Content from './sheets/Content.vue'
 import Failure from './sheets/Failure.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
-    { path: '/ue/matter/article/:siteId/:appId/guide', name: 'guide', component: Guide, props: true },
+    { path: '/ue/matter/article/:siteId/:appId/cover', name: 'cover', component: Cover, props: true },
     { path: '/ue/matter/article/:siteId/:appId/content', name: 'content', component: Content, props: true },
     { path: '/ue/matter/article/*', name: 'failure', component: Failure, props: true }
 ]

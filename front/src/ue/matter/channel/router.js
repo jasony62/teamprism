@@ -1,14 +1,12 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
 
-import Guide from './sheets/Guide.vue'
 import Failure from './sheets/Failure.vue'
 import Content from './sheets/Content.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
-    { path: '/ue/matter/channel/:siteId/:appId/guide', name: 'guide', component: Guide, props: true },
     { path: '/ue/matter/channel/:siteId/:appId/Content', name: 'content', component: Content, props: true },
     { path: '/ue/matter/channel/*', name: 'failure', component: Failure, props: true }
 ]

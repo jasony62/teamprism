@@ -45,8 +45,8 @@ class Rule extends Base {
     async checkRegister(userid) {
         if (this.scope.register !== 'Y') return null
 
-        let moAccount = this.model('user/account')
-        let account = await moAccount.byId(userid)
+        let dmAccount = this.model('user/account')
+        let account = await dmAccount.byId(userid)
 
         return account.unionid ? true : false
     }
@@ -58,8 +58,8 @@ class Rule extends Base {
 
         if (!this.mschemas) return '需要填写通讯录信息，请联系活动的组织者解决。'
 
-        let moMember = this.model('user/member')
-        let members = await moMember.byUser(userid, { mschemas: this.mschemas })
+        let dmMember = this.model('user/member')
+        let members = await dmMember.byUser(userid, { mschemas: this.mschemas })
 
         return members.length > 0
     }
@@ -71,8 +71,8 @@ class Rule extends Base {
 
         if (!this.group)
             return '没有指定作为进入规则的分组活动，请联系活动的组织者解决'
-        let moGroup = this.model('matter/group')
-        let group = await moGroup.byId(this.group.id)
+        let dmGroup = this.model('matter/group')
+        let group = await dmGroup.byId(this.group.id)
         if (false === group || group.state !== 1)
             return '指定的分组活动不可访问，请联系活动的组织者解决。'
 
@@ -89,7 +89,6 @@ class Rule extends Base {
             } else
                 bMatched = true
         }
-
         return bMatched ? true : `您【ID:${userid}】目前的分组，不满足参与规则，无法访问，请联系活动的组织者解决。`
     }
     /**
@@ -101,8 +100,8 @@ class Rule extends Base {
         if (!this.enroll || !this.enroll.id)
             return '没有指定作为进入规则的记录活动，请联系活动的组织者解决。'
 
-        let moEnroll = this.model('matter/enroll')
-        let enroll = await moEnroll.byId(this.enroll.id)
+        let dmEnroll = this.model('matter/enroll')
+        let enroll = await dmEnroll.byId(this.enroll.id)
         if (false === enroll || enroll.state !== 1)
             return '指定作为进入规则的记录活动不存在，请联系活动的组织者解决。'
 
@@ -123,13 +122,22 @@ class Rule extends Base {
 
         let result = new Map()
 
-        new Array('register', 'member', 'group', 'enroll').forEach(async s => {
-            let method = `check${s.replace(/^(\w)/,f=>f.toUpperCase())}`
-            let r = await this[method](userid)
-            if (r !== null && r !== true) {
-                result.set(s, r)
-            }
-        })
+        let r = await this.checkRegister(userid)
+        if (r !== null && r !== true) {
+            result.set('register', r)
+        }
+        r = await this.checkMember(userid)
+        if (r !== null && r !== true) {
+            result.set('member', r)
+        }
+        r = await this.checkGroup(userid)
+        if (r !== null && r !== true) {
+            result.set('group', r)
+        }
+        r = await this.checkEnroll(userid)
+        if (r !== null && r !== true) {
+            result.set('enroll', r)
+        }
 
         return result
     }
