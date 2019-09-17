@@ -69,10 +69,13 @@ class Main extends Base {
         return new ResultData(this.article)
     }
     /**
-     * 不检查进入规则，返回活动的信息
+     * 不检查进入规则，返回活动的基本信息
      */
     async guide() {
-        return new ResultData(this.article)
+        let cover = {}
+        let coverFields = ['author']
+        coverFields.forEach
+        return new ResultData(cover)
     }
 }
 

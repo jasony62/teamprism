@@ -5,8 +5,8 @@ const { Base } = require('./base')
 const FIELD_ENTRY_RULE = Symbol('field_entry_rule')
 
 class Rule extends Base {
-    constructor({ debug = false } = {}) {
-        super('', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('', { db, debug })
     }
     get rule() {
         return this[FIELD_ENTRY_RULE]
@@ -135,8 +135,4 @@ class Rule extends Base {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Rule({ debug })
-}
-
-module.exports = { Rule, create }
+module.exports = { Rule, create: Rule.create.bind(Rule) }
