@@ -3,8 +3,8 @@ const { Base: MatterBase } = require('../base')
 // const MissionRound = require('../mission/round')
 
 class Round extends MatterBase {
-    constructor({ debug = false } = {}) {
-        super('xxt_enroll_round', { debug })
+    constructor({ db, debug = false } = {}) {
+        super('xxt_enroll_round', { db, debug })
     }
     
     /**
@@ -15,7 +15,7 @@ class Round extends MatterBase {
 	async byId(rid, aOptions = {}) {
 		let fields = 'fields' in aOptions ? aOptions.fields : '*';
 
-        let db = await this.db()
+        let db = this.db
         let dbSelect = db.newSelectOne('xxt_enroll_round', fields)
         dbSelect.where.fieldMatch('rid', '=', rid)
 		let oRound = await dbSelect.exec()
@@ -137,7 +137,7 @@ class Round extends MatterBase {
             /* 根据轮次开始时间获得轮次，但是必须是常规轮次 */
             let current = Data.parse(new Data()).toString.substr(0,10);
 
-            let db = await this.db()
+            let db = this.db
             let dbSelect = db.newSelect('xxt_enroll_round', fields)
             dbSelect.where.and("aid = '" + oApp.id + "' and state = 1 and purpose = 'C' and start_at <= " + current);
             // $q2 = [
@@ -175,8 +175,4 @@ class Round extends MatterBase {
     }
 }
 
-function create({ debug = false } = {}) {
-    return new Round({ debug })
-}
-
-module.exports = { Round, create }
+module.exports = { Round, create: Round.create.bind(Round) }

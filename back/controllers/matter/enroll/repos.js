@@ -1,4 +1,4 @@
-const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
+const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/ctrl')
 const { getDeepValue, replaceHTMLTags } = require('../../../tms/utilities')
 const Base = require('./base')
 

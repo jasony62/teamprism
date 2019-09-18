@@ -5,8 +5,8 @@ const { getDeepValue } = require('../../../tms/utilities')
 
 class Record extends MatterBase {
 
-	constructor({ debug = false } = {}) {
-		super('xxt_enroll_record', { debug })
+	constructor({ db, debug = false } = {}) {
+		super('xxt_enroll_record', { db, debug })
 		
 		this.REPOS_FIELDS = 'id,enroll_key,aid,rid,purpose,userid,nickname,group_id,first_enroll_at,enroll_at,enroll_key,data,agreed,agreed_log,dislike_data_num,dislike_log,dislike_num,favor_num,like_data_num,like_log,like_num,rec_remark_num,remark_num,score,supplement,tags,vote_cowork_num,vote_schema_num'
 	}
@@ -15,7 +15,7 @@ class Record extends MatterBase {
 		let fields = "fields" in aOptions ? aOptions.fields : '*';
 		let verbose = "verbose" in aOptions ? aOptions.verbose : 'N';
 
-		let db = await this.db()
+		let db = this.db
         let dbSelect = db.newSelectOne('xxt_enroll_record', fields)
         dbSelect.where.fieldMatch('enroll_key', '=', ek)
 		if (aOptions.state) {
@@ -337,7 +337,7 @@ class Record extends MatterBase {
 		 * 处理获得的数据
 		 */
 		let oResult = {} // 返回的结果
-		let db = await this.db()
+		let db = this.db
 		let dbSelect = db.newSelect(table, fields)
 		let where = [w]
         dbSelect.where.and(where)
@@ -526,8 +526,4 @@ class Record extends MatterBase {
 	}
 }
 
-function create({ debug = false } = {}) {
-    return new Record({ debug })
-}
-
-module.exports = { Record, create }
+module.exports = { Record, create: Record.create.bind(Record) }

@@ -1,4 +1,4 @@
-const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/api')
+const { ResultData, ResultFault, ResultObjectNotFound } = require('../../../tms/ctrl')
 const Base = require('./base')
 
 class Main extends Base {

@@ -14,7 +14,7 @@ class Config extends DbModel {
     async bySite(siteId, oOptions = {}) {
         const fields = oOptions.fields || '*'
 
-        let db = await this.db()
+        let db = this.db
         let dbSelect = db.newSelectOne(this.table, fields)
         dbSelect.where.fieldMatch('siteid', '=', siteId)
         let wx = await dbSelect.exec()
