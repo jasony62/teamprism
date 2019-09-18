@@ -1,6 +1,6 @@
 module.exports = {
     apps: [{
-        name: "teamprism-ue",
+        name: "teamprism",
         script: "node app",
 
         // Options reference: https://pm2.io/doc/en/runtime/reference/ecosystem-file/
