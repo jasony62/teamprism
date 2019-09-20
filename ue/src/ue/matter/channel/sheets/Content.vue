@@ -23,7 +23,7 @@ export default {
         MatterItem
     },
     mounted() {
-        this.$eventHub.$on('shell-loaded', async channel => {
+        this.$tmsOn('shell-loaded', async channel => {
             try {
                 let matters = await apis.mattersGet(channel.id)
                 let moment = require('moment')

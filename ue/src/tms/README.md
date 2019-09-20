@@ -15,6 +15,8 @@
 }
 ```
 
+获得 token，后续的请求都添加 token
+
 #components
 
 ##提示框（message）

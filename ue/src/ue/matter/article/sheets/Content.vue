@@ -35,7 +35,7 @@ export default {
         matter: Object
     },
     mounted() {
-        this.$eventHub.$on('shell-loaded', article => {})
+        this.$tmsOn('shell-loaded', article => {})
     },
     methods: {
         gotoChannel(channel) {}

@@ -10,7 +10,7 @@ export default {
         }
     },
     mounted() {
-        this.$eventHub.$on('main-loaded', async () => {
+        this.$tmsOn('main-loaded', async () => {
             let apis = this.apis()
             if (apis && apis.skeleton && typeof apis.skeleton === 'function') {
                 let matter
@@ -24,7 +24,7 @@ export default {
                         }
                         this.site = matter.site
                         this.matter = matter
-                        this.$eventHub.$emit('shell-loaded', matter)
+                        this.$tmsEmit('shell-loaded', matter)
                     }
                 } catch (e) {
                     // 不满足进入规则
@@ -37,7 +37,7 @@ export default {
                         if (this.$router.currentRoute.name !== 'cover')
                             this.$router.push({ name: 'cover' })
 
-                        this.$eventHub.$emit('shell-loaded', matter)
+                        this.$tmsEmit('shell-loaded', matter)
                     } else {
                         this.$message({
                             message: e,
@@ -46,13 +46,13 @@ export default {
                             showClose: true
                         })
                     }
-                    this.$eventHub.$emit('shell-failed')
+                    this.$tmsEmit('shell-failed')
                 } finally {
                     this.loading = false
                 }
             }
         })
-        this.$eventHub.$on('main-failed', () => {
+        this.$tmsOn('main-failed', () => {
             this.loading = false
         })
     }

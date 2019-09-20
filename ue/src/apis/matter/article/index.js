@@ -1,4 +1,4 @@
-import axios from "@/tms/apis/axios2"
+import { TmsAxios } from 'tms-vue'
 
 export default {
     /**
@@ -7,7 +7,7 @@ export default {
      * @param {String} appId
      */
     skeleton(appId) {
-        return axios.get(`/api/ue/matter/article/get?app=${appId}`)
+        return TmsAxios.ins('api-ue').get(`/matter/article/get?app=${appId}`)
             .then(rst => rst.data.result)
             .catch(err => Promise.reject(err))
     },
@@ -17,7 +17,7 @@ export default {
      * @param {String} appId
      */
     cover(appId) {
-        return axios.get(`/api/ue/matter/article/cover?app=${appId}`)
+        return TmsAxios.ins('api-ue').get(`/matter/article/cover?app=${appId}`)
             .then(rst => rst.data.result)
             .catch(err => Promise.reject(err))
     }

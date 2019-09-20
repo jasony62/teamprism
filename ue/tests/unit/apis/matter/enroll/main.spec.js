@@ -3,7 +3,7 @@ import apis from '@/apis/matter/enroll'
 import axios, { setupAccessToken } from '@/tms/apis/axios2';
 import MockAdapter from 'axios-mock-adapter'
 
-const mock = new MockAdapter(axios);
+const mock = new MockAdapter(axios)
 mock.onGet('/ue/auth/token?site=validsiteid').reply(200, {
     code: 0,
     result: {

@@ -1,4 +1,4 @@
-import axios from '@/tms/apis/axios2'
+import { TmsAxios } from 'tms-vue'
 
 export default {
     /**
@@ -7,17 +7,13 @@ export default {
      * @param {String} appId 
      */
     skeleton(appId) {
-        return axios.get(`/api/ue/matter/channel/get?app=${appId}`)
+        return TmsAxios.ins('api-ue').get(`/matter/channel/get?app=${appId}`)
             .then(rst => rst.data.result)
             .catch(err => Promise.reject(err))
     },
     mattersGet(channelId) {
-        return new Promise((resolve, reject) => {
-            axios.get(`/api/ue/matter/channel/mattersGet?app=${channelId}`).then(rst => {
-                resolve(rst.data.result)
-            }).catch(err => {
-                reject(err)
-            })
-        })
-    },
+        return TmsAxios.ins('api-ue').get(`/matter/channel/mattersGet?app=${channelId}`)
+            .then(rst => rst.data.result)
+            .catch(err => Promise.reject(err))
+    }
 }
