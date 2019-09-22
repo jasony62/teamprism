@@ -10,6 +10,12 @@ npm i -g eslint
 npm i -g pm2
 ```
 
+支持 log4js
+
+```
+pm2 install pm2-intercom
+```
+
 分别在`back`和`ue`目录下安装项目依赖包
 
 ```
@@ -68,6 +74,20 @@ redis.js
 module.exports = {
     host: '127.0.0.1',
     port: 6379
+}
+```
+
+log4js.js
+
+```
+module.exports = {
+    appenders: {
+        consoleout: { type: "console" }
+    },
+    categories: {
+        default: { appenders: ["consoleout"], level: "info" }
+    },
+    pm2: true
 }
 ```
 
