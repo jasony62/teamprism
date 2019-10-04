@@ -9,6 +9,13 @@ module.exports = {
         style: true
       },
       'vant'
+    ],
+    [
+      'import',
+      {
+        libraryName: 'tms-vue-ui',
+        style: true
+      }
     ]
   ]
 }
