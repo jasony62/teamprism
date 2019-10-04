@@ -1,52 +1,52 @@
 {
-    "name": "teamprism-ue",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint",
-        "test": "vue-cli-service test:unit"
-    },
-    "dependencies": {
-        "axios": "^0.19.0",
-        "core-js": "^2.6.5",
-        "lodash": "^4.17.15",
-        "moment": "^2.24.0",
-        "qrcode": "^1.4.2",
-        "query-string": "^6.8.3",
-        "tms-vue": "^0.0.2",
-        "underscore": "^1.9.1",
-        "vant": "^2.2.2",
-        "vue": "^2.6.10",
-        "vue-router": "^3.1.3"
-    },
-    "devDependencies": {
-        "@vue/cli-plugin-babel": "^3.11.0",
-        "@vue/cli-plugin-eslint": "^3.11.0",
-        "@vue/cli-plugin-unit-jest": "^3.11.0",
-        "@vue/cli-service": "^3.11.0",
-        "@vue/test-utils": "1.0.0-beta.29",
-        "axios-mock-adapter": "^1.17.0",
-        "babel-core": "7.0.0-bridge.0",
-        "babel-eslint": "^10.0.3",
-        "babel-jest": "^24.9.0",
-        "babel-plugin-import": "^1.12.1",
-        "eslint-plugin-vue": "^5.2.3",
-        "less": "^3.10.3",
-        "less-loader": "^5.0.0",
-        "node-sass": "^4.12.0",
-        "sass-loader": "^8.0.0",
-        "sinon": "^7.4.2",
-        "vue-template-compiler": "^2.6.10"
-    },
-    "postcss": {
-        "plugins": {
-            "autoprefixer": {}
-        }
-    },
-    "browserslist": [
-        "> 1%",
-        "last 2 versions"
-    ]
+  "name": "teamprism-ue",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "test": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "core-js": "^2.6.5",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "qrcode": "^1.4.2",
+    "query-string": "^6.8.3",
+    "tms-vue": "^0.0.2",
+    "underscore": "^1.9.1",
+    "vant": "^2.2.2",
+    "vue": "^2.6.10",
+    "vue-router": "^3.1.3"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.11.0",
+    "@vue/cli-plugin-eslint": "^3.11.0",
+    "@vue/cli-plugin-unit-jest": "^3.11.0",
+    "@vue/cli-service": "^3.11.0",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "axios-mock-adapter": "^1.17.0",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^23.6.0",
+    "babel-plugin-import": "^1.12.1",
+    "eslint-plugin-vue": "^5.2.3",
+    "less": "^3.10.3",
+    "less-loader": "^5.0.0",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^8.0.0",
+    "sinon": "^7.4.2",
+    "vue-template-compiler": "^2.6.10"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
 }
