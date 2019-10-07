@@ -1,5 +1,5 @@
 <template>
-    <div id="failure">
-        <div>link failure</div>
-    </div>
+  <div id="failure">
+    <div>link failure</div>
+  </div>
 </template>

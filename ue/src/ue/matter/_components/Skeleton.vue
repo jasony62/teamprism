@@ -1,49 +1,50 @@
 <template>
-    <div class="skeleton">
-        <div class="loading" v-if="loading">
-            <div>Loading...</div>
-        </div>
-        <div v-else>
-            <navbar-top></navbar-top>
-            <div class="content">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-3 col-md-push-9 col-xs-12">
-                            <site-card :site="site"></site-card>
-                            <div class="qrcode hidden-xs hidden-sm">
-                                <canvas ref="matterQrcode"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-9 col-md-pull-3 col-xs-12">
-                            <router-view :matter="matter"></router-view>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="skeleton">
+    <div class="loading" v-if="loading">
+      <div>Loading...</div>
     </div>
+    <div v-else>
+      <navbar-top></navbar-top>
+      <div class="content">
+        <div class="container">
+          <div class="row">
+            <div class="additional col-md-3 col-md-push-9 col-xs-12">
+              <site-card :site="site"></site-card>
+              <slot name="matterCard"></slot>
+              <div class="qrcode hidden-xs hidden-sm">
+                <canvas ref="matterQrcode"></canvas>
+              </div>
+            </div>
+            <div class="detail col-md-9 col-md-pull-3 col-xs-12">
+              <router-view :matter="matter"></router-view>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
 import NavbarTop from '@/ue/matter/_components/NavbarTop.vue'
 import SiteCard from '@/ue/matter/_components/SiteCard.vue'
 
 export default {
-    props: ['site', 'matter'],
-    components: {
-        NavbarTop,
-        SiteCard
-    },
-    watch: {
-        matter: {
-            async handler(nv) {
-                if (nv && nv.id) {
-                    let QRCode = require('qrcode')
-                    let canvas = this.$refs.matterQrcode
-                    if (canvas) QRCode.toCanvas(canvas, location.href)
-                }
-            }
+  props: ['site', 'matter'],
+  components: {
+    NavbarTop,
+    SiteCard
+  },
+  watch: {
+    matter: {
+      async handler(nv) {
+        if (nv && nv.id) {
+          let QRCode = require('qrcode')
+          let canvas = this.$refs.matterQrcode
+          if (canvas) QRCode.toCanvas(canvas, location.href)
         }
+      }
     }
+  }
 }
 </script>
 <style lang="less">
@@ -51,10 +52,20 @@ export default {
 </style>
 <style lang='less' scoped>
 .skeleton {
-    height: 100%;
-    background-color: #f5f5f5;
-    .qrcode {
-        text-align: center;
+  height: 100%;
+  background-color: #f5f5f5;
+  .detail {
+    padding-right: 16px;
+  }
+  .qrcode {
+    text-align: center;
+  }
+}
+@media screen and (max-width: 768px) {
+  .skeleton {
+    .detail {
+      padding-right: 0;
     }
+  }
 }
 </style>
