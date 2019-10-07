@@ -1,36 +1,28 @@
 <template>
-    <div class="matter-card panel">
-        <div class="panel-body">
-            <div class="item">
-                <h4>{{matter.title}}</h4>
-            </div>
-            <div class="item headpic" v-if="matter.hide_pic!=='Y'">
-                <span>
-                    <img :src="matter.pic" />
-                </span>
-            </div>
-            <div class="item summary">{{matter.summary}}</div>
-        </div>
+  <van-panel class="matter-card" :title="matter.title">
+    <div>
+      <van-cell v-if="matter.hide_pic!=='Y'">
+        <van-image :src="matter.pic" fit="contain"></van-image>
+      </van-cell>
+      <van-cell class="summary" :value="matter.summary"></van-cell>
     </div>
+  </van-panel>
 </template>
 <script>
+import Vue from 'vue'
+import { Panel, Cell, Image } from 'vant'
+Vue.use(Panel)
+  .use(Cell)
+  .use(Image)
+
 export default {
-    props: ['matter']
+  props: {
+    matter: {
+      type: Object,
+      default: function() {
+        return { title: '', pic: '', summary: '' }
+      }
+    }
+  }
 }
 </script>
-<style lang='less' scoped>
-.panel {
-    border-color: #ddd;
-    margin-bottom: 16px;
-    .panel-body {
-        padding: 16px;
-        background: #fff;
-        .item {
-            margin-bottom: 16px;
-            img {
-                max-width: 100%;
-            }
-        }
-    }
-}
-</style>

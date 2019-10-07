@@ -9,11 +9,14 @@
         <div class="container">
           <div class="row">
             <div class="additional col-md-3 col-md-push-9 col-xs-12">
-              <site-card :site="site"></site-card>
-              <slot name="matterCard"></slot>
-              <div class="qrcode hidden-xs hidden-sm">
-                <canvas ref="matterQrcode"></canvas>
-              </div>
+              <tms-flex direction="column">
+                <site-card :site="site"></site-card>
+                <slot name="matterCard"></slot>
+                <div class="qrcode hidden-xs hidden-sm">
+                  <canvas ref="matterQrcode"></canvas>
+                </div>
+                <slot name="others"></slot>
+              </tms-flex>
             </div>
             <div class="detail col-md-9 col-md-pull-3 col-xs-12">
               <router-view :matter="matter"></router-view>
@@ -25,6 +28,10 @@
   </div>
 </template>
 <script>
+import Vue from 'vue'
+import { Flex } from 'tms-vue-ui'
+Vue.use(Flex)
+
 import NavbarTop from '@/ue/matter/_components/NavbarTop.vue'
 import SiteCard from '@/ue/matter/_components/SiteCard.vue'
 
