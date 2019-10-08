@@ -16,7 +16,7 @@ export default {
 </script>
 <style lang="less">
 .matter-item {
-  height: 160px;
+  height: 144px;
   padding: 8px 0;
   img {
     width: 144px;
@@ -26,7 +26,7 @@ export default {
 }
 @media screen and (max-width: 768px) {
   .matter-item {
-    height: 112px;
+    height: 96px;
     padding: 8px 0;
     img {
       width: 96px;

@@ -4,7 +4,9 @@
       <van-cell v-if="matter.hide_pic!=='Y'">
         <van-image :src="matter.pic" fit="contain"></van-image>
       </van-cell>
-      <van-cell class="summary" :value="matter.summary"></van-cell>
+      <van-cell class="summary">
+        <tms-text :lines-sm="2">{{matter.summary}}</tms-text>
+      </van-cell>
     </div>
   </van-panel>
 </template>

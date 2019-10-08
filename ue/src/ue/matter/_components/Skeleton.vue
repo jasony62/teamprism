@@ -4,33 +4,38 @@
       <div>Loading...</div>
     </div>
     <div v-else>
-      <navbar-top></navbar-top>
-      <div class="content">
-        <div class="container">
-          <div class="row">
-            <div class="additional col-md-3 col-md-push-9 col-xs-12">
-              <tms-flex direction="column">
-                <site-card :site="site"></site-card>
-                <slot name="matterCard"></slot>
-                <div class="qrcode hidden-xs hidden-sm">
-                  <canvas ref="matterQrcode"></canvas>
-                </div>
-                <slot name="others"></slot>
-              </tms-flex>
+      <tms-frame
+        :display="{header:true,footer:true,right:true}"
+        :display-sm="{header:true,footer:true,right:true}"
+        main-direction-sm="column-reverse"
+        center-margin-sm="8px 0 0"
+      >
+        <template v-slot:header>
+          <navbar-top></navbar-top>
+        </template>
+        <template v-slot:center>
+          <router-view :matter="matter"></router-view>
+        </template>
+        <template v-slot:right>
+          <tms-flex direction="column" align-items="center">
+            <site-card :site="site"></site-card>
+            <slot name="matterCard"></slot>
+            <div class="qrcode hidden-sm">
+              <canvas ref="matterQrcode"></canvas>
             </div>
-            <div class="detail col-md-9 col-md-pull-3 col-xs-12">
-              <router-view :matter="matter"></router-view>
+            <div class="hidden-sm">
+              <slot name="others"></slot>
             </div>
-          </div>
-        </div>
-      </div>
+          </tms-flex>
+        </template>
+      </tms-frame>
     </div>
   </div>
 </template>
 <script>
 import Vue from 'vue'
-import { Flex } from 'tms-vue-ui'
-Vue.use(Flex)
+import { Flex, Frame } from 'tms-vue-ui'
+Vue.use(Flex).use(Frame)
 
 import NavbarTop from '@/ue/matter/_components/NavbarTop.vue'
 import SiteCard from '@/ue/matter/_components/SiteCard.vue'
@@ -55,24 +60,20 @@ export default {
 }
 </script>
 <style lang="less">
-@import '../../../assets/css/bootstrap.css';
-</style>
-<style lang='less' scoped>
-.skeleton {
-  height: 100%;
-  background-color: #f5f5f5;
-  .detail {
-    padding-right: 16px;
-  }
-  .qrcode {
-    text-align: center;
+.tms-frame {
+  align-items: center;
+  .tms-frame__main {
+    width: 960px;
   }
 }
-@media screen and (max-width: 768px) {
-  .skeleton {
-    .detail {
-      padding-right: 0;
+@media (max-width: 768px) {
+  .tms-frame {
+    .tms-frame__main {
+      width: 100%;
     }
+  }
+  .hidden-sm {
+    display: none !important;
   }
 }
 </style>
